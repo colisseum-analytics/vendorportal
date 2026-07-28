@@ -2,12 +2,20 @@
 
 A multi-neighborhood vendor directory. Anyone can browse; each neighborhood
 has its own admins who can add, edit, and remove vendors. New neighborhoods
-can sign up and start their own directory at any time — no code changes or
-file uploads needed.
+can request a directory at any time — no code changes or file uploads
+needed, just a quick review by a platform admin.
+
+**New to this codebase?** See [ARCHITECTURE.md](ARCHITECTURE.md) for the
+data model, permission model, and how the pieces fit together — this file
+is just setup/deploy steps.
 
 - **Public**: browse, search, and filter vendors — no login required.
-- **Admins**: email/password login (Google/Apple/Microsoft can be turned on
-  later with no code changes) to manage vendors and invite co-admins.
+- **Neighborhood admins**: email/password login (Google/Apple/Microsoft can
+  be turned on later with no code changes) to manage vendors, settings, and
+  co-admins for their own neighborhood.
+- **Platform admins**: oversee every neighborhood — approve/reject new
+  directory requests, activate/deactivate/delete neighborhoods, manage user
+  accounts. See "The platform admin role" below.
 - **Hosting**: everything ships from a GitHub repo. Once it's connected to
   Vercel, every `git push` deploys automatically — you never touch a
   hosting file manager again.
@@ -20,7 +28,11 @@ file uploads needed.
    new project. No credit card required.
 2. In the project, open **SQL Editor → New query**, paste the entire
    contents of `supabase/schema.sql`, and run it. This creates the tables,
-   security rules, and helper functions.
+   security rules, and helper functions. (This is a snapshot of every file
+   in `supabase/migrations/` run in order — see
+   [supabase/migrations/README.md](supabase/migrations/README.md) if
+   you're catching up an existing project instead of starting fresh, or
+   want to use the Supabase CLI's migration workflow going forward.)
 3. Go to **Settings → API** and copy your **Project URL** and **anon
    public** key — you'll need both next.
 4. Optional but recommended for a real launch: **Authentication → Settings**
@@ -56,20 +68,53 @@ From here on, any time you (or a contributor) push a commit to `main`,
 Vercel rebuilds and redeploys automatically. There is no manual file
 upload step, ever again.
 
-### 4. Try it
+### 4. Make yourself the first platform admin
 
-Visit your Vercel URL, click **Start a directory**, create an account,
-name your neighborhood, and you're the first admin. Add a vendor and try
-**Settings** to confirm everything's wired up. Set up the invite email
-flow (below) whenever you're ready to bring in co-admins.
+Starting a directory now goes through a review step (see below), so you
+need at least one platform admin before anyone — including you — can get
+approved. Sign up for a regular account on your deployed site first, then
+in the Supabase SQL Editor:
+
+```sql
+insert into platform_admins (user_id)
+select id from auth.users where email = 'you@example.com';
+```
+
+### 5. Try it
+
+Visit your Vercel URL, click **Start a directory**, and submit the form
+(no account needed for this part). Log in as your platform admin at
+`/platform-admin`, approve the request you just submitted, then sign up
+with the contact email you used — that account becomes the neighborhood's
+first admin automatically. Add a vendor and try **Settings** to confirm
+everything's wired up. Set up the invite email flow (below) whenever
+you're ready to bring in co-admins.
 
 ## How other neighborhoods join later
 
-No action needed from you. Anyone can visit the homepage, click **Start a
-directory**, sign up, and name their own neighborhood — they become its
-first admin automatically. Each neighborhood's vendors, categories, and
-admins are completely separate (enforced at the database level, not just
-in the app), so neighborhoods never see or affect each other's data.
+Anyone can visit the homepage, click **Start a directory**, and submit
+the request form — no account needed. A platform admin reviews it at
+`/platform-admin`; approving it creates the neighborhood and lets the
+requester sign up (with the email they gave) to become its first admin
+automatically. Each neighborhood's vendors, categories, and admins are
+completely separate (enforced at the database level, not just in the
+app), so neighborhoods never see or affect each other's data.
+
+## The platform admin role
+
+Platform admins oversee the whole platform, not any one neighborhood:
+reviewing directory requests, activating/deactivating/renaming/deleting
+any neighborhood, and managing every user account (password resets,
+disabling accounts, editing emails). There's intentionally no self-serve
+way to become one — grant it to an existing account by email:
+
+```sql
+insert into platform_admins (user_id)
+select id from auth.users where email = 'their-email@example.com';
+```
+
+Once you have one platform admin, they can grant the role to others
+directly from `/platform-admin` (no SQL needed after the first one).
 
 ## How admins invite co-admins
 
@@ -131,6 +176,12 @@ cp .env.example .env.local   # fill in your Supabase URL + anon key
 npm run dev
 ```
 
+Local dev and your deployed site point at the **same** Supabase project
+by default — there's no separate local database. Schema changes need to
+be applied to that one shared project regardless of whether you've
+deployed the frontend change yet; see
+[supabase/migrations/README.md](supabase/migrations/README.md).
+
 ## A few things worth knowing
 
 - **The admin password model is real, not a stand-in.** Unlike a
@@ -153,3 +204,11 @@ npm run dev
   dashboard (name, tagline, and categories — the web address/slug is
   intentionally not editable there, to avoid breaking links people
   already have to it).
+- **Passwords require 10+ characters with upper/lower/number/special
+  character**, enforced client-side at signup and password reset — see
+  `src/utils/passwordPolicy.js` if that needs to change.
+- **"Disable account" (platform admin) is a real login ban**, not just a
+  UI restriction — it writes directly to Supabase's own `auth.users`
+  table, which the auth server checks on every login. See
+  [ARCHITECTURE.md](ARCHITECTURE.md) for how that (and a few other things
+  that look like they'd need a service-role key) work without one.
