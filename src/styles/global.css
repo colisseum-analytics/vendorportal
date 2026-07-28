@@ -201,23 +201,26 @@ a { color: var(--blue); }
 .grid.list-view{ grid-template-columns: 1fr; gap: 8px; }
 .grid.list-view .card{
   display:grid;
-  grid-template-columns: minmax(0,1fr) 112px 190px 112px auto;
+  grid-template-columns: minmax(0,0.7fr) minmax(0,1.6fr) 108px 148px 100px auto;
   align-items:center;
   column-gap: 16px;
   padding: 10px 18px 10px 30px;
 }
 .grid.list-view .card:hover{ transform:none; }
 .grid.list-view .pin{ top:50%; transform:translateY(-50%); }
-.grid.list-view .card-top{ grid-column:1; padding-left:0; min-width:0; }
-.grid.list-view .card-top > div{ min-width:0; }
+.grid.list-view .card-top{ display:contents; }
+.grid.list-view .card-top-name{ grid-column:1; grid-row:1; min-width:0; }
 .grid.list-view h3{ font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
 .grid.list-view .category{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
-.grid.list-view p.desc{ display:none; }
-.grid.list-view .card-top-actions{ grid-column:2; }
-.grid.list-view .meta{ grid-column:3; flex-direction:row; padding-left:0; gap:12px; margin-bottom:0; min-width:0; overflow:hidden; }
+.grid.list-view p.desc{
+  grid-column:2; grid-row:1; margin:0; padding:0; font-size:13px; color: var(--ink-soft);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; cursor:help;
+}
+.grid.list-view .card-top-actions{ grid-column:3; grid-row:1; }
+.grid.list-view .meta{ grid-column:4; grid-row:1; flex-direction:row; padding-left:0; gap:12px; margin-bottom:0; min-width:0; overflow:hidden; }
 .grid.list-view .meta .row{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-.grid.list-view .resident-badge{ grid-column:4; margin-top:0; margin-left:0; justify-self:end; }
-.grid.list-view .card-admin-actions{ grid-column:5; padding-left:0; border-top:none; margin-top:0; padding-top:0; }
+.grid.list-view .resident-badge{ grid-column:5; grid-row:1; margin-top:0; margin-left:0; justify-self:end; }
+.grid.list-view .card-admin-actions{ grid-column:6; padding-left:0; border-top:none; margin-top:0; padding-top:0; }
 
 /* ---------- csv import preview ---------- */
 .import-preview{ max-height: 320px; overflow-y:auto; border:1px solid var(--line); border-radius: 10px; margin-bottom: 16px; }

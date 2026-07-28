@@ -36,8 +36,8 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
     <div className="card">
       <span className="pin" style={{ background: colorForCategory(categories, v.category) }} />
       <div className="card-top">
-        <div>
-          <h3>{v.name}</h3>
+        <div className="card-top-name">
+          <h3 title={v.description || undefined}>{v.name}</h3>
           <div className="category">{v.category}{v.specialty ? ` · ${v.specialty}` : ''}</div>
         </div>
         <div className="card-top-actions">
@@ -47,7 +47,7 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
           <span className={`status-tag status-${(v.status || 'active').toLowerCase()}`}>{v.status || 'Active'}</span>
         </div>
       </div>
-      {v.description ? <p className="desc">{v.description}</p> : null}
+      {v.description ? <p className="desc" title={v.description}>{v.description}</p> : null}
       <div className="meta">
         {v.address ? (
           <div className="row"><span className="icon">⌂</span><span>{v.address}</span></div>

@@ -11,6 +11,7 @@ export default function PlatformAdmin() {
 
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendorCounts, setVendorCounts] = useState({})
+  const [lastVendorAdded, setLastVendorAdded] = useState({})
   const [users, setUsers] = useState([])
   const [userSearch, setUserSearch] = useState('')
   const [requests, setRequests] = useState([])
@@ -53,15 +54,22 @@ export default function PlatformAdmin() {
     setLoading(true)
     const [{ data: n }, { data: v }, { data: u }, { data: r }, { data: m }] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
-      supabase.from('vendors').select('neighborhood_id'),
+      supabase.from('vendors').select('neighborhood_id, created_at'),
       supabase.rpc('list_all_users'),
       supabase.from('neighborhood_requests').select('*').eq('status', 'pending').order('created_at'),
       supabase.from('contact_messages').select('*').order('created_at', { ascending: false }),
     ])
     setNeighborhoods(n || [])
     const counts = {}
-    ;(v || []).forEach((row) => { counts[row.neighborhood_id] = (counts[row.neighborhood_id] || 0) + 1 })
+    const lastAdded = {}
+    ;(v || []).forEach((row) => {
+      counts[row.neighborhood_id] = (counts[row.neighborhood_id] || 0) + 1
+      if (!lastAdded[row.neighborhood_id] || row.created_at > lastAdded[row.neighborhood_id]) {
+        lastAdded[row.neighborhood_id] = row.created_at
+      }
+    })
     setVendorCounts(counts)
+    setLastVendorAdded(lastAdded)
     setUsers(u || [])
     setRequests(r || [])
     setMessages(m || [])
@@ -197,6 +205,11 @@ export default function PlatformAdmin() {
   const filteredUsers = users.filter((u) => (u.email || '').toLowerCase().includes(userSearch.toLowerCase()))
   const unresolvedMessageCount = messages.filter((m) => !m.resolved).length
   const neighborhoodNameById = Object.fromEntries(neighborhoods.map((n) => [n.id, n.name]))
+  const adminCounts = {}
+  users.forEach((u) => {
+    ;(u.admin_of || []).forEach((n) => { adminCounts[n.id] = (adminCounts[n.id] || 0) + 1 })
+  })
+  const activeCount = neighborhoods.filter((n) => n.active).length
 
   if (authLoading || !checked) {
     return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
@@ -238,6 +251,7 @@ export default function PlatformAdmin() {
 
       <div className="stats-row">
         <div className="stat-item"><strong>{neighborhoods.length}</strong><span>Neighborhoods</span></div>
+        <div className="stat-item"><strong>{activeCount} / {neighborhoods.length - activeCount}</strong><span>Active / Inactive</span></div>
         <div className="stat-item"><strong>{users.length}</strong><span>Users</span></div>
         <div className="stat-item"><strong>{requests.length}</strong><span>Pending requests</span></div>
         {unresolvedMessageCount > 0 ? (
@@ -289,26 +303,26 @@ export default function PlatformAdmin() {
       ) : neighborhoods.length === 0 ? (
         <div className="empty"><strong>No neighborhoods yet</strong></div>
       ) : (
-        <div className="platform-table">
-          <div className="platform-row platform-row-head">
-            <span>Neighborhood</span>
-            <span>Vendors</span>
-            <span>Status</span>
-            <span>Actions</span>
-          </div>
+        <div className="user-list" style={{ marginBottom: 26 }}>
           {neighborhoods.map((n) => (
-            <div className="platform-row" key={n.id}>
-              <div>
-                <Link to={`/n/${n.slug}`} className="platform-name">{n.name}</Link>
-                <div className="platform-slug">/n/{n.slug}</div>
-              </div>
-              <div className="platform-count">{vendorCounts[n.id] || 0}</div>
-              <div>
-                <span className={`badge ${n.active ? 'badge-active' : 'badge-inactive'}`}>
-                  {n.active ? 'Active' : 'Inactive'}
+            <div className="user-row" key={n.id}>
+              <div className="user-row-main">
+                <strong>
+                  <Link to={`/n/${n.slug}`} className="platform-name">{n.name}</Link>
+                </strong>
+                <span className="user-row-meta">
+                  /n/{n.slug} · Created {relativeTime(n.created_at)}
+                  {n.updated_at && n.updated_at !== n.created_at ? ` · Updated ${relativeTime(n.updated_at)}` : ''}
+                  {lastVendorAdded[n.id] ? ` · Last vendor added ${relativeTime(lastVendorAdded[n.id])}` : ''}
                 </span>
               </div>
-              <div className="platform-actions">
+              <div className="user-row-roles">
+                <span className={`badge ${n.active ? 'badge-active' : 'badge-inactive'}`}>{n.active ? 'Active' : 'Inactive'}</span>
+                <span className="badge badge-neutral">{vendorCounts[n.id] || 0} vendor{(vendorCounts[n.id] || 0) === 1 ? '' : 's'}</span>
+                <span className="badge badge-neutral">{(n.categories || []).length} categor{(n.categories || []).length === 1 ? 'y' : 'ies'}</span>
+                <span className="badge badge-neutral">{adminCounts[n.id] || 0} admin{(adminCounts[n.id] || 0) === 1 ? '' : 's'}</span>
+              </div>
+              <div className="user-row-actions">
                 <button className="btn-ghost" disabled={busyId === n.id} onClick={() => startRename(n)}>Rename</button>
                 <button className="btn-ghost" disabled={busyId === n.id} onClick={() => toggleActive(n)}>
                   {n.active ? 'Deactivate' : 'Activate'}

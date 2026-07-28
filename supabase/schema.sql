@@ -18,7 +18,8 @@ create table neighborhoods (
   categories jsonb not null default '["Food & Drink","Home & Repair","Health & Wellness","Shops & Services","Kids & Pets","Professional"]'::jsonb,
   logo_url text,
   active boolean not null default true,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 -- Platform admins oversee every neighborhood (rename/deactivate/delete,
@@ -324,6 +325,24 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function handle_new_user_invites();
+
+-- Keeps neighborhoods.updated_at current on every edit (name, tagline,
+-- categories, logo, active/inactive) — powers "last updated" in the
+-- platform admin view.
+create or replace function public.touch_neighborhood_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists on_neighborhood_updated on neighborhoods;
+create trigger on_neighborhood_updated
+  before update on neighborhoods
+  for each row execute function touch_neighborhood_updated_at();
 
 -- Looks up a user's id by email so the invite-admin Edge Function can
 -- tell whether someone already has an account. Only the service role
