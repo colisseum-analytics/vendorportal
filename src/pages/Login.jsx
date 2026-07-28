@@ -52,7 +52,10 @@ export default function Login() {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
           </div>
           <div className="field">
-            <label>Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <label>Password</label>
+              <Link to="/forgot-password" style={{ fontSize: 12 }}>Forgot password?</Link>
+            </div>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>

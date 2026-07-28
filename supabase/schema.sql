@@ -468,7 +468,8 @@ returns table (
   created_at timestamptz,
   last_sign_in_at timestamptz,
   is_platform_admin boolean,
-  admin_of jsonb
+  admin_of jsonb,
+  is_banned boolean
 )
 language sql
 security definer
@@ -487,7 +488,8 @@ as $$
        join neighborhoods n on n.id = na.neighborhood_id
        where na.user_id = u.id),
       '[]'::jsonb
-    )
+    ),
+    coalesce(u.banned_until, 'epoch'::timestamptz) > now()
   from auth.users u
   where is_platform_admin()
   order by u.created_at desc;
@@ -511,6 +513,50 @@ begin
     raise exception 'You can''t delete your own account from here.';
   end if;
   delete from auth.users where id = p_user_id;
+end;
+$$;
+
+-- Bans or unbans an account by writing auth.users.banned_until directly —
+-- Supabase's own auth server checks this column on every login, so this
+-- takes effect immediately without any Admin API / service-role Edge
+-- Function. Platform-admin only; can't disable yourself.
+create or replace function public.set_user_banned(p_user_id uuid, p_banned boolean)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_platform_admin() then
+    raise exception 'Only a platform admin can disable an account.';
+  end if;
+  if p_user_id = auth.uid() then
+    raise exception 'You can''t disable your own account from here.';
+  end if;
+  update auth.users
+  set banned_until = case when p_banned then 'infinity'::timestamptz else null end
+  where id = p_user_id;
+end;
+$$;
+
+-- Changes an account's email directly (e.g. fixing a typo). Marks it
+-- confirmed immediately since a platform admin is vouching for it —
+-- skips Supabase's usual "confirm your new email" round trip.
+-- Platform-admin only.
+create or replace function public.admin_update_user_email(p_user_id uuid, p_new_email text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_platform_admin() then
+    raise exception 'Only a platform admin can edit a user''s email.';
+  end if;
+  update auth.users
+  set email = lower(trim(p_new_email)),
+      email_confirmed_at = coalesce(email_confirmed_at, now())
+  where id = p_user_id;
 end;
 $$;
 

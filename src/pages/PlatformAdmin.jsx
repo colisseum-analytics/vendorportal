@@ -33,8 +33,11 @@ export default function PlatformAdmin() {
   const [rejectNote, setRejectNote] = useState('')
 
   const [userError, setUserError] = useState('')
+  const [userMsg, setUserMsg] = useState('')
   const [busyUserId, setBusyUserId] = useState(null)
   const [deleteUserTarget, setDeleteUserTarget] = useState(null)
+  const [editEmailTarget, setEditEmailTarget] = useState(null)
+  const [editEmailValue, setEditEmailValue] = useState('')
 
   const [messages, setMessages] = useState([])
 
@@ -185,6 +188,53 @@ export default function PlatformAdmin() {
       setUserError(error.message)
       return
     }
+    await loadAll()
+  }
+
+  const sendPasswordReset = async (u) => {
+    setBusyUserId(u.user_id)
+    setUserError('')
+    setUserMsg('')
+    const { error } = await supabase.auth.resetPasswordForEmail(u.email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    setBusyUserId(null)
+    if (error) {
+      setUserError(error.message)
+      return
+    }
+    setUserMsg(`Password reset link sent to ${u.email}.`)
+  }
+
+  const toggleBanned = async (u) => {
+    setBusyUserId(u.user_id)
+    setUserError('')
+    const { error } = await supabase.rpc('set_user_banned', { p_user_id: u.user_id, p_banned: !u.is_banned })
+    setBusyUserId(null)
+    if (error) {
+      setUserError(error.message)
+      return
+    }
+    await loadAll()
+  }
+
+  const startEditEmail = (u) => { setEditEmailTarget(u); setEditEmailValue(u.email) }
+
+  const saveEditEmail = async (e) => {
+    e.preventDefault()
+    if (!editEmailValue.trim()) return
+    setBusyUserId(editEmailTarget.user_id)
+    setUserError('')
+    const { error } = await supabase.rpc('admin_update_user_email', {
+      p_user_id: editEmailTarget.user_id,
+      p_new_email: editEmailValue.trim(),
+    })
+    setBusyUserId(null)
+    if (error) {
+      setUserError(error.message)
+      return
+    }
+    setEditEmailTarget(null)
     await loadAll()
   }
 
@@ -346,13 +396,14 @@ export default function PlatformAdmin() {
         <input type="text" placeholder="Search users by email…" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} />
       </div>
       {userError ? <div className="error-msg">{userError}</div> : null}
+      {userMsg ? <div className="success-msg">{userMsg}</div> : null}
 
       {loading ? null : filteredUsers.length === 0 ? (
         <p className="sub">No users match.</p>
       ) : (
         <div className="user-list">
           {filteredUsers.map((u) => (
-            <div className="user-row" key={u.user_id}>
+            <div className={`user-row ${u.is_banned ? 'user-row-banned' : ''}`} key={u.user_id}>
               <div className="user-row-main">
                 <strong>{u.email}{u.user_id === user.id ? ' (you)' : ''}</strong>
                 <span className="user-row-meta">
@@ -360,6 +411,7 @@ export default function PlatformAdmin() {
                 </span>
               </div>
               <div className="user-row-roles">
+                {u.is_banned ? <span className="badge badge-inactive">Disabled</span> : null}
                 {u.is_platform_admin ? <span className="badge badge-active">Platform admin</span> : null}
                 {(u.admin_of || []).map((n) => (
                   <span className="badge badge-neutral" key={n.id}>
@@ -376,8 +428,21 @@ export default function PlatformAdmin() {
                 ))}
               </div>
               <div className="user-row-actions">
+                <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => startEditEmail(u)}>
+                  Edit email
+                </button>
+                <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => sendPasswordReset(u)}>
+                  Send password reset
+                </button>
                 <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => togglePlatformAdmin(u)}>
                   {u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin'}
+                </button>
+                <button
+                  className="btn-ghost danger"
+                  disabled={busyUserId === u.user_id || u.user_id === user.id}
+                  onClick={() => toggleBanned(u)}
+                >
+                  {u.is_banned ? 'Enable account' : 'Disable account'}
                 </button>
                 <button
                   className="btn-ghost danger"
@@ -416,6 +481,28 @@ export default function PlatformAdmin() {
           ))}
         </div>
       )}
+
+      {editEmailTarget ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setEditEmailTarget(null) }}>
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <button className="close-x" onClick={() => setEditEmailTarget(null)}>×</button>
+            <h2>Edit email</h2>
+            <p className="sub">Changes take effect immediately — no confirmation email is sent.</p>
+            <form onSubmit={saveEditEmail}>
+              <div className="field">
+                <label>Email</label>
+                <input type="email" value={editEmailValue} onChange={(e) => setEditEmailValue(e.target.value)} autoFocus />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setEditEmailTarget(null)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={busyUserId === editEmailTarget.user_id}>
+                  {busyUserId === editEmailTarget.user_id ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
 
       {deleteUserTarget ? (
         <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteUserTarget(null) }}>
