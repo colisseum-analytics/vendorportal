@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { PASSWORD_RULES, isPasswordValid } from '../utils/passwordPolicy'
 
 // Keep this list in sync with Login.jsx — see the note there for how
 // to turn on social login later.
@@ -9,6 +10,7 @@ const OAUTH_PROVIDERS = []
 export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [touched, setTouched] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -18,6 +20,11 @@ export default function Signup() {
 
   const submit = async (e) => {
     e.preventDefault()
+    setTouched(true)
+    if (!isPasswordValid(password)) {
+      setError('Your password needs to meet all the requirements below.')
+      return
+    }
     setLoading(true)
     setError('')
     const { data, error } = await supabase.auth.signUp({ email, password })
@@ -69,8 +76,23 @@ export default function Signup() {
           </div>
           <div className="field">
             <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-            <div className="hint">At least 6 characters.</div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => setTouched(true)}
+              required
+            />
+            <ul className="password-rules">
+              {PASSWORD_RULES.map((r) => {
+                const met = r.test(password)
+                return (
+                  <li key={r.key} className={met ? 'rule-met' : touched ? 'rule-unmet' : ''}>
+                    <span className="rule-mark">{met ? '✓' : '·'}</span>{r.label}
+                  </li>
+                )
+              })}
+            </ul>
           </div>
           <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
             {loading ? 'Creating account…' : 'Create account'}

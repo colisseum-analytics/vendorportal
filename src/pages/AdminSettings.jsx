@@ -14,12 +14,57 @@ export default function AdminSettings() {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [logoError, setLogoError] = useState('')
+
   useEffect(() => {
     if (!neighborhood) return
     setName(neighborhood.name || '')
     setTagline(neighborhood.tagline || '')
     setCategoriesText((neighborhood.categories || []).join(', '))
   }, [neighborhood])
+
+  const uploadLogo = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setLogoError('Please choose an image file.')
+      return
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setLogoError('Image is too large — please use one under 3MB.')
+      return
+    }
+    setLogoError('')
+    setLogoUploading(true)
+    const ext = file.name.split('.').pop()
+    const path = `${neighborhood.id}/logo.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('neighborhood-logos')
+      .upload(path, file, { upsert: true, cacheControl: '3600' })
+    if (uploadError) {
+      setLogoUploading(false)
+      setLogoError(uploadError.message)
+      return
+    }
+    const { data: pub } = supabase.storage.from('neighborhood-logos').getPublicUrl(path)
+    const logo_url = `${pub.publicUrl}?v=${Date.now()}`
+    const { error: dbError } = await supabase.from('neighborhoods').update({ logo_url }).eq('id', neighborhood.id)
+    setLogoUploading(false)
+    if (dbError) {
+      setLogoError(dbError.message)
+      return
+    }
+    reload()
+  }
+
+  const removeLogo = async () => {
+    setLogoUploading(true)
+    await supabase.from('neighborhoods').update({ logo_url: null }).eq('id', neighborhood.id)
+    setLogoUploading(false)
+    reload()
+  }
 
   if (authLoading || loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
 
@@ -92,6 +137,28 @@ export default function AdminSettings() {
       </div>
 
       <div className="auth-card" style={{ maxWidth: 520 }}>
+        <div className="field logo-field">
+          <label>Neighborhood logo</label>
+          <div className="logo-row">
+            {neighborhood.logo_url ? (
+              <img src={neighborhood.logo_url} alt="" className="logo-preview" />
+            ) : (
+              <div className="logo-preview logo-placeholder">{neighborhood.name?.[0]?.toUpperCase() || '?'}</div>
+            )}
+            <div className="logo-actions">
+              <label className="btn-secondary logo-upload-btn">
+                {logoUploading ? 'Uploading…' : neighborhood.logo_url ? 'Replace' : 'Upload image'}
+                <input type="file" accept="image/*" onChange={uploadLogo} disabled={logoUploading} hidden />
+              </label>
+              {neighborhood.logo_url ? (
+                <button type="button" className="btn-ghost" onClick={removeLogo} disabled={logoUploading}>Remove</button>
+              ) : null}
+            </div>
+          </div>
+          {logoError ? <div className="error-msg">{logoError}</div> : null}
+          <div className="hint">Square images work best. Shown next to the neighborhood name across the site.</div>
+        </div>
+
         {error ? <div className="error-msg">{error}</div> : null}
         {saved ? <div className="success-msg">Saved.</div> : null}
         <form onSubmit={submit}>

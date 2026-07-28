@@ -1,26 +1,51 @@
-const CATEGORY_COLORS = ['#3C6E8F', '#D89A2E', '#4C7A54', '#B14A3D', '#7A5C9E', '#3C8F84']
-
-function colorForCategory(categories, cat) {
-  const idx = categories.indexOf(cat)
-  return CATEGORY_COLORS[(idx >= 0 ? idx : cat.length) % CATEGORY_COLORS.length]
-}
+import { useState } from 'react'
+import { colorForCategory } from '../utils/categoryColor'
 
 function normalizeUrl(u) {
   if (!u) return ''
   return /^https?:\/\//i.test(u) ? u : `https://${u}`
 }
 
+function buildShareText(v) {
+  const lines = [v.name]
+  const sub = [v.category, v.specialty].filter(Boolean).join(' · ')
+  if (sub) lines.push(sub)
+  if (v.description) lines.push(v.description)
+  if (v.address) lines.push(`Address: ${v.address}`)
+  if (v.phone) lines.push(`Phone: ${v.phone}`)
+  if (v.website) lines.push(`Website: ${normalizeUrl(v.website)}`)
+  return lines.join('\n')
+}
+
 export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDelete }) {
   const v = vendor
+  const [copied, setCopied] = useState(false)
+
+  const copy = async (e) => {
+    e.preventDefault()
+    try {
+      await navigator.clipboard.writeText(buildShareText(v))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard unavailable (e.g. insecure context) — fail silently
+    }
+  }
+
   return (
     <div className="card">
       <span className="pin" style={{ background: colorForCategory(categories, v.category) }} />
       <div className="card-top">
         <div>
           <h3>{v.name}</h3>
-          <div className="category">{v.category}</div>
+          <div className="category">{v.category}{v.specialty ? ` · ${v.specialty}` : ''}</div>
         </div>
-        <span className={`status-tag status-${(v.status || 'open').toLowerCase()}`}>{v.status || 'Open'}</span>
+        <div className="card-top-actions">
+          <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title="Copy details to share" aria-label="Copy details to share">
+            {copied ? '✓' : '⧉'}
+          </button>
+          <span className={`status-tag status-${(v.status || 'active').toLowerCase()}`}>{v.status || 'Active'}</span>
+        </div>
       </div>
       {v.description ? <p className="desc">{v.description}</p> : null}
       <div className="meta">
@@ -39,6 +64,7 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
           </div>
         ) : null}
       </div>
+      {v.is_resident ? <div className="resident-badge">★ Neighbor</div> : null}
       {isAdmin ? (
         <div className="card-admin-actions">
           <button onClick={() => onEdit(v)}>Edit</button>

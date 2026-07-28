@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { useAuth } from '../context/AuthContext.jsx'
+import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
 
 const DEFAULT_CATEGORIES = ['Food & Drink', 'Home & Repair', 'Health & Wellness', 'Shops & Services', 'Kids & Pets', 'Professional']
 
@@ -10,36 +10,24 @@ function slugify(str) {
 }
 
 export default function CreateNeighborhood() {
-  const { user, loading: authLoading } = useAuth()
-  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
   const [tagline, setTagline] = useState('')
   const [categoriesText, setCategoriesText] = useState(DEFAULT_CATEGORIES.join(', '))
+  const [contactName, setContactName] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-
-  if (authLoading) return null
-
-  if (!user) {
-    return (
-      <div className="wrap-narrow">
-        <div className="auth-card">
-          <h1>Start a directory</h1>
-          <p className="sub">Create an account first — you'll automatically become the directory's first admin.</p>
-          <Link className="btn-primary" to="/signup?redirect=/new" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>Create an account</Link>
-          <p className="auth-switch">Already have one? <Link to="/login?redirect=/new">Log in</Link></p>
-        </div>
-      </div>
-    )
-  }
+  const [submitted, setSubmitted] = useState(false)
 
   const onNameChange = (e) => {
     const val = e.target.value
     setName(val)
     if (!slugEdited) setSlug(slugify(val))
   }
+
+  const categories = categoriesText.split(',').map((c) => c.trim()).filter(Boolean)
 
   const submit = async (e) => {
     e.preventDefault()
@@ -48,28 +36,64 @@ export default function CreateNeighborhood() {
       setError('Give your neighborhood a name.')
       return
     }
-    setSaving(true)
-    setError('')
-    const categories = categoriesText.split(',').map((c) => c.trim()).filter(Boolean)
-    const { data, error } = await supabase.rpc('create_neighborhood', {
-      p_name: name.trim(),
-      p_slug: cleanSlug,
-      p_tagline: tagline.trim(),
-      p_categories: categories,
-    })
-    setSaving(false)
-    if (error) {
-      setError(error.message.includes('duplicate') ? 'That web address is already taken — try another.' : error.message)
+    if (!contactEmail.trim()) {
+      setError("Add the email you'll use to sign in once this is approved.")
       return
     }
-    navigate(`/n/${cleanSlug}/admin`)
+    setSaving(true)
+    setError('')
+
+    const { data: existing } = await supabase.from('neighborhoods').select('id').eq('slug', cleanSlug).maybeSingle()
+    if (existing) {
+      setSaving(false)
+      setError('That web address is already taken — try another.')
+      return
+    }
+
+    const { error: insertError } = await supabase.from('neighborhood_requests').insert({
+      name: name.trim(),
+      slug: cleanSlug,
+      tagline: tagline.trim() || null,
+      categories,
+      contact_name: contactName.trim() || null,
+      contact_email: contactEmail.trim().toLowerCase(),
+    })
+    setSaving(false)
+    if (insertError) {
+      setError(insertError.message)
+      return
+    }
+    setSubmitted(true)
+  }
+
+  if (submitted) {
+    return (
+      <div className="wrap-narrow">
+        <div className="auth-card">
+          <h1>Request submitted</h1>
+          <p className="sub">
+            A platform admin will review "{name}" shortly. Once approved, come back and
+            {' '}<Link to={`/signup?redirect=/n/${slugify(slug)}/admin`}>create an account with {contactEmail}</Link>{' '}
+            — that exact email becomes the directory's first admin automatically.
+          </p>
+          <p className="sub">In the meantime, you can get your vendor list ready:</p>
+          <button type="button" className="btn-secondary" style={{ width: '100%' }} onClick={() => downloadVendorCsvTemplate(categories)}>
+            Download CSV template
+          </button>
+          <p className="auth-switch"><Link to="/">← Back home</Link></p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="wrap-narrow">
       <div className="auth-card">
         <h1>Start a directory</h1>
-        <p className="sub">You'll be the first admin. You can invite neighbors to help manage it once it's live.</p>
+        <p className="sub">
+          No account needed yet — submit the basics below for review. Once a platform admin
+          approves it, you'll create an account and become the first admin.
+        </p>
         {error ? <div className="error-msg">{error}</div> : null}
         <form onSubmit={submit}>
           <div className="field">
@@ -90,10 +114,34 @@ export default function CreateNeighborhood() {
             <input type="text" value={categoriesText} onChange={(e) => setCategoriesText(e.target.value)} />
             <div className="hint">Comma-separated. You can change these later.</div>
           </div>
+          <div className="field-row">
+            <div className="field">
+              <label>Your name (optional)</label>
+              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Your email *</label>
+              <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="you@example.com" />
+            </div>
+          </div>
+          <div className="hint" style={{ marginBottom: 14 }}>
+            Once approved, sign up with this exact email to become the admin.
+          </div>
           <button type="submit" className="btn-primary" disabled={saving} style={{ width: '100%' }}>
-            {saving ? 'Creating…' : 'Create directory'}
+            {saving ? 'Submitting…' : 'Submit for approval'}
           </button>
         </form>
+        <p className="auth-switch">Already an admin somewhere? <Link to="/login">Log in</Link></p>
+      </div>
+
+      <div className="auth-card" style={{ marginTop: 16 }}>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, margin: '0 0 6px' }}>Get ready to import vendors</h2>
+        <p className="sub" style={{ marginBottom: 14 }}>
+          See the columns we expect for a bulk vendor import — handy to fill in while your request is reviewed.
+        </p>
+        <button type="button" className="btn-secondary" style={{ width: '100%' }} onClick={() => downloadVendorCsvTemplate(categories)}>
+          Download CSV template
+        </button>
       </div>
     </div>
   )

@@ -1,12 +1,14 @@
 import { useState } from 'react'
 
-const STATUSES = ['Open', 'Closed', 'Seasonal']
+const STATUSES = ['Active', 'Inactive']
 
 export default function VendorFormModal({ categories, existing, onCancel, onSave }) {
   const [form, setForm] = useState({
     name: existing?.name || '',
     category: existing?.category || categories[0] || '',
-    status: existing?.status || 'Open',
+    specialty: existing?.specialty || '',
+    is_resident: existing?.is_resident || false,
+    status: existing?.status || 'Active',
     description: existing?.description || '',
     address: existing?.address || '',
     phone: existing?.phone || '',
@@ -16,6 +18,7 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
   const [saving, setSaving] = useState(false)
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const updateCheckbox = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.checked }))
 
   const submit = async (e) => {
     e.preventDefault()
@@ -57,6 +60,18 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
               <select value={form.status} onChange={update('status')}>
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
+            </div>
+          </div>
+          <div className="field-row">
+            <div className="field">
+              <label>Specialty</label>
+              <input type="text" value={form.specialty} onChange={update('specialty')} placeholder="e.g. Plomero, A/C Tecnico" />
+            </div>
+            <div className="field" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'flex-end', paddingBottom: 9 }}>
+              <label className="checkbox-label">
+                <input type="checkbox" checked={form.is_resident} onChange={updateCheckbox('is_resident')} />
+                Lives in this neighborhood
+              </label>
             </div>
           </div>
           <div className="field">

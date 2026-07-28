@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
+import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
+import ViewToggle from '../components/ViewToggle.jsx'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
+import { useVendorView } from '../hooks/useVendorView.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { colorForCategory } from '../utils/categoryColor'
+import { relativeTime } from '../utils/relativeTime'
 
 export default function AdminDashboard() {
   const { slug } = useParams()
@@ -13,10 +18,20 @@ export default function AdminDashboard() {
 
   const [vendors, setVendors] = useState([])
   const [invites, setInvites] = useState([])
+  const [messages, setMessages] = useState([])
+  const [currentAdmins, setCurrentAdmins] = useState([])
+  const [adminsError, setAdminsError] = useState('')
+  const [busyAdminId, setBusyAdminId] = useState(null)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingVendor, setEditingVendor] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importMsg, setImportMsg] = useState('')
+  const [view, setView] = useVendorView()
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('All')
+  const [status, setStatus] = useState('All')
 
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteMsg, setInviteMsg] = useState('')
@@ -27,17 +42,42 @@ export default function AdminDashboard() {
     if (!neighborhood || !isAdmin) return
     let active = true
     async function loadExtras() {
-      const [{ data: v }, { data: inv }] = await Promise.all([
+      const [{ data: v }, { data: inv }, { data: msg }, { data: adm }] = await Promise.all([
         supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name'),
         supabase.from('admin_invites').select('*').eq('neighborhood_id', neighborhood.id).order('created_at'),
+        supabase.from('contact_messages').select('*').eq('neighborhood_id', neighborhood.id).order('created_at', { ascending: false }),
+        supabase.rpc('list_neighborhood_admins', { p_neighborhood_id: neighborhood.id }),
       ])
       if (!active) return
       setVendors(v || [])
       setInvites(inv || [])
+      setMessages(msg || [])
+      setCurrentAdmins(adm || [])
     }
     loadExtras()
     return () => { active = false }
   }, [neighborhood, isAdmin])
+
+  const filtered = useMemo(() => {
+    return vendors
+      .filter((v) => category === 'All' || v.category === category)
+      .filter((v) => status === 'All' || v.status === status)
+      .filter((v) => {
+        if (!search) return true
+        const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
+        return hay.includes(search.toLowerCase())
+      })
+  }, [vendors, category, status, search])
+
+  const toggleResolved = async (msg) => {
+    const { data } = await supabase.from('contact_messages').update({ resolved: !msg.resolved }).eq('id', msg.id).select().maybeSingle()
+    if (data) setMessages((list) => list.map((m) => (m.id === msg.id ? data : m)))
+  }
+
+  const deleteMessage = async (id) => {
+    await supabase.from('contact_messages').delete().eq('id', id)
+    setMessages((list) => list.filter((m) => m.id !== id))
+  }
 
   const refreshVendors = async () => {
     const { data } = await supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name')
@@ -102,6 +142,18 @@ export default function AdminDashboard() {
     setInvites((list) => list.filter((i) => i.id !== id))
   }
 
+  const removeAdmin = async (userId) => {
+    setBusyAdminId(userId)
+    setAdminsError('')
+    const { error } = await supabase.rpc('remove_neighborhood_admin', { p_neighborhood_id: neighborhood.id, p_user_id: userId })
+    setBusyAdminId(null)
+    if (error) {
+      setAdminsError(error.message)
+      return
+    }
+    setCurrentAdmins((list) => list.filter((a) => a.user_id !== userId))
+  }
+
   if (authLoading || loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
 
   if (!user) {
@@ -143,14 +195,22 @@ export default function AdminDashboard() {
   }
 
   const categories = neighborhood.categories || []
+  const residentCount = vendors.filter((v) => v.is_resident).length
+  const lastAdded = vendors.reduce((max, v) => (!max || v.created_at > max ? v.created_at : max), null)
+  const unresolvedCount = messages.filter((m) => !m.resolved).length
 
   return (
     <div className="wrap">
       <div className="masthead">
-        <div>
-          <p className="eyebrow"><Link to={`/n/${slug}`}>{neighborhood.name}</Link> · Admin</p>
-          <h1>Manage vendors</h1>
-          <p className="tagline">Changes here appear on the public directory immediately.</p>
+        <div className="masthead-with-logo">
+          {neighborhood.logo_url ? (
+            <img src={neighborhood.logo_url} alt="" className="masthead-logo" />
+          ) : null}
+          <div>
+            <p className="eyebrow"><Link to={`/n/${slug}`}>{neighborhood.name}</Link> · Admin</p>
+            <h1>Manage vendors</h1>
+            <p className="tagline">Changes here appear on the public directory immediately.</p>
+          </div>
         </div>
         <div className="admin-corner">
           <div className="admin-pill"><span className="dot" />{user.email}</div><br />
@@ -159,16 +219,58 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="count-row">{vendors.length} vendor{vendors.length === 1 ? '' : 's'} listed</div>
+      <div className="stats-row">
+        <div className="stat-item"><strong>{vendors.length}</strong><span>Vendor{vendors.length === 1 ? '' : 's'}</span></div>
+        <div className="stat-item"><strong>{categories.length}</strong><span>Categor{categories.length === 1 ? 'y' : 'ies'}</span></div>
+        <div className="stat-item"><strong>{residentCount}</strong><span>Neighbor-recommended</span></div>
+        {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>Last added</span></div> : null}
+        {unresolvedCount > 0 ? (
+          <button
+            type="button"
+            className="stat-item stat-alert stat-item-clickable"
+            onClick={() => document.getElementById('messages')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          >
+            <strong>{unresolvedCount}</strong><span>New message{unresolvedCount === 1 ? '' : 's'}</span>
+          </button>
+        ) : null}
+      </div>
 
-      {vendors.length === 0 ? (
+      <div className="controls">
+        <div className="search-box">
+          <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <div className="status-toggle">
+          {['All', 'Active', 'Inactive'].map((s) => (
+            <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{s}</button>
+          ))}
+        </div>
+      </div>
+      <div className="chip-row">
+        {['All', ...categories].map((c) => (
+          <span key={c} className={`chip ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>
+            {c !== 'All' ? <span className="chip-dot" style={{ background: colorForCategory(categories, c) }} /> : null}
+            {c}
+          </span>
+        ))}
+      </div>
+
+      <div className="count-row-with-action">
+        <div className="count-row">Showing {filtered.length} of {vendors.length} vendor{vendors.length === 1 ? '' : 's'}</div>
+        <div className="count-row-actions">
+          <ViewToggle view={view} onChange={setView} />
+          <button className="btn-ghost" onClick={() => { setImportMsg(''); setImportOpen(true) }}>Import CSV</button>
+        </div>
+      </div>
+      {importMsg ? <div className="success-msg">{importMsg}</div> : null}
+
+      {filtered.length === 0 ? (
         <div className="empty">
           <strong>Nothing here yet</strong>
-          Add your first vendor with the button in the corner.
+          {vendors.length === 0 ? 'Add your first vendor with the button in the corner, or import a CSV.' : 'No vendors match your search or filters.'}
         </div>
       ) : (
-        <div className="grid">
-          {vendors.map((v) => (
+        <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
+          {filtered.map((v) => (
             <VendorCard
               key={v.id}
               vendor={v}
@@ -180,6 +282,49 @@ export default function AdminDashboard() {
           ))}
         </div>
       )}
+
+      <h2 className="section-title" id="messages">Messages {unresolvedCount > 0 ? <span className="badge badge-inactive">{unresolvedCount} new</span> : null}</h2>
+      {messages.length === 0 ? (
+        <p className="sub">Nothing yet — suggestions and concerns from the public directory's "Contact admins" form will show up here.</p>
+      ) : (
+        <div className="message-list">
+          {messages.map((m) => (
+            <div key={m.id} className={`message-item ${m.resolved ? 'message-resolved' : ''}`}>
+              <div className="message-item-head">
+                <span className="message-from">{m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}</span>
+                <span className="message-time">{relativeTime(m.created_at)}</span>
+              </div>
+              <p className="message-text">{m.message}</p>
+              <div className="message-actions">
+                <button className="btn-ghost" onClick={() => toggleResolved(m)}>{m.resolved ? 'Reopen' : 'Mark resolved'}</button>
+                <button className="btn-ghost danger" onClick={() => deleteMessage(m.id)}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h2 className="section-title">Admins</h2>
+      {adminsError ? <div className="error-msg">{adminsError}</div> : null}
+      {currentAdmins.length > 0 ? (
+        <ul className="admin-list">
+          {currentAdmins.map((a) => (
+            <li key={a.user_id}>
+              {a.email}{a.user_id === user.id ? ' (you)' : ''}{' '}
+              {currentAdmins.length > 1 ? (
+                <button
+                  className="btn-ghost"
+                  style={{ padding: '2px 8px', fontSize: 10 }}
+                  disabled={busyAdminId === a.user_id}
+                  onClick={() => removeAdmin(a.user_id)}
+                >
+                  remove
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <h2 className="section-title">Invite a co-admin</h2>
       <form className="invite-row" onSubmit={sendInvite}>
@@ -207,6 +352,18 @@ export default function AdminDashboard() {
           existing={editingVendor}
           onCancel={() => { setModalOpen(false); setEditingVendor(null) }}
           onSave={saveVendor}
+        />
+      ) : null}
+
+      {importOpen ? (
+        <ImportVendorsModal
+          neighborhood={neighborhood}
+          onCancel={() => setImportOpen(false)}
+          onImported={async (count) => {
+            setImportOpen(false)
+            setImportMsg(`Imported ${count} vendor${count === 1 ? '' : 's'}.`)
+            await refreshVendors()
+          }}
         />
       ) : null}
 
