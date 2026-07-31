@@ -162,6 +162,9 @@ a { color: var(--blue); }
 /* ---------- controls ---------- */
 .controls{ display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; margin-bottom: 22px; }
 .search-box{ flex: 1 1 220px; position: relative; }
+.controls-compact{ align-items:center; }
+.search-box-compact{ flex: 0 1 260px; }
+.search-box-compact input{ padding-top:8px; padding-bottom:8px; }
 .search-box input{
   width:100%; font-family:'Inter'; font-size:14px;
   padding: 10px 14px 10px 34px; border-radius: 9px; border: 1px solid var(--line);
@@ -315,7 +318,10 @@ a { color: var(--blue); }
 .empty strong{ display:block; color:var(--ink-soft); font-family:'Fraunces',serif; font-size:18px; font-weight:600; margin-bottom:6px; }
 
 /* ---------- neighborhood list (home) ---------- */
-.n-list{ display:flex; flex-direction:column; gap:10px; }
+.n-list{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+@media (max-width: 700px){
+  .n-list{ grid-template-columns: 1fr; }
+}
 .n-row{
   display:flex; justify-content:space-between; align-items:center; gap:14px;
   background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);

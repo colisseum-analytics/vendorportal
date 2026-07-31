@@ -96,8 +96,8 @@ export default function BrowseVendors() {
         <div className="stat-item"><strong>{cityCount}</strong><span>{t('browse.statCities')}</span></div>
       </div>
 
-      <div className="controls">
-        <div className="search-box">
+      <div className="controls controls-compact">
+        <div className="search-box search-box-compact">
           <input
             type="text"
             placeholder={t('browse.searchPlaceholder')}
@@ -105,12 +105,11 @@ export default function BrowseVendors() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-      </div>
-
-      <div className="filter-pill-row" style={{ marginBottom: 16 }}>
-        <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
-        <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
-        <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} />
+        <div className="filter-pill-row">
+          <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
+          <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
+          <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} />
+        </div>
       </div>
 
       <div className="count-row-with-action">
