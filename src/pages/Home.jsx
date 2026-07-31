@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
+import FooterExtras from '../components/FooterExtras.jsx'
 
 export default function Home() {
   const { user, signOut } = useAuth()
@@ -70,6 +71,7 @@ export default function Home() {
         <div className="search-box">
           <input type="text" placeholder="Search neighborhoods…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
+        <Link className="btn-ghost" to="/browse">Browse all vendors →</Link>
       </div>
 
       {loading ? (
@@ -100,7 +102,10 @@ export default function Home() {
         </div>
       )}
 
-      <footer className="site-footer">A directory platform run by neighbors, for neighbors.</footer>
+      <footer className="site-footer">
+        A directory platform run by neighbors, for neighbors.
+        <FooterExtras />
+      </footer>
     </div>
   )
 }

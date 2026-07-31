@@ -2,8 +2,23 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
+import CityPicker from '../components/CityPicker.jsx'
+import ContactAdminModal from '../components/ContactAdminModal.jsx'
 
-const DEFAULT_CATEGORIES = ['Food & Drink', 'Home & Repair', 'Health & Wellness', 'Shops & Services', 'Kids & Pets', 'Professional']
+const LAUNCH_STATES = ['FL']
+
+const DEFAULT_CATEGORIES = [
+  'Home Repair & Trades',
+  'Cleaning',
+  'Auto & Transportation',
+  'Personal Care',
+  'Health & Wellness',
+  'Pet Care',
+  'Insurance',
+  'Food',
+  'Professional Services',
+]
+const DEFAULT_TAGLINE = 'A resident-run guide to trusted local vendors.'
 
 function slugify(str) {
   return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -13,13 +28,15 @@ export default function CreateNeighborhood() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
-  const [tagline, setTagline] = useState('')
-  const [categoriesText, setCategoriesText] = useState(DEFAULT_CATEGORIES.join(', '))
+  const [tagline, setTagline] = useState(DEFAULT_TAGLINE)
+  const [city, setCity] = useState('')
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [contactName, setContactName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [outOfStateContactOpen, setOutOfStateContactOpen] = useState(false)
 
   const onNameChange = (e) => {
     const val = e.target.value
@@ -27,7 +44,11 @@ export default function CreateNeighborhood() {
     if (!slugEdited) setSlug(slugify(val))
   }
 
-  const categories = categoriesText.split(',').map((c) => c.trim()).filter(Boolean)
+  const toggleCategory = (c) => {
+    setCategories((list) =>
+      list.includes(c) ? list.filter((x) => x !== c) : DEFAULT_CATEGORIES.filter((d) => d === c || list.includes(d))
+    )
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -36,8 +57,16 @@ export default function CreateNeighborhood() {
       setError('Give your neighborhood a name.')
       return
     }
+    if (!contactName.trim()) {
+      setError('Add your full name.')
+      return
+    }
     if (!contactEmail.trim()) {
       setError("Add the email you'll use to sign in once this is approved.")
+      return
+    }
+    if (!city.trim()) {
+      setError('Add the city this neighborhood is in.')
       return
     }
     setSaving(true)
@@ -54,6 +83,7 @@ export default function CreateNeighborhood() {
       name: name.trim(),
       slug: cleanSlug,
       tagline: tagline.trim() || null,
+      city: city.trim(),
       categories,
       contact_name: contactName.trim() || null,
       contact_email: contactEmail.trim().toLowerCase(),
@@ -110,14 +140,32 @@ export default function CreateNeighborhood() {
             <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="A resident-run guide to local businesses" />
           </div>
           <div className="field">
+            <label>City *</label>
+            <CityPicker value={city} onChange={setCity} restrictTo={LAUNCH_STATES} />
+            <div className="hint">
+              The broader city/metro area — used for cross-neighborhood city search. We're currently only onboarding
+              neighborhoods in Florida.{' '}
+              <button type="button" className="footer-link" onClick={() => setOutOfStateContactOpen(true)}>
+                Interested in another state? Let us know.
+              </button>
+            </div>
+          </div>
+          <div className="field">
             <label>Vendor categories</label>
-            <input type="text" value={categoriesText} onChange={(e) => setCategoriesText(e.target.value)} />
-            <div className="hint">Comma-separated. You can change these later.</div>
+            <div className="category-checkbox-grid">
+              {DEFAULT_CATEGORIES.map((c) => (
+                <label key={c} className="category-checkbox">
+                  <input type="checkbox" checked={categories.includes(c)} onChange={() => toggleCategory(c)} />
+                  {c}
+                </label>
+              ))}
+            </div>
+            <div className="hint">Pick the ones that fit your neighborhood. You can change these later.</div>
           </div>
           <div className="field-row">
             <div className="field">
-              <label>Your name (optional)</label>
-              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+              <label>Your full name *</label>
+              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Jane Rodriguez" />
             </div>
             <div className="field">
               <label>Your email *</label>
@@ -143,6 +191,14 @@ export default function CreateNeighborhood() {
           Download CSV template
         </button>
       </div>
+
+      {outOfStateContactOpen ? (
+        <ContactAdminModal
+          title="Interested in another state?"
+          description="We're focused on Florida for now, but tell us where you'd like to see this next."
+          onCancel={() => setOutOfStateContactOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }

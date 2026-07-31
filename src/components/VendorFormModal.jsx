@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const STATUSES = ['Active', 'Inactive']
+const STATUSES = ['Verified', 'Unknown']
 
 export default function VendorFormModal({ categories, existing, onCancel, onSave }) {
   const [form, setForm] = useState({
@@ -8,7 +8,7 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
     category: existing?.category || categories[0] || '',
     specialty: existing?.specialty || '',
     is_resident: existing?.is_resident || false,
-    status: existing?.status || 'Active',
+    status: existing?.status || 'Unknown',
     description: existing?.description || '',
     address: existing?.address || '',
     phone: existing?.phone || '',
@@ -56,7 +56,7 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
               </select>
             </div>
             <div className="field">
-              <label>Status</label>
+              <label>Verified by neighbors?</label>
               <select value={form.status} onChange={update('status')}>
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>

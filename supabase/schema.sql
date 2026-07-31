@@ -17,6 +17,7 @@ create table neighborhoods (
   tagline text,
   categories jsonb not null default '["Food & Drink","Home & Repair","Health & Wellness","Shops & Services","Kids & Pets","Professional"]'::jsonb,
   logo_url text,
+  city text,
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -37,7 +38,7 @@ create table vendors (
   category text not null,
   specialty text,
   is_resident boolean not null default false,
-  status text not null default 'Active',
+  status text not null default 'Unknown',
   description text,
   address text,
   phone text,
@@ -67,7 +68,9 @@ create table admin_invites (
 -- want a reply). Optionally tied to a specific vendor.
 create table contact_messages (
   id uuid primary key default gen_random_uuid(),
-  neighborhood_id uuid not null references neighborhoods(id) on delete cascade,
+  -- null when sent before a neighborhood exists (e.g. a "wrong state" inquiry
+  -- from the Start a directory form) — platform admins can still read/resolve it.
+  neighborhood_id uuid references neighborhoods(id) on delete cascade,
   vendor_id uuid references vendors(id) on delete set null,
   name text,
   email text,
@@ -86,6 +89,7 @@ create table neighborhood_requests (
   name text not null,
   slug text not null,
   tagline text,
+  city text,
   categories jsonb not null default '[]'::jsonb,
   contact_name text,
   contact_email text not null,
@@ -171,39 +175,41 @@ create policy "vendors_public_read"
 
 create policy "vendors_admin_insert"
   on vendors for insert
-  with check (is_neighborhood_admin(vendors.neighborhood_id));
+  with check (is_neighborhood_admin(vendors.neighborhood_id) or is_platform_admin());
 
 create policy "vendors_admin_update"
   on vendors for update
-  using (is_neighborhood_admin(vendors.neighborhood_id));
+  using (is_neighborhood_admin(vendors.neighborhood_id) or is_platform_admin());
 
 create policy "vendors_admin_delete"
   on vendors for delete
-  using (is_neighborhood_admin(vendors.neighborhood_id));
+  using (is_neighborhood_admin(vendors.neighborhood_id) or is_platform_admin());
 
 -- neighborhood_admins: a user can see their own membership rows, and
--- admins of a neighborhood can see their fellow admins for that
--- neighborhood (so the dashboard can list "who else can edit this").
+-- admins of a neighborhood (or a platform admin) can see their fellow
+-- admins for that neighborhood (so the dashboard can list "who else can
+-- edit this").
 create policy "admins_read"
   on neighborhood_admins for select
   using (
     user_id = auth.uid()
     or is_neighborhood_admin(neighborhood_admins.neighborhood_id)
+    or is_platform_admin()
   );
 
--- admin_invites: only admins of a neighborhood can create or view its
--- pending invites.
+-- admin_invites: admins of a neighborhood, or a platform admin, can
+-- create or view its pending invites.
 create policy "invites_admin_insert"
   on admin_invites for insert
-  with check (is_neighborhood_admin(admin_invites.neighborhood_id));
+  with check (is_neighborhood_admin(admin_invites.neighborhood_id) or is_platform_admin());
 
 create policy "invites_admin_read"
   on admin_invites for select
-  using (is_neighborhood_admin(admin_invites.neighborhood_id));
+  using (is_neighborhood_admin(admin_invites.neighborhood_id) or is_platform_admin());
 
 create policy "invites_admin_delete"
   on admin_invites for delete
-  using (is_neighborhood_admin(admin_invites.neighborhood_id));
+  using (is_neighborhood_admin(admin_invites.neighborhood_id) or is_platform_admin());
 
 -- platform_admins: only visible to other platform admins (so the
 -- platform dashboard can list "who else has this role").
@@ -423,8 +429,8 @@ begin
     raise exception 'That request was not found, or has already been reviewed.';
   end if;
 
-  insert into neighborhoods (name, slug, tagline, categories)
-  values (req.name, req.slug, req.tagline, coalesce(req.categories, '[]'::jsonb))
+  insert into neighborhoods (name, slug, tagline, city, categories)
+  values (req.name, req.slug, req.tagline, req.city, coalesce(req.categories, '[]'::jsonb))
   returning id into new_id;
 
   insert into admin_invites (neighborhood_id, email)

@@ -5,6 +5,7 @@ import Signup from './pages/Signup.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 import CreateNeighborhood from './pages/CreateNeighborhood.jsx'
+import BrowseVendors from './pages/BrowseVendors.jsx'
 import NeighborhoodDirectory from './pages/NeighborhoodDirectory.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/new" element={<CreateNeighborhood />} />
+        <Route path="/browse" element={<BrowseVendors />} />
         <Route path="/n/:slug" element={<NeighborhoodDirectory />} />
         <Route path="/n/:slug/admin" element={<AdminDashboard />} />
         <Route path="/n/:slug/admin/settings" element={<AdminSettings />} />

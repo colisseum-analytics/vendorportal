@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
+import CityPicker from '../components/CityPicker.jsx'
 
 export default function PlatformAdmin() {
   const { user, loading: authLoading } = useAuth()
@@ -17,8 +18,9 @@ export default function PlatformAdmin() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const [renaming, setRenaming] = useState(null) // neighborhood being renamed
+  const [renaming, setRenaming] = useState(null) // neighborhood being edited
   const [renameValue, setRenameValue] = useState('')
+  const [renameCityValue, setRenameCityValue] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [busyId, setBusyId] = useState(null)
 
@@ -127,13 +129,13 @@ export default function PlatformAdmin() {
     setBusyId(null)
   }
 
-  const startRename = (n) => { setRenaming(n); setRenameValue(n.name) }
+  const startRename = (n) => { setRenaming(n); setRenameValue(n.name); setRenameCityValue(n.city || '') }
 
   const saveRename = async (e) => {
     e.preventDefault()
     if (!renameValue.trim()) return
     setBusyId(renaming.id)
-    await supabase.from('neighborhoods').update({ name: renameValue.trim() }).eq('id', renaming.id)
+    await supabase.from('neighborhoods').update({ name: renameValue.trim(), city: renameCityValue.trim() || null }).eq('id', renaming.id)
     setRenaming(null)
     await loadAll()
     setBusyId(null)
@@ -326,7 +328,7 @@ export default function PlatformAdmin() {
           {requests.map((r) => (
             <div key={r.id} className="message-item">
               <div className="message-item-head">
-                <span className="message-from">{r.name} · /n/{r.slug}</span>
+                <span className="message-from">{r.name} · /n/{r.slug}{r.city ? ` · ${r.city}` : ''}</span>
                 <span className="message-time">{relativeTime(r.created_at)}</span>
               </div>
               {r.tagline ? <p className="message-text" style={{ marginBottom: 4 }}>{r.tagline}</p> : null}
@@ -361,7 +363,7 @@ export default function PlatformAdmin() {
                   <Link to={`/n/${n.slug}`} className="platform-name">{n.name}</Link>
                 </strong>
                 <span className="user-row-meta">
-                  /n/{n.slug} · Created {relativeTime(n.created_at)}
+                  /n/{n.slug} · {n.city || <em>no city set</em>} · Created {relativeTime(n.created_at)}
                   {n.updated_at && n.updated_at !== n.created_at ? ` · Updated ${relativeTime(n.updated_at)}` : ''}
                   {lastVendorAdded[n.id] ? ` · Last vendor added ${relativeTime(lastVendorAdded[n.id])}` : ''}
                 </span>
@@ -373,7 +375,7 @@ export default function PlatformAdmin() {
                 <span className="badge badge-neutral">{adminCounts[n.id] || 0} admin{(adminCounts[n.id] || 0) === 1 ? '' : 's'}</span>
               </div>
               <div className="user-row-actions">
-                <button className="btn-ghost" disabled={busyId === n.id} onClick={() => startRename(n)}>Rename</button>
+                <button className="btn-ghost" disabled={busyId === n.id} onClick={() => startRename(n)}>Edit</button>
                 <button className="btn-ghost" disabled={busyId === n.id} onClick={() => toggleActive(n)}>
                   {n.active ? 'Deactivate' : 'Activate'}
                 </button>
@@ -468,7 +470,7 @@ export default function PlatformAdmin() {
             <div key={m.id} className={`message-item ${m.resolved ? 'message-resolved' : ''}`}>
               <div className="message-item-head">
                 <span className="message-from">
-                  {neighborhoodNameById[m.neighborhood_id] || 'Unknown neighborhood'} · {m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}
+                  {m.neighborhood_id ? (neighborhoodNameById[m.neighborhood_id] || 'Unknown neighborhood') : 'General inquiry'} · {m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}
                 </span>
                 <span className="message-time">{relativeTime(m.created_at)}</span>
               </div>
@@ -528,11 +530,15 @@ export default function PlatformAdmin() {
         <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setRenaming(null) }}>
           <div className="modal" style={{ maxWidth: 400 }}>
             <button className="close-x" onClick={() => setRenaming(null)}>×</button>
-            <h2>Rename neighborhood</h2>
+            <h2>Edit neighborhood</h2>
             <form onSubmit={saveRename}>
               <div className="field">
                 <label>Name</label>
                 <input type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)} autoFocus />
+              </div>
+              <div className="field">
+                <label>City</label>
+                <CityPicker value={renameCityValue} onChange={setRenameCityValue} />
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={() => setRenaming(null)}>Cancel</button>

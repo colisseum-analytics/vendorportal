@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
+import CityPicker from '../components/CityPicker.jsx'
+import CategoryManager from '../components/CategoryManager.jsx'
 
 export default function AdminSettings() {
   const { slug } = useParams()
@@ -9,7 +11,7 @@ export default function AdminSettings() {
 
   const [name, setName] = useState('')
   const [tagline, setTagline] = useState('')
-  const [categoriesText, setCategoriesText] = useState('')
+  const [city, setCity] = useState('')
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -21,7 +23,7 @@ export default function AdminSettings() {
     if (!neighborhood) return
     setName(neighborhood.name || '')
     setTagline(neighborhood.tagline || '')
-    setCategoriesText((neighborhood.categories || []).join(', '))
+    setCity(neighborhood.city || '')
   }, [neighborhood])
 
   const uploadLogo = async (e) => {
@@ -112,10 +114,9 @@ export default function AdminSettings() {
     setSaving(true)
     setError('')
     setSaved(false)
-    const categories = categoriesText.split(',').map((c) => c.trim()).filter(Boolean)
     const { error } = await supabase
       .from('neighborhoods')
-      .update({ name: name.trim(), tagline: tagline.trim(), categories })
+      .update({ name: name.trim(), tagline: tagline.trim(), city: city.trim() || null })
       .eq('id', neighborhood.id)
     setSaving(false)
     if (error) {
@@ -171,9 +172,9 @@ export default function AdminSettings() {
             <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} />
           </div>
           <div className="field">
-            <label>Vendor categories</label>
-            <input type="text" value={categoriesText} onChange={(e) => setCategoriesText(e.target.value)} />
-            <div className="hint">Comma-separated. Renaming or removing a category doesn't change existing vendors' saved category — update those individually if needed.</div>
+            <label>City</label>
+            <CityPicker value={city} onChange={setCity} />
+            <div className="hint">The broader city/metro area — used for cross-neighborhood city search.</div>
           </div>
           <div className="field">
             <label>Web address</label>
@@ -184,6 +185,12 @@ export default function AdminSettings() {
             {saving ? 'Saving…' : 'Save changes'}
           </button>
         </form>
+      </div>
+
+      <div className="auth-card" style={{ maxWidth: 520, marginTop: 16 }}>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, margin: '0 0 6px' }}>Vendor categories</h2>
+        <p className="sub" style={{ marginBottom: 14 }}>Changes here save immediately.</p>
+        <CategoryManager neighborhood={neighborhood} onChanged={reload} />
       </div>
 
       <p style={{ marginTop: 20 }}><Link className="btn-ghost" to={`/n/${slug}/admin`}>← Back to manage vendors</Link></p>

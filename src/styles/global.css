@@ -192,6 +192,36 @@ a { color: var(--blue); }
 }
 .view-toggle button.active{ background: var(--ink); color: var(--paper-raised); }
 
+/* ---------- filter pills ---------- */
+.filter-pill-row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.filter-pill{ position:relative; }
+.filter-pill-btn{
+  display:flex; align-items:center; gap:5px;
+  font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.02em;
+  background: var(--paper-raised); border:1px dashed var(--line); color: var(--ink-soft);
+  padding: 7px 12px; border-radius: 20px; cursor:pointer; white-space:nowrap; transition: all .15s ease;
+}
+.filter-pill-btn:hover{ border-color: var(--blue); color: var(--ink); }
+.filter-pill-btn-active{ border-style:solid; border-color: var(--ink); background: var(--ink); color: var(--paper-raised); }
+.filter-pill-label{ opacity:0.75; }
+.filter-pill-clear{
+  margin-left:2px; display:inline-flex; align-items:center; justify-content:center;
+  width:15px; height:15px; border-radius:50%; opacity:0.75;
+}
+.filter-pill-clear:hover{ opacity:1; background: rgba(255,255,255,0.15); }
+.filter-pill-menu{
+  position:absolute; top: calc(100% + 6px); left:0; z-index:50; min-width:200px; max-height:280px; overflow-y:auto;
+  background: var(--paper-raised); border:1px solid var(--line); border-radius:10px; box-shadow: var(--shadow-lift);
+  padding:6px; display:flex; flex-direction:column; gap:1px;
+}
+.filter-pill-option{
+  text-align:left; background:none; border:none; padding:8px 10px; border-radius:7px; cursor:pointer;
+  font-family:'Inter'; font-size:13px; color: var(--ink);
+}
+.filter-pill-option:hover{ background: var(--paper); }
+.filter-pill-option-selected{ background: var(--blue-soft); color: var(--blue); font-weight:600; }
+.filter-pill-empty{ padding:10px; font-size:12.5px; color: var(--ink-faint); text-align:center; }
+
 /* ---------- list view ----------
    Each row is its own CSS grid (not flex) with fixed column tracks, and
    every field is pinned to an explicit grid-column. That way copy/status/
@@ -244,9 +274,11 @@ a { color: var(--blue); }
 .card-top{ padding-left: 18px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
 .card h3{ font-family:'Fraunces', serif; font-weight:600; font-size: 18px; margin: 0 0 3px; line-height:1.25; }
 .card .category{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:0.05em; text-transform: uppercase; color: var(--ink-soft); }
+.vendor-neighborhood-link{ color: var(--blue); text-decoration:none; }
+.vendor-neighborhood-link:hover{ text-decoration:underline; }
 .status-tag{ font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 12px; white-space:nowrap; flex-shrink:0; }
-.status-active{ background: var(--green-soft); color: var(--green); }
-.status-inactive{ background: var(--red-soft); color: var(--red); }
+.status-verified{ background: var(--green-soft); color: var(--green); }
+.status-unknown{ background: var(--blue-soft); color: var(--ink-soft); }
 .card-top-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .copy-btn{
   width:26px; height:26px; border-radius:7px; border:1px solid var(--line); background: var(--paper-raised);
@@ -325,6 +357,26 @@ a { color: var(--blue); }
 .field-row{ display:flex; gap:10px; }
 .field-row .field{ flex:1; }
 .field .hint{ font-size:11.5px; color: var(--ink-faint); margin-top:4px; }
+.city-picker{ display:flex; gap:10px; }
+.city-picker select{
+  flex:1; width:auto; font-family:'Inter'; font-size:14px; padding:9px 11px; border-radius:8px;
+  border:1px solid var(--line); background: var(--paper); color: var(--ink); outline:none;
+}
+.city-picker select:focus{ border-color: var(--blue); background:var(--paper-raised); }
+.city-picker select:disabled{ opacity:0.55; }
+.category-checkbox-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+.category-checkbox{ display:flex; align-items:center; gap:7px; font-size:13px; color: var(--ink); cursor:pointer; font-weight:normal; }
+.category-checkbox input{ width:auto; margin:0; }
+@media (max-width: 560px){
+  .category-checkbox-grid{ grid-template-columns: 1fr; }
+}
+.category-manager-list{ list-style:none; margin:0 0 12px; padding:0; display:flex; flex-direction:column; gap:6px; }
+.category-manager-list li{ display:flex; align-items:center; gap:8px; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background: var(--paper); }
+.category-manager-list li span{ flex:1; font-size:13px; }
+.category-manager-list li input{ flex:1; font-family:'Inter'; font-size:13px; padding:6px 9px; border-radius:6px; border:1px solid var(--line); background: var(--paper-raised); color: var(--ink); }
+.category-manager-add{ display:flex; gap:8px; margin-bottom:10px; }
+.category-manager-add input{ flex:1; font-family:'Inter'; font-size:14px; padding:9px 11px; border-radius:8px; border:1px solid var(--line); background: var(--paper); color: var(--ink); outline:none; }
+.category-manager-add input:focus{ border-color: var(--blue); background:var(--paper-raised); }
 .password-rules{ list-style:none; padding:0; margin:8px 0 0; display:flex; flex-direction:column; gap:3px; }
 .password-rules li{ font-size:11.5px; color: var(--ink-faint); display:flex; align-items:center; gap:6px; }
 .password-rules .rule-mark{ width:12px; text-align:center; }
@@ -441,6 +493,8 @@ a { color: var(--blue); }
 
 footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-faint); font-family:'IBM Plex Mono', monospace; }
 .footer-link{ background:none; border:none; padding:0; font:inherit; color: var(--blue); cursor:pointer; text-decoration:underline; }
+.footer-credit{ margin-top: 6px; }
+.footer-disclaimer{ margin-top: 10px; font-size: 10px; color: var(--ink-faint); opacity: 0.65; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.5; }
 
 @media (max-width: 560px){
   .masthead{ flex-direction:column; }

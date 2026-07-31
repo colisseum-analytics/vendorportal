@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
+import FooterExtras from '../components/FooterExtras.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { colorForCategory } from '../utils/categoryColor'
 import { relativeTime } from '../utils/relativeTime'
@@ -50,13 +51,16 @@ export default function NeighborhoodDirectory() {
       setVendors(v || [])
 
       if (user) {
-        const { data: admin } = await supabase
-          .from('neighborhood_admins')
-          .select('user_id')
-          .eq('neighborhood_id', n.id)
-          .eq('user_id', user.id)
-          .maybeSingle()
-        if (active) setIsAdmin(!!admin)
+        const [{ data: admin }, { data: platformAdmin }] = await Promise.all([
+          supabase
+            .from('neighborhood_admins')
+            .select('user_id')
+            .eq('neighborhood_id', n.id)
+            .eq('user_id', user.id)
+            .maybeSingle(),
+          supabase.rpc('is_platform_admin'),
+        ])
+        if (active) setIsAdmin(!!admin || !!platformAdmin)
       }
       setLoading(false)
     }
@@ -129,7 +133,7 @@ export default function NeighborhoodDirectory() {
           <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="status-toggle">
-          {['All', 'Active', 'Inactive'].map((s) => (
+          {['All', 'Verified', 'Unknown'].map((s) => (
             <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{s}</button>
           ))}
         </div>
@@ -161,6 +165,7 @@ export default function NeighborhoodDirectory() {
       <footer className="site-footer">
         Run by neighborhood volunteers. See something out of date?{' '}
         <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>Ask an admin</button> to fix it.
+        <FooterExtras />
       </footer>
 
       {contactOpen ? (

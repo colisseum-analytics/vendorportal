@@ -4,7 +4,7 @@ export const VENDOR_CSV_HEADERS = ['name', 'category', 'specialty', 'status', 'd
 
 export function downloadVendorCsvTemplate(categories = [], filename = 'vendor-import-template.csv') {
   const sample = {
-    name: '', category: categories[0] || '', specialty: '', status: 'Active',
+    name: '', category: categories[0] || '', specialty: '', status: 'Unknown',
     description: '', address: '', phone: '', website: '', lives_here: '',
   }
   const csv = toCsv(VENDOR_CSV_HEADERS, [sample])

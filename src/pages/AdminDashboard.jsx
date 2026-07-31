@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
 import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
+import { downloadVendorsCsv } from '../utils/vendorCsvExport'
 import ViewToggle from '../components/ViewToggle.jsx'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useVendorView } from '../hooks/useVendorView.js'
@@ -240,7 +241,7 @@ export default function AdminDashboard() {
           <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="status-toggle">
-          {['All', 'Active', 'Inactive'].map((s) => (
+          {['All', 'Verified', 'Unknown'].map((s) => (
             <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{s}</button>
           ))}
         </div>
@@ -258,6 +259,13 @@ export default function AdminDashboard() {
         <div className="count-row">Showing {filtered.length} of {vendors.length} vendor{vendors.length === 1 ? '' : 's'}</div>
         <div className="count-row-actions">
           <ViewToggle view={view} onChange={setView} />
+          <button
+            className="btn-ghost"
+            disabled={vendors.length === 0}
+            onClick={() => downloadVendorsCsv(vendors, `${slug}-vendors.csv`)}
+          >
+            Export CSV
+          </button>
           <button className="btn-ghost" onClick={() => { setImportMsg(''); setImportOpen(true) }}>Import CSV</button>
         </div>
       </div>

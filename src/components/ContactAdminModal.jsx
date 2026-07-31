@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 
-export default function ContactAdminModal({ neighborhood, onCancel }) {
+export default function ContactAdminModal({ neighborhood, title, description, onCancel }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
@@ -18,7 +18,7 @@ export default function ContactAdminModal({ neighborhood, onCancel }) {
     setSending(true)
     setError('')
     const { error: insertError } = await supabase.from('contact_messages').insert({
-      neighborhood_id: neighborhood.id,
+      neighborhood_id: neighborhood ? neighborhood.id : null,
       name: name.trim() || null,
       email: email.trim() || null,
       message: message.trim(),
@@ -38,15 +38,15 @@ export default function ContactAdminModal({ neighborhood, onCancel }) {
         {sent ? (
           <>
             <h2>Message sent</h2>
-            <p className="sub">Thanks — an admin of {neighborhood.name} will see this.</p>
+            <p className="sub">{neighborhood ? `Thanks — an admin of ${neighborhood.name} will see this.` : 'Thanks — a platform admin will see this.'}</p>
             <div className="modal-actions">
               <button type="button" className="btn-primary" onClick={onCancel} style={{ width: '100%' }}>Done</button>
             </div>
           </>
         ) : (
           <>
-            <h2>Contact the admins</h2>
-            <p className="sub">Suggest a vendor, report an update, or flag a concern with {neighborhood.name}.</p>
+            <h2>{title || 'Contact the admins'}</h2>
+            <p className="sub">{description || `Suggest a vendor, report an update, or flag a concern with ${neighborhood?.name}.`}</p>
             {error ? <div className="error-msg">{error}</div> : null}
             <form onSubmit={submit}>
               <div className="field">

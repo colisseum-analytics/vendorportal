@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient'
 import { parseCsv } from '../utils/csv'
 import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
 
-const STATUSES = ['Active', 'Inactive']
+const STATUSES = ['Verified', 'Unknown']
 
 const HEADER_ALIASES = {
   name: 'name', 'business name': 'name', 'provider name': 'name',
@@ -41,12 +41,13 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
     if (!rawCategory) errors.push('missing category')
     else if (!category) errors.push(`category "${rawCategory}" isn't in this neighborhood's list — add it in Settings first`)
 
-    let status = (raw.status || 'Active').trim()
-    const STATUS_ALIASES = { open: 'Active', closed: 'Inactive', seasonal: 'Inactive' }
+    let status = (raw.status || 'Unknown').trim()
+    // legacy values from earlier relabelings all collapse to Unknown
+    const STATUS_ALIASES = { open: 'Unknown', closed: 'Unknown', seasonal: 'Unknown', active: 'Unknown', inactive: 'Unknown' }
     const aliased = STATUS_ALIASES[status.toLowerCase()]
     if (aliased) status = aliased
     if (!STATUSES.some((s) => s.toLowerCase() === status.toLowerCase())) {
-      errors.push(`status "${status}" must be Active or Inactive`)
+      errors.push(`status "${status}" must be Verified or Unknown`)
     } else {
       status = STATUSES.find((s) => s.toLowerCase() === status.toLowerCase())
     }

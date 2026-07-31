@@ -24,14 +24,17 @@ export function useNeighborhoodAccess(slug) {
       if (!n) { setNotFound(true); setLoading(false); return }
       setNeighborhood(n)
 
-      const { data: admin } = await supabase
-        .from('neighborhood_admins')
-        .select('user_id')
-        .eq('neighborhood_id', n.id)
-        .eq('user_id', user.id)
-        .maybeSingle()
+      const [{ data: admin }, { data: platformAdmin }] = await Promise.all([
+        supabase
+          .from('neighborhood_admins')
+          .select('user_id')
+          .eq('neighborhood_id', n.id)
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase.rpc('is_platform_admin'),
+      ])
       if (!active) return
-      setIsAdmin(!!admin)
+      setIsAdmin(!!admin || !!platformAdmin)
       setLoading(false)
     }
     load()

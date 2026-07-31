@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { colorForCategory } from '../utils/categoryColor'
 
 function normalizeUrl(u) {
@@ -17,7 +18,7 @@ function buildShareText(v) {
   return lines.join('\n')
 }
 
-export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDelete }) {
+export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDelete, neighborhood }) {
   const v = vendor
   const [copied, setCopied] = useState(false)
 
@@ -38,13 +39,23 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
       <div className="card-top">
         <div className="card-top-name">
           <h3 title={v.description || undefined}>{v.name}</h3>
-          <div className="category">{v.category}{v.specialty ? ` · ${v.specialty}` : ''}</div>
+          <div className="category">
+            {v.category}{v.specialty ? ` · ${v.specialty}` : ''}
+            {neighborhood ? (
+              <>
+                {' · '}
+                <Link to={`/n/${neighborhood.slug}`} className="vendor-neighborhood-link" onClick={(e) => e.stopPropagation()}>
+                  {neighborhood.city ? `${neighborhood.name}, ${neighborhood.city}` : neighborhood.name}
+                </Link>
+              </>
+            ) : null}
+          </div>
         </div>
         <div className="card-top-actions">
           <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title="Copy details to share" aria-label="Copy details to share">
             {copied ? '✓' : '⧉'}
           </button>
-          <span className={`status-tag status-${(v.status || 'active').toLowerCase()}`}>{v.status || 'Active'}</span>
+          <span className={`status-tag status-${(v.status || 'unknown').toLowerCase()}`}>{v.status || 'Unknown'}</span>
         </div>
       </div>
       {v.description ? <p className="desc" title={v.description}>{v.description}</p> : null}
