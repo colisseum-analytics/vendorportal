@@ -220,6 +220,7 @@ a { color: var(--blue); }
 }
 .filter-reset-btn:hover{ color: var(--red); }
 .filter-pill-btn-active{ border-style:solid; border-color: var(--ink); background: var(--ink); color: var(--paper-raised); }
+.filter-pill-btn-active:hover{ border-color: var(--blue); color: var(--paper-raised); background: var(--ink); }
 .filter-pill-label{ opacity:0.75; }
 .filter-pill-clear{
   margin-left:2px; display:inline-flex; align-items:center; justify-content:center;
