@@ -4,26 +4,32 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
+import { stateForCity } from '../utils/usCities'
 
 export default function Home() {
   const { user, signOut } = useAuth()
   const { t } = useLanguage()
   const [neighborhoods, setNeighborhoods] = useState([])
+  const [vendorCounts, setVendorCounts] = useState({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
 
   useEffect(() => {
     let active = true
-    supabase
-      .from('neighborhoods')
-      .select('id, slug, name, tagline, logo_url, active')
-      .order('name')
-      .then(({ data, error }) => {
-        if (!active) return
-        if (!error) setNeighborhoods((data || []).filter((n) => n.active))
-        setLoading(false)
-      })
+    async function load() {
+      const [{ data: n, error }, { data: v }] = await Promise.all([
+        supabase.from('neighborhoods').select('id, slug, name, tagline, logo_url, city, active').order('name'),
+        supabase.from('vendors').select('neighborhood_id'),
+      ])
+      if (!active) return
+      if (!error) setNeighborhoods((n || []).filter((row) => row.active))
+      const counts = {}
+      for (const row of v || []) counts[row.neighborhood_id] = (counts[row.neighborhood_id] || 0) + 1
+      setVendorCounts(counts)
+      setLoading(false)
+    }
+    load()
     return () => { active = false }
   }, [])
 
@@ -96,6 +102,13 @@ export default function Home() {
                 <div>
                   <h3>{n.name}</h3>
                   {n.tagline ? <p>{n.tagline}</p> : null}
+                  <p className="n-row-meta">
+                    {n.city ? `${n.city}${stateForCity(n.city) ? `, ${stateForCity(n.city)}` : ''} · ` : ''}
+                    {t(
+                      vendorCounts[n.id] === 1 ? 'home.vendorCountOne' : 'home.vendorCountOther',
+                      { count: vendorCounts[n.id] || 0 }
+                    )}
+                  </p>
                 </div>
               </div>
               <span className="arrow">→</span>

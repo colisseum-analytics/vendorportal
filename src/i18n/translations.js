@@ -41,6 +41,8 @@ export const translations = {
       browseAll: 'Browse all vendors →',
       emptyTitle: 'No neighborhoods yet',
       emptyBody: 'Be the first — start a directory above.',
+      vendorCountOne: '{count} active vendor',
+      vendorCountOther: '{count} active vendors',
     },
     directory: {
       eyebrow: 'Vendor Directory',
@@ -249,6 +251,8 @@ export const translations = {
       browseAll: 'Ver todos los proveedores →',
       emptyTitle: 'Todavía no hay vecindarios',
       emptyBody: 'Sé el primero — crea un directorio arriba.',
+      vendorCountOne: '{count} proveedor activo',
+      vendorCountOther: '{count} proveedores activos',
     },
     directory: {
       eyebrow: 'Directorio de Proveedores',

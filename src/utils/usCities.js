@@ -134,3 +134,13 @@ export const CITIES_BY_STATE = {
   WI: ['Milwaukee', 'Madison', 'Green Bay'],
   WY: [],
 }
+
+// Reverse lookup used to display a state next to a stored city name
+// (e.g. neighborhood banners) — not guaranteed unique across all US
+// cities (a few names repeat across states), but fine for this app's
+// Florida-only launch data.
+export function stateForCity(city) {
+  if (!city) return ''
+  const hit = Object.entries(CITIES_BY_STATE).find(([, cities]) => cities.includes(city))
+  return hit ? hit[0] : ''
+}

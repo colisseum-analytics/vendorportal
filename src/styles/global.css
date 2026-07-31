@@ -325,6 +325,7 @@ a { color: var(--blue); }
 .n-row h3{ font-family:'Fraunces', serif; font-weight:600; font-size:17px; margin:0 0 3px; }
 .n-row p{ margin:0; font-size:13px; color:var(--ink-soft); }
 .n-row .arrow{ color: var(--ink-faint); font-size:18px; }
+.n-row-meta{ font-size:11.5px !important; color: var(--ink-faint) !important; margin-top:3px !important; }
 
 .cta-banner{
   display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;

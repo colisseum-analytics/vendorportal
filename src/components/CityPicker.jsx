@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
-import { US_STATES, CITIES_BY_STATE } from '../utils/usCities'
+import { US_STATES, CITIES_BY_STATE, stateForCity } from '../utils/usCities'
 import { useLanguage } from '../context/LanguageContext.jsx'
-
-function stateForCity(city) {
-  if (!city) return ''
-  const hit = Object.entries(CITIES_BY_STATE).find(([, cities]) => cities.includes(city))
-  return hit ? hit[0] : ''
-}
 
 // Cascading State -> City selects, populated from a static list of US
 // cities with population over ~100k, so directory creators pick a
