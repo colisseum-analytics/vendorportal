@@ -213,6 +213,12 @@ a { color: var(--blue); }
   padding: 7px 12px; border-radius: 20px; cursor:pointer; white-space:nowrap; transition: all .15s ease;
 }
 .filter-pill-btn:hover{ border-color: var(--blue); color: var(--ink); }
+.filter-reset-btn{
+  font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.02em;
+  background:none; border:none; color: var(--ink-faint); cursor:pointer;
+  padding: 7px 6px; white-space:nowrap; transition: color .15s ease;
+}
+.filter-reset-btn:hover{ color: var(--red); }
 .filter-pill-btn-active{ border-style:solid; border-color: var(--ink); background: var(--ink); color: var(--paper-raised); }
 .filter-pill-label{ opacity:0.75; }
 .filter-pill-clear{

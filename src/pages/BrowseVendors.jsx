@@ -109,6 +109,15 @@ export default function BrowseVendors() {
           <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
           <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
           <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} />
+          {status || city || category ? (
+            <button
+              type="button"
+              className="filter-reset-btn"
+              onClick={() => { setStatus(null); setCity(null); setCategory(null) }}
+            >
+              {t('browse.reset')} ×
+            </button>
+          ) : null}
         </div>
       </div>
 
