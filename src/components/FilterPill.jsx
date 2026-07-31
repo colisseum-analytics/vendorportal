@@ -31,6 +31,7 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
         type="button"
         className={`filter-pill-btn ${value ? 'filter-pill-btn-active' : ''}`}
         onClick={() => setOpen((o) => !o)}
+        title={value ? `${label}: ${selectedLabel}` : label}
       >
         {value ? (
           <>
@@ -60,6 +61,7 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
                   key={optValue}
                   className={`filter-pill-option ${optValue === value ? 'filter-pill-option-selected' : ''}`}
                   onClick={() => { onChange(optValue); setOpen(false) }}
+                  title={renderOption ? renderOption(o) : optLabel}
                 >
                   {renderOption ? renderOption(o) : optLabel}
                 </button>
