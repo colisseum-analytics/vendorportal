@@ -14,6 +14,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
+  const [adMessage] = useState(() => (Math.random() < 0.5 ? 'adMessage1' : 'adMessage2'))
 
   useEffect(() => {
     let active = true
@@ -67,12 +68,20 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="cta-banner">
-        <div>
-          <h2>{t('home.ctaTitle')}</h2>
-          <p>{t('home.ctaBody')}</p>
+      <div className="cta-grid">
+        <div className="cta-banner">
+          <div>
+            <h2>{t('home.ctaTitle')}</h2>
+            <p>{t('home.ctaBody')}</p>
+          </div>
+          <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
         </div>
-        <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
+        <div className="cta-banner ad-banner">
+          <div>
+            <p>{t(`home.${adMessage}`)}</p>
+          </div>
+          <Link className="btn-invert" to="/new">{t('home.adCta')}</Link>
+        </div>
       </div>
 
       <div className="controls">

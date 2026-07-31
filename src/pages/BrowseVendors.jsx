@@ -17,6 +17,7 @@ export default function BrowseVendors() {
   const [city, setCity] = useState(null)
   const [category, setCategory] = useState(null)
   const [status, setStatus] = useState(null)
+  const [neighborhoodFilter, setNeighborhoodFilter] = useState(null)
   const [view, setView] = useVendorView()
 
   useEffect(() => {
@@ -64,19 +65,24 @@ export default function BrowseVendors() {
     [vendors]
   )
   const statusOptions = ['Verified', 'Unknown']
+  const neighborhoodOptions = useMemo(
+    () => neighborhoods.map((n) => ({ value: n.id, label: n.name })),
+    [neighborhoods]
+  )
 
   const filtered = useMemo(() => {
     return vendors
       .filter((v) => !status || (v.status || 'Unknown') === status)
       .filter((v) => !category || v.category === category)
       .filter((v) => !city || neighborhoodById[v.neighborhood_id]?.city === city)
+      .filter((v) => !neighborhoodFilter || v.neighborhood_id === neighborhoodFilter)
       .filter((v) => {
         if (!search) return true
         const n = neighborhoodById[v.neighborhood_id]
         const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.description || ''} ${n?.name || ''} ${n?.city || ''}`.toLowerCase()
         return hay.includes(search.toLowerCase())
       })
-  }, [vendors, status, category, city, search, neighborhoodById])
+  }, [vendors, status, category, city, neighborhoodFilter, search, neighborhoodById])
 
   const cityCount = new Set(neighborhoods.map((n) => n.city).filter(Boolean)).size
 
@@ -109,11 +115,12 @@ export default function BrowseVendors() {
           <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
           <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
           <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} />
-          {status || city || category ? (
+          <FilterPill label={t('browse.filterNeighborhood')} options={neighborhoodOptions} value={neighborhoodFilter} onChange={setNeighborhoodFilter} />
+          {status || city || category || neighborhoodFilter ? (
             <button
               type="button"
               className="filter-reset-btn"
-              onClick={() => { setStatus(null); setCity(null); setCategory(null) }}
+              onClick={() => { setStatus(null); setCity(null); setCategory(null); setNeighborhoodFilter(null) }}
             >
               {t('browse.reset')} ×
             </button>
