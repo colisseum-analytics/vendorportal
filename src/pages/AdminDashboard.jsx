@@ -236,8 +236,8 @@ export default function AdminDashboard() {
         ) : null}
       </div>
 
-      <div className="controls">
-        <div className="search-box">
+      <div className="controls controls-compact">
+        <div className="search-box search-box-compact">
           <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="status-toggle">

@@ -130,8 +130,8 @@ export default function NeighborhoodDirectory() {
         {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>{t('directory.statLastAdded')}</span></div> : null}
       </div>
 
-      <div className="controls">
-        <div className="search-box">
+      <div className="controls controls-compact">
+        <div className="search-box search-box-compact">
           <input type="text" placeholder={t('directory.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="status-toggle">
