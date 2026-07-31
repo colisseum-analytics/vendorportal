@@ -44,7 +44,8 @@ export const translations = {
       vendorCountOne: '{count} active vendor',
       vendorCountOther: '{count} active vendors',
       adMessage1: 'Connect your residents with trusted local techs, caregivers, and services verified by the people next door.',
-      adMessage2: 'STOP answering "Do you know a good plumber?" emails. Give your community a private, board-approved vendor directory in under 5 minutes.',
+      adMessage2Title: 'Too many "Do you know a good plumber?" emails/messages?',
+      adMessage2Body: 'Give your community a vendor directory in under 5 minutes.',
       adCta: 'Get started →',
     },
     directory: {
@@ -259,7 +260,8 @@ export const translations = {
       vendorCountOne: '{count} proveedor activo',
       vendorCountOther: '{count} proveedores activos',
       adMessage1: 'Conecta a tus residentes con técnicos, cuidadores y servicios locales de confianza, verificados por sus propios vecinos.',
-      adMessage2: 'DEJA de responder correos de "¿Conoces un buen plomero?". Dale a tu comunidad un directorio de proveedores privado y aprobado por la junta, en menos de 5 minutos.',
+      adMessage2Title: '¿Demasiados correos o mensajes de "¿Conoces un buen plomero?"?',
+      adMessage2Body: 'Dale a tu comunidad un directorio de proveedores en menos de 5 minutos.',
       adCta: 'Comenzar →',
     },
     directory: {

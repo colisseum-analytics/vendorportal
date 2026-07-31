@@ -78,7 +78,14 @@ export default function Home() {
         </div>
         <div className="cta-banner ad-banner">
           <div>
-            <p>{t(`home.${adMessage}`)}</p>
+            {adMessage === 'adMessage2' ? (
+              <>
+                <h2>{t('home.adMessage2Title')}</h2>
+                <p>{t('home.adMessage2Body')}</p>
+              </>
+            ) : (
+              <p className="ad-banner-solo">{t('home.adMessage1')}</p>
+            )}
           </div>
           <Link className="btn-invert" to="/new">{t('home.adCta')}</Link>
         </div>

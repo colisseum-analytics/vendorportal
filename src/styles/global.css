@@ -351,7 +351,8 @@ a { color: var(--blue); }
 .cta-banner h2{ font-family:'Fraunces', serif; font-weight:600; font-size:20px; margin:0 0 4px; }
 .cta-banner p{ margin:0; font-size:13.5px; color:rgba(255,255,255,0.85); max-width:44ch; }
 .ad-banner{ background: linear-gradient(135deg, #B5622B, #8A3E9E); }
-.ad-banner p{ font-size:14px; font-weight:600; color:#fff; max-width:40ch; }
+.ad-banner h2{ max-width:40ch; }
+.ad-banner-solo{ font-size:14px; font-weight:600; color:#fff; max-width:40ch; }
 .btn-invert{
   background: var(--paper-raised); color: var(--ink); border:none; padding:10px 18px;
   border-radius:8px; font-family:'Inter'; font-weight:600; font-size:14px; cursor:pointer; text-decoration:none; white-space:nowrap;
