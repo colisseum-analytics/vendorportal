@@ -91,7 +91,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="controls">
+      <div className="controls home-controls-grid">
         <div className="search-box">
           <input type="text" placeholder={t('home.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>

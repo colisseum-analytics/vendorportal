@@ -44,7 +44,7 @@ export const translations = {
       vendorCountOne: '{count} active vendor',
       vendorCountOther: '{count} active vendors',
       adMessage1: 'Connect your residents with trusted local techs, caregivers, and services verified by the people next door.',
-      adMessage2Title: 'Too many "Do you know a good plumber?" emails/messages?',
+      adMessage2Title: 'Too many "Do you know a good plumber?" emails or messages?',
       adMessage2Body: 'Give your community a vendor directory in under 5 minutes.',
       adCta: 'Get started →',
     },

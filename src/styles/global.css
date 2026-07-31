@@ -343,6 +343,12 @@ a { color: var(--blue); }
 @media (max-width: 700px){
   .cta-grid{ grid-template-columns: 1fr; }
 }
+.home-controls-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:center; }
+.home-controls-grid .btn-ghost{ justify-self:end; }
+@media (max-width: 700px){
+  .home-controls-grid{ grid-template-columns: 1fr; }
+  .home-controls-grid .btn-ghost{ justify-self:start; }
+}
 .cta-banner{
   display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
   background: var(--accent-grad); color: #fff; border-radius: var(--radius);
