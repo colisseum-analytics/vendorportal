@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { PASSWORD_RULES, isPasswordValid } from '../utils/passwordPolicy'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 // Keep this list in sync with Login.jsx — see the note there for how
 // to turn on social login later.
 const OAUTH_PROVIDERS = []
 
 export default function Signup() {
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [touched, setTouched] = useState(false)
@@ -22,7 +24,7 @@ export default function Signup() {
     e.preventDefault()
     setTouched(true)
     if (!isPasswordValid(password)) {
-      setError('Your password needs to meet all the requirements below.')
+      setError(t('signup.errorPasswordRules'))
       return
     }
     setLoading(true)
@@ -49,9 +51,9 @@ export default function Signup() {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
-          <h1>Check your email</h1>
-          <p className="sub">We sent a confirmation link to {email}. Click it, then come back and log in.</p>
-          <Link className="btn-ghost" to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>Go to login</Link>
+          <h1>{t('signup.checkEmailTitle')}</h1>
+          <p className="sub">{t('signup.checkEmailBody', { email })}</p>
+          <Link className="btn-ghost" to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>{t('signup.goToLogin')}</Link>
         </div>
       </div>
     )
@@ -60,8 +62,8 @@ export default function Signup() {
   return (
     <div className="wrap-narrow">
       <div className="auth-card">
-        <h1>Create an account</h1>
-        <p className="sub">You'll need this to start or manage a neighborhood directory.</p>
+        <h1>{t('signup.title')}</h1>
+        <p className="sub">{t('signup.subtitle')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
 
         {OAUTH_PROVIDERS.map((p) => (
@@ -71,11 +73,11 @@ export default function Signup() {
 
         <form onSubmit={submit}>
           <div className="field">
-            <label>Email</label>
+            <label>{t('signup.emailLabel')}</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
           </div>
           <div className="field">
-            <label>Password</label>
+            <label>{t('signup.passwordLabel')}</label>
             <input
               type="password"
               value={password}
@@ -95,10 +97,10 @@ export default function Signup() {
             </ul>
           </div>
           <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'Creating account…' : 'Create account'}
+            {loading ? t('signup.submitting') : t('signup.submit')}
           </button>
         </form>
-        <p className="auth-switch">Already have an account? <Link to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>Log in</Link></p>
+        <p className="auth-switch">{t('signup.alreadyHaveAccount')} <Link to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>{t('signup.logIn')}</Link></p>
       </div>
     </div>
   )

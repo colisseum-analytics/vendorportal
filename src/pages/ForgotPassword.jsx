@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 export default function ForgotPassword() {
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
@@ -27,9 +29,9 @@ export default function ForgotPassword() {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
-          <h1>Check your email</h1>
-          <p className="sub">If an account exists for {email}, we sent a link to reset the password.</p>
-          <Link className="btn-ghost" to="/login">← Back to login</Link>
+          <h1>{t('forgotPassword.checkEmailTitle')}</h1>
+          <p className="sub">{t('forgotPassword.checkEmailBody', { email })}</p>
+          <Link className="btn-ghost" to="/login">{t('forgotPassword.backToLogin')}</Link>
         </div>
       </div>
     )
@@ -38,19 +40,19 @@ export default function ForgotPassword() {
   return (
     <div className="wrap-narrow">
       <div className="auth-card">
-        <h1>Reset your password</h1>
-        <p className="sub">Enter your account email and we'll send you a link to set a new password.</p>
+        <h1>{t('forgotPassword.title')}</h1>
+        <p className="sub">{t('forgotPassword.subtitle')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
         <form onSubmit={submit}>
           <div className="field">
-            <label>Email</label>
+            <label>{t('forgotPassword.emailLabel')}</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
           </div>
           <button type="submit" className="btn-primary" disabled={sending} style={{ width: '100%' }}>
-            {sending ? 'Sending…' : 'Send reset link'}
+            {sending ? t('forgotPassword.submitting') : t('forgotPassword.submit')}
           </button>
         </form>
-        <p className="auth-switch"><Link to="/login">← Back to login</Link></p>
+        <p className="auth-switch"><Link to="/login">{t('forgotPassword.backToLogin')}</Link></p>
       </div>
     </div>
   )

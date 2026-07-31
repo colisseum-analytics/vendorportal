@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { PASSWORD_RULES, isPasswordValid } from '../utils/passwordPolicy'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 export default function ResetPassword() {
+  const { t } = useLanguage()
   const [ready, setReady] = useState(false)
   const [password, setPassword] = useState('')
   const [touched, setTouched] = useState(false)
@@ -29,7 +31,7 @@ export default function ResetPassword() {
     e.preventDefault()
     setTouched(true)
     if (!isPasswordValid(password)) {
-      setError('Your password needs to meet all the requirements below.')
+      setError(t('resetPassword.errorPasswordRules'))
       return
     }
     setSaving(true)
@@ -48,8 +50,8 @@ export default function ResetPassword() {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
-          <h1>Password updated</h1>
-          <p className="sub">Taking you home…</p>
+          <h1>{t('resetPassword.doneTitle')}</h1>
+          <p className="sub">{t('resetPassword.doneBody')}</p>
         </div>
       </div>
     )
@@ -59,12 +61,9 @@ export default function ResetPassword() {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
-          <h1>Reset your password</h1>
-          <p className="sub">
-            Waiting for the reset link to verify — if you opened this page directly instead of from the
-            email, request a new link.
-          </p>
-          <Link className="btn-ghost" to="/forgot-password">Request a reset link</Link>
+          <h1>{t('resetPassword.waitingTitle')}</h1>
+          <p className="sub">{t('resetPassword.waitingBody')}</p>
+          <Link className="btn-ghost" to="/forgot-password">{t('resetPassword.requestNewLink')}</Link>
         </div>
       </div>
     )
@@ -73,12 +72,12 @@ export default function ResetPassword() {
   return (
     <div className="wrap-narrow">
       <div className="auth-card">
-        <h1>Set a new password</h1>
-        <p className="sub">Choose a new password for your account.</p>
+        <h1>{t('resetPassword.title')}</h1>
+        <p className="sub">{t('resetPassword.subtitle')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
         <form onSubmit={submit}>
           <div className="field">
-            <label>New password</label>
+            <label>{t('resetPassword.newPasswordLabel')}</label>
             <input
               type="password"
               value={password}
@@ -99,7 +98,7 @@ export default function ResetPassword() {
             </ul>
           </div>
           <button type="submit" className="btn-primary" disabled={saving} style={{ width: '100%' }}>
-            {saving ? 'Saving…' : 'Set new password'}
+            {saving ? t('resetPassword.submitting') : t('resetPassword.submit')}
           </button>
         </form>
       </div>

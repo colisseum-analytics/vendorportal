@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
 import CityPicker from '../components/CityPicker.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 const LAUNCH_STATES = ['FL']
 
@@ -25,6 +26,7 @@ function slugify(str) {
 }
 
 export default function CreateNeighborhood() {
+  const { t } = useLanguage()
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
@@ -54,19 +56,19 @@ export default function CreateNeighborhood() {
     e.preventDefault()
     const cleanSlug = slugify(slug)
     if (!name.trim() || !cleanSlug) {
-      setError('Give your neighborhood a name.')
+      setError(t('createNeighborhood.errorNeedName'))
       return
     }
     if (!contactName.trim()) {
-      setError('Add your full name.')
+      setError(t('createNeighborhood.errorNeedFullName'))
       return
     }
     if (!contactEmail.trim()) {
-      setError("Add the email you'll use to sign in once this is approved.")
+      setError(t('createNeighborhood.errorNeedEmail'))
       return
     }
     if (!city.trim()) {
-      setError('Add the city this neighborhood is in.')
+      setError(t('createNeighborhood.errorNeedCity'))
       return
     }
     setSaving(true)
@@ -75,7 +77,7 @@ export default function CreateNeighborhood() {
     const { data: existing } = await supabase.from('neighborhoods').select('id').eq('slug', cleanSlug).maybeSingle()
     if (existing) {
       setSaving(false)
-      setError('That web address is already taken — try another.')
+      setError(t('createNeighborhood.errorSlugTaken'))
       return
     }
 
@@ -100,17 +102,17 @@ export default function CreateNeighborhood() {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
-          <h1>Request submitted</h1>
+          <h1>{t('createNeighborhood.submittedTitle')}</h1>
           <p className="sub">
-            A platform admin will review "{name}" shortly. Once approved, come back and
-            {' '}<Link to={`/signup?redirect=/n/${slugify(slug)}/admin`}>create an account with {contactEmail}</Link>{' '}
-            — that exact email becomes the directory's first admin automatically.
+            {t('createNeighborhood.submittedBody1', { name })}
+            {' '}<Link to={`/signup?redirect=/n/${slugify(slug)}/admin`}>{t('createNeighborhood.submittedBody1Link', { email: contactEmail })}</Link>{' '}
+            {t('createNeighborhood.submittedBody1End')}
           </p>
-          <p className="sub">In the meantime, you can get your vendor list ready:</p>
+          <p className="sub">{t('createNeighborhood.submittedBody2')}</p>
           <button type="button" className="btn-secondary" style={{ width: '100%' }} onClick={() => downloadVendorCsvTemplate(categories)}>
-            Download CSV template
+            {t('createNeighborhood.downloadTemplateButton')}
           </button>
-          <p className="auth-switch"><Link to="/">← Back home</Link></p>
+          <p className="auth-switch"><Link to="/">{t('createNeighborhood.backHome')}</Link></p>
         </div>
       </div>
     )
@@ -119,39 +121,35 @@ export default function CreateNeighborhood() {
   return (
     <div className="wrap-narrow">
       <div className="auth-card">
-        <h1>Start a directory</h1>
-        <p className="sub">
-          No account needed yet — submit the basics below for review. Once a platform admin
-          approves it, you'll create an account and become the first admin.
-        </p>
+        <h1>{t('createNeighborhood.title')}</h1>
+        <p className="sub">{t('createNeighborhood.subtitle')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
         <form onSubmit={submit}>
           <div className="field">
-            <label>Neighborhood name *</label>
-            <input type="text" value={name} onChange={onNameChange} placeholder="Sandpiper Cove" autoFocus />
+            <label>{t('createNeighborhood.nameLabel')}</label>
+            <input type="text" value={name} onChange={onNameChange} placeholder={t('createNeighborhood.namePlaceholder')} autoFocus />
           </div>
           <div className="field">
-            <label>Web address</label>
+            <label>{t('createNeighborhood.webAddressLabel')}</label>
             <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setSlugEdited(true) }} placeholder="sandpiper-cove" />
             <div className="hint">yoursite.com/n/{slug || 'your-neighborhood'}</div>
           </div>
           <div className="field">
-            <label>One-line description</label>
-            <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="A resident-run guide to local businesses" />
+            <label>{t('createNeighborhood.taglineLabel')}</label>
+            <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder={DEFAULT_TAGLINE} />
           </div>
           <div className="field">
-            <label>City *</label>
+            <label>{t('createNeighborhood.cityLabel')}</label>
             <CityPicker value={city} onChange={setCity} restrictTo={LAUNCH_STATES} />
             <div className="hint">
-              The broader city/metro area — used for cross-neighborhood city search. We're currently only onboarding
-              neighborhoods in Florida.{' '}
+              {t('createNeighborhood.cityHint')}{' '}
               <button type="button" className="footer-link" onClick={() => setOutOfStateContactOpen(true)}>
-                Interested in another state? Let us know.
+                {t('createNeighborhood.cityOutOfState')}
               </button>
             </div>
           </div>
           <div className="field">
-            <label>Vendor categories</label>
+            <label>{t('createNeighborhood.categoriesLabel')}</label>
             <div className="category-checkbox-grid">
               {DEFAULT_CATEGORIES.map((c) => (
                 <label key={c} className="category-checkbox">
@@ -160,42 +158,40 @@ export default function CreateNeighborhood() {
                 </label>
               ))}
             </div>
-            <div className="hint">Pick the ones that fit your neighborhood. You can change these later.</div>
+            <div className="hint">{t('createNeighborhood.categoriesHint')}</div>
           </div>
           <div className="field-row">
             <div className="field">
-              <label>Your full name *</label>
-              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Jane Rodriguez" />
+              <label>{t('createNeighborhood.yourFullName')}</label>
+              <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder={t('createNeighborhood.yourFullNamePlaceholder')} />
             </div>
             <div className="field">
-              <label>Your email *</label>
+              <label>{t('createNeighborhood.yourEmail')}</label>
               <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="you@example.com" />
             </div>
           </div>
           <div className="hint" style={{ marginBottom: 14 }}>
-            Once approved, sign up with this exact email to become the admin.
+            {t('createNeighborhood.onceApproved')}
           </div>
           <button type="submit" className="btn-primary" disabled={saving} style={{ width: '100%' }}>
-            {saving ? 'Submitting…' : 'Submit for approval'}
+            {saving ? t('createNeighborhood.submitting') : t('createNeighborhood.submit')}
           </button>
         </form>
-        <p className="auth-switch">Already an admin somewhere? <Link to="/login">Log in</Link></p>
+        <p className="auth-switch">{t('createNeighborhood.alreadyAdmin')} <Link to="/login">{t('createNeighborhood.logIn')}</Link></p>
       </div>
 
       <div className="auth-card" style={{ marginTop: 16 }}>
-        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, margin: '0 0 6px' }}>Get ready to import vendors</h2>
-        <p className="sub" style={{ marginBottom: 14 }}>
-          See the columns we expect for a bulk vendor import — handy to fill in while your request is reviewed.
-        </p>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, margin: '0 0 6px' }}>{t('createNeighborhood.downloadTemplateTitle')}</h2>
+        <p className="sub" style={{ marginBottom: 14 }}>{t('createNeighborhood.downloadTemplateBody')}</p>
         <button type="button" className="btn-secondary" style={{ width: '100%' }} onClick={() => downloadVendorCsvTemplate(categories)}>
-          Download CSV template
+          {t('createNeighborhood.downloadTemplateButton')}
         </button>
       </div>
 
       {outOfStateContactOpen ? (
         <ContactAdminModal
-          title="Interested in another state?"
-          description="We're focused on Florida for now, but tell us where you'd like to see this next."
+          title={t('createNeighborhood.outOfStateModalTitle')}
+          description={t('createNeighborhood.outOfStateModalDescription')}
           onCancel={() => setOutOfStateContactOpen(false)}
         />
       ) : null}

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 export default function FilterPill({ label, options, value, onChange, renderOption }) {
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -17,7 +19,11 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
   }, [open])
 
   const selectedOption = options.find((o) => (typeof o === 'string' ? o : o.value) === value)
-  const selectedLabel = selectedOption ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label) : null
+  const selectedLabel = selectedOption
+    ? renderOption
+      ? renderOption(selectedOption)
+      : typeof selectedOption === 'string' ? selectedOption : selectedOption.label
+    : null
 
   return (
     <div className="filter-pill" ref={ref}>
@@ -33,7 +39,7 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
               className="filter-pill-clear"
               onClick={(e) => { e.stopPropagation(); onChange(null); setOpen(false) }}
               role="button"
-              aria-label={`Clear ${label} filter`}
+              aria-label={t('filterPill.clear', { label })}
             >×</span>
           </>
         ) : (
@@ -43,7 +49,7 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
       {open ? (
         <div className="filter-pill-menu">
           {options.length === 0 ? (
-            <div className="filter-pill-empty">Nothing to filter yet</div>
+            <div className="filter-pill-empty">{t('filterPill.nothingToFilter')}</div>
           ) : (
             options.map((o) => {
               const optValue = typeof o === 'string' ? o : o.value

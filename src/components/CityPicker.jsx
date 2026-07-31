@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { US_STATES, CITIES_BY_STATE } from '../utils/usCities'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 function stateForCity(city) {
   if (!city) return ''
@@ -13,6 +14,7 @@ function stateForCity(city) {
 // like "Miami" vs "miami " vs "Miami, FL"). Only the city name is stored —
 // the state selector is just a filter to narrow the city list.
 export default function CityPicker({ value, onChange, restrictTo }) {
+  const { t } = useLanguage()
   const [state, setState] = useState(() => stateForCity(value))
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function CityPicker({ value, onChange, restrictTo }) {
           onChange('')
         }}
       >
-        <option value="">State…</option>
+        <option value="">{t('cityPicker.state')}</option>
         {US_STATES.map((s) => (
           <option key={s.code} value={s.code} disabled={restrictTo ? !restrictTo.includes(s.code) : false}>
             {s.name}
@@ -43,7 +45,7 @@ export default function CityPicker({ value, onChange, restrictTo }) {
         onChange={(e) => onChange(e.target.value)}
         disabled={!state}
       >
-        <option value="">{state ? (cities.length ? 'City…' : 'No cities over 100k in this state') : 'Choose a state first'}</option>
+        <option value="">{state ? (cities.length ? t('cityPicker.city') : t('cityPicker.noCities')) : t('cityPicker.chooseStateFirst')}</option>
         {cities.map((c) => (
           <option key={c} value={c}>{c}</option>
         ))}

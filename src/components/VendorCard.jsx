@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { colorForCategory } from '../utils/categoryColor'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 function normalizeUrl(u) {
   if (!u) return ''
@@ -20,6 +21,7 @@ function buildShareText(v) {
 
 export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDelete, neighborhood }) {
   const v = vendor
+  const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
 
   const copy = async (e) => {
@@ -52,10 +54,12 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
           </div>
         </div>
         <div className="card-top-actions">
-          <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title="Copy details to share" aria-label="Copy details to share">
+          <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title={t('vendorCard.copyToShare')} aria-label={t('vendorCard.copyToShare')}>
             {copied ? '✓' : '⧉'}
           </button>
-          <span className={`status-tag status-${(v.status || 'unknown').toLowerCase()}`}>{v.status || 'Unknown'}</span>
+          <span className={`status-tag status-${(v.status || 'unknown').toLowerCase()}`}>
+            {t(`directory.status${v.status || 'Unknown'}`)}
+          </span>
         </div>
       </div>
       {v.description ? <p className="desc" title={v.description}>{v.description}</p> : null}
@@ -75,11 +79,11 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
           </div>
         ) : null}
       </div>
-      {v.is_resident ? <div className="resident-badge">★ Neighbor</div> : null}
+      {v.is_resident ? <div className="resident-badge">{t('vendorCard.neighborRecommended')}</div> : null}
       {isAdmin ? (
         <div className="card-admin-actions">
-          <button onClick={() => onEdit(v)}>Edit</button>
-          <button className="danger" onClick={() => onDelete(v)}>Delete</button>
+          <button onClick={() => onEdit(v)}>{t('vendorCard.edit')}</button>
+          <button className="danger" onClick={() => onDelete(v)}>{t('vendorCard.delete')}</button>
         </div>
       ) : null}
     </div>

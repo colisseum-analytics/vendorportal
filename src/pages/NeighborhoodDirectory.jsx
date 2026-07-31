@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
@@ -13,6 +14,7 @@ import { relativeTime } from '../utils/relativeTime'
 export default function NeighborhoodDirectory() {
   const { slug } = useParams()
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [neighborhood, setNeighborhood] = useState(null)
   const [vendors, setVendors] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
@@ -79,13 +81,13 @@ export default function NeighborhoodDirectory() {
       })
   }, [vendors, category, status, search])
 
-  if (loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading the directory…</div></div>
+  if (loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>{t('directory.loadingDirectory')}</div></div>
   if (notFound) {
     return (
       <div className="wrap">
         <div className="empty" style={{ marginTop: 60 }}>
-          <strong>Neighborhood not found</strong>
-          <Link to="/">← Back to all neighborhoods</Link>
+          <strong>{t('directory.notFoundTitle')}</strong>
+          <Link to="/">← {t('common.backToAllNeighborhoods')}</Link>
         </div>
       </div>
     )
@@ -103,38 +105,38 @@ export default function NeighborhoodDirectory() {
             <img src={neighborhood.logo_url} alt="" className="masthead-logo" />
           ) : null}
           <div>
-            <p className="eyebrow"><Link to="/">All neighborhoods</Link> · Vendor Directory</p>
+            <p className="eyebrow"><Link to="/">{t('common.backToAllNeighborhoods')}</Link> · {t('directory.eyebrow')}</p>
             <h1>{neighborhood.name}</h1>
             {neighborhood.tagline ? <p className="tagline">{neighborhood.tagline}</p> : null}
           </div>
         </div>
         <div className="admin-corner">
           {isAdmin ? (
-            <Link className="btn-ghost" to={`/n/${slug}/admin`}>Admin dashboard</Link>
+            <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.adminDashboard')}</Link>
           ) : user ? (
-            <Link className="btn-ghost" to={`/n/${slug}/admin`}>Request admin access</Link>
+            <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.requestAdminAccess')}</Link>
           ) : (
-            <Link className="btn-ghost" to={`/login?redirect=/n/${slug}/admin`}>Admin login</Link>
+            <Link className="btn-ghost" to={`/login?redirect=/n/${slug}/admin`}>{t('directory.adminLogin')}</Link>
           )}
           <br />
-          <button className="btn-ghost" style={{ marginTop: 8 }} onClick={() => setContactOpen(true)}>Contact admins</button>
+          <button className="btn-ghost" style={{ marginTop: 8 }} onClick={() => setContactOpen(true)}>{t('directory.contactAdmins')}</button>
         </div>
       </div>
 
       <div className="stats-row">
-        <div className="stat-item"><strong>{vendors.length}</strong><span>Vendor{vendors.length === 1 ? '' : 's'}</span></div>
-        <div className="stat-item"><strong>{categories.length}</strong><span>Categor{categories.length === 1 ? 'y' : 'ies'}</span></div>
-        <div className="stat-item"><strong>{residentCount}</strong><span>Neighbor-recommended</span></div>
-        {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>Last added</span></div> : null}
+        <div className="stat-item"><strong>{vendors.length}</strong><span>{vendors.length === 1 ? t('directory.statVendors') : t('directory.statVendorsPlural')}</span></div>
+        <div className="stat-item"><strong>{categories.length}</strong><span>{categories.length === 1 ? t('directory.statCategory') : t('directory.statCategoriesPlural')}</span></div>
+        <div className="stat-item"><strong>{residentCount}</strong><span>{t('directory.statResidentRecommended')}</span></div>
+        {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>{t('directory.statLastAdded')}</span></div> : null}
       </div>
 
       <div className="controls">
         <div className="search-box">
-          <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder={t('directory.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="status-toggle">
           {['All', 'Verified', 'Unknown'].map((s) => (
-            <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{s}</button>
+            <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{t(`directory.status${s}`)}</button>
           ))}
         </div>
       </div>
@@ -142,19 +144,21 @@ export default function NeighborhoodDirectory() {
         {['All', ...categories].map((c) => (
           <span key={c} className={`chip ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>
             {c !== 'All' ? <span className="chip-dot" style={{ background: colorForCategory(categories, c) }} /> : null}
-            {c}
+            {c === 'All' ? t('directory.statusAll') : c}
           </span>
         ))}
       </div>
       <div className="count-row-with-action">
-        <div className="count-row">Showing {filtered.length} of {vendors.length} vendor{vendors.length === 1 ? '' : 's'}</div>
+        <div className="count-row">
+          {t(vendors.length === 1 ? 'directory.showingOne' : 'directory.showingOther', { shown: filtered.length, total: vendors.length })}
+        </div>
         <ViewToggle view={view} onChange={setView} />
       </div>
 
       {filtered.length === 0 ? (
         <div className="empty">
-          <strong>Nothing here yet</strong>
-          {vendors.length === 0 ? 'Check back soon — admins are still building this list.' : 'No vendors match your search or filters.'}
+          <strong>{t('directory.emptyNothingYetTitle')}</strong>
+          {vendors.length === 0 ? t('directory.emptyNothingYetNoVendors') : t('directory.emptyNothingYetNoMatch')}
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
@@ -163,8 +167,8 @@ export default function NeighborhoodDirectory() {
       )}
 
       <footer className="site-footer">
-        Run by neighborhood volunteers. See something out of date?{' '}
-        <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>Ask an admin</button> to fix it.
+        {t('directory.footerAskAdmin')}{' '}
+        <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>{t('directory.footerAskAdminLink')}</button> {t('directory.footerAskAdminSuffix')}
         <FooterExtras />
       </footer>
 

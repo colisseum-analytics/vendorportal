@@ -6,8 +6,10 @@ import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 export default function BrowseVendors() {
+  const { t } = useLanguage()
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -82,23 +84,23 @@ export default function BrowseVendors() {
     <div className="wrap">
       <div className="masthead">
         <div>
-          <p className="eyebrow"><Link to="/">All neighborhoods</Link> · Browse Vendors</p>
-          <h1>Browse all vendors</h1>
-          <p className="tagline">Search vendors across every neighborhood directory on the platform.</p>
+          <p className="eyebrow"><Link to="/">{t('common.backToAllNeighborhoods')}</Link> · {t('browse.eyebrow')}</p>
+          <h1>{t('browse.title')}</h1>
+          <p className="tagline">{t('browse.subtitle')}</p>
         </div>
       </div>
 
       <div className="stats-row">
-        <div className="stat-item"><strong>{vendors.length}</strong><span>Vendors</span></div>
-        <div className="stat-item"><strong>{neighborhoods.length}</strong><span>Neighborhoods</span></div>
-        <div className="stat-item"><strong>{cityCount}</strong><span>Cities</span></div>
+        <div className="stat-item"><strong>{vendors.length}</strong><span>{t('browse.statVendors')}</span></div>
+        <div className="stat-item"><strong>{neighborhoods.length}</strong><span>{t('browse.statNeighborhoods')}</span></div>
+        <div className="stat-item"><strong>{cityCount}</strong><span>{t('browse.statCities')}</span></div>
       </div>
 
       <div className="controls">
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search vendors, categories, neighborhoods…"
+            placeholder={t('browse.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -106,22 +108,24 @@ export default function BrowseVendors() {
       </div>
 
       <div className="filter-pill-row" style={{ marginBottom: 16 }}>
-        <FilterPill label="Status" options={statusOptions} value={status} onChange={setStatus} />
-        <FilterPill label="City" options={cityOptions} value={city} onChange={setCity} />
-        <FilterPill label="Category" options={categoryOptions} value={category} onChange={setCategory} />
+        <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
+        <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
+        <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} />
       </div>
 
       <div className="count-row-with-action">
-        <div className="count-row">Showing {filtered.length} of {vendors.length} vendor{vendors.length === 1 ? '' : 's'}</div>
+        <div className="count-row">
+          {t(vendors.length === 1 ? 'browse.showingOne' : 'browse.showingOther', { shown: filtered.length, total: vendors.length })}
+        </div>
         <ViewToggle view={view} onChange={setView} />
       </div>
 
       {loading ? (
-        <div className="empty">Loading vendors…</div>
+        <div className="empty">{t('browse.loading')}</div>
       ) : filtered.length === 0 ? (
         <div className="empty">
-          <strong>No vendors match</strong>
-          {vendors.length === 0 ? 'No neighborhoods have added vendors yet.' : 'Try a different search or filter.'}
+          <strong>{t('browse.emptyTitle')}</strong>
+          {vendors.length === 0 ? t('browse.emptyNoVendors') : t('browse.emptyNoMatch')}
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
@@ -138,7 +142,7 @@ export default function BrowseVendors() {
       )}
 
       <footer className="site-footer">
-        A directory platform run by neighbors, for neighbors.
+        {t('footer.tagline')}
         <FooterExtras />
       </footer>
     </div>

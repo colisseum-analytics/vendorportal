@@ -11,11 +11,15 @@ import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
 import PlatformAdmin from './pages/PlatformAdmin.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
+import LanguageToggle from './components/LanguageToggle.jsx'
 
 export default function App() {
   return (
     <>
-      <div className="theme-toggle-corner"><ThemeToggle /></div>
+      <div className="theme-toggle-corner">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

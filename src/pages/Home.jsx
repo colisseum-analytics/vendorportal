@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 
 export default function Home() {
   const { user, signOut } = useAuth()
+  const { t } = useLanguage()
   const [neighborhoods, setNeighborhoods] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -42,44 +44,44 @@ export default function Home() {
     <div className="wrap">
       <div className="masthead">
         <div>
-          <p className="eyebrow">Neighborhood Directory</p>
-          <h1>Find your neighborhood</h1>
-          <p className="tagline">Browse local vendor directories run by residents, or start one for a neighborhood that doesn't have one yet.</p>
+          <p className="eyebrow">{t('home.eyebrow')}</p>
+          <h1>{t('home.title')}</h1>
+          <p className="tagline">{t('home.subtitle')}</p>
         </div>
         <div className="admin-corner">
           {user ? (
             <>
               <div className="admin-pill"><span className="dot" />{user.email}</div><br />
-              {isPlatformAdmin ? <Link className="btn-ghost" to="/platform-admin" style={{ marginRight: 6 }}>Platform admin</Link> : null}
-              <button className="btn-ghost" onClick={signOut}>Log out</button>
+              {isPlatformAdmin ? <Link className="btn-ghost" to="/platform-admin" style={{ marginRight: 6 }}>{t('nav.platformAdmin')}</Link> : null}
+              <button className="btn-ghost" onClick={signOut}>{t('nav.logOut')}</button>
             </>
           ) : (
-            <Link className="btn-ghost" to="/login">Log in</Link>
+            <Link className="btn-ghost" to="/login">{t('nav.logIn')}</Link>
           )}
         </div>
       </div>
 
       <div className="cta-banner">
         <div>
-          <h2>Don't see your neighborhood?</h2>
-          <p>Request a directory in a couple of minutes — no account needed until it's approved.</p>
+          <h2>{t('home.ctaTitle')}</h2>
+          <p>{t('home.ctaBody')}</p>
         </div>
-        <Link className="btn-invert" to="/new">Start a directory →</Link>
+        <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
       </div>
 
       <div className="controls">
         <div className="search-box">
-          <input type="text" placeholder="Search neighborhoods…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder={t('home.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <Link className="btn-ghost" to="/browse">Browse all vendors →</Link>
+        <Link className="btn-ghost" to="/browse">{t('home.browseAll')}</Link>
       </div>
 
       {loading ? (
-        <div className="empty">Loading neighborhoods…</div>
+        <div className="empty">{t('common.loading')}</div>
       ) : filtered.length === 0 ? (
         <div className="empty">
-          <strong>No neighborhoods yet</strong>
-          Be the first — start a directory above.
+          <strong>{t('home.emptyTitle')}</strong>
+          {t('home.emptyBody')}
         </div>
       ) : (
         <div className="n-list">
@@ -103,7 +105,7 @@ export default function Home() {
       )}
 
       <footer className="site-footer">
-        A directory platform run by neighbors, for neighbors.
+        {t('footer.tagline')}
         <FooterExtras />
       </footer>
     </div>

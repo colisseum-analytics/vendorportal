@@ -73,7 +73,15 @@ a { color: var(--blue); }
   transition: all .15s ease;
 }
 .theme-toggle:hover{ border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
-.theme-toggle-corner{ position: fixed; top: 18px; right: 20px; z-index: 60; }
+.theme-toggle-corner{ position: fixed; top: 18px; right: 20px; z-index: 60; display:flex; gap:8px; align-items:center; }
+.lang-toggle{
+  height: 34px; padding: 0 11px; border-radius: 17px; flex-shrink: 0;
+  border: 1px solid var(--line); background: var(--paper-raised); color: var(--ink-soft);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em; line-height: 1; cursor: pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition: all .15s ease;
+}
+.lang-toggle:hover{ border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
 @media (max-width: 560px){
   .theme-toggle-corner{ top: 12px; right: 12px; }
 }
