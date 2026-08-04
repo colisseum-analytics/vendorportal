@@ -81,6 +81,7 @@ export default function CreateNeighborhood() {
       return
     }
 
+    const cleanEmail = contactEmail.trim().toLowerCase()
     const { error: insertError } = await supabase.from('neighborhood_requests').insert({
       name: name.trim(),
       slug: cleanSlug,
@@ -88,11 +89,25 @@ export default function CreateNeighborhood() {
       city: city.trim(),
       categories,
       contact_name: contactName.trim() || null,
-      contact_email: contactEmail.trim().toLowerCase(),
+      contact_email: cleanEmail,
+    })
+    if (insertError) {
+      setSaving(false)
+      setError(insertError.message)
+      return
+    }
+
+    // Sends a magic-link email (via Supabase's built-in email sender) that
+    // both confirms this is really their inbox and creates their account —
+    // approval later grants that account admin rights directly, no
+    // separate signup step needed.
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/verify-request` },
     })
     setSaving(false)
-    if (insertError) {
-      setError(insertError.message)
+    if (otpError) {
+      setError(otpError.message)
       return
     }
     setSubmitted(true)
@@ -103,11 +118,7 @@ export default function CreateNeighborhood() {
       <div className="wrap-narrow">
         <div className="auth-card">
           <h1>{t('createNeighborhood.submittedTitle')}</h1>
-          <p className="sub">
-            {t('createNeighborhood.submittedBody1', { name })}
-            {' '}<Link to={`/signup?redirect=/n/${slugify(slug)}/admin`}>{t('createNeighborhood.submittedBody1Link', { email: contactEmail })}</Link>{' '}
-            {t('createNeighborhood.submittedBody1End')}
-          </p>
+          <p className="sub">{t('createNeighborhood.submittedBody1', { name, email: contactEmail })}</p>
           <p className="sub">{t('createNeighborhood.submittedBody2')}</p>
           <button type="button" className="btn-secondary" style={{ width: '100%' }} onClick={() => downloadVendorCsvTemplate(categories)}>
             {t('createNeighborhood.downloadTemplateButton')}

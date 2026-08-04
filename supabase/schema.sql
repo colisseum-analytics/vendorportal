@@ -97,7 +97,11 @@ create table neighborhood_requests (
   review_note text,
   reviewed_at timestamptz,
   reviewed_by uuid references auth.users(id),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Set once the requester confirms their contact email via a magic-link
+  -- sign-in (see verify_my_pending_request()) — required before a
+  -- platform admin can approve.
+  email_verified boolean not null default false
 );
 
 create index vendors_neighborhood_idx on vendors(neighborhood_id);
@@ -406,10 +410,44 @@ begin
 end;
 $$;
 
+-- Called by the requester's own (now-authenticated, magic-link) session
+-- to confirm their contact email. Doesn't trust a client-supplied
+-- request id — verifies whichever pending request matches their
+-- confirmed auth email.
+create or replace function public.verify_my_pending_request()
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  my_email text;
+  req_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'You must be signed in to verify a request.';
+  end if;
+
+  select email into my_email from auth.users where id = auth.uid();
+
+  update neighborhood_requests
+  set email_verified = true
+  where lower(contact_email) = lower(my_email)
+    and status = 'pending'
+    and email_verified = false
+  returning id into req_id;
+
+  return req_id;
+end;
+$$;
+
 -- Approves a pending directory request: creates the real neighborhood
--- and invites the requester's email as its first admin (via the existing
--- admin_invites mechanism — they're promoted the moment they sign up
--- with that address). Only callable by a platform admin.
+-- and grants the requester's already-verified account admin rights
+-- directly. Requires email_verified — the requester's account is created
+-- (and their email confirmed) via a magic-link sign-in at request-submit
+-- time, before an admin ever reviews it. Falls back to the admin_invites
+-- mechanism if for some reason no matching account exists yet. Only
+-- callable by a platform admin.
 create or replace function public.approve_neighborhood_request(p_request_id uuid)
 returns uuid
 language plpgsql
@@ -419,6 +457,7 @@ as $$
 declare
   req neighborhood_requests%rowtype;
   new_id uuid;
+  existing_user_id uuid;
 begin
   if not is_platform_admin() then
     raise exception 'Only a platform admin can approve a directory request.';
@@ -429,12 +468,24 @@ begin
     raise exception 'That request was not found, or has already been reviewed.';
   end if;
 
+  if not req.email_verified then
+    raise exception 'This request cannot be approved until the requester verifies their email.';
+  end if;
+
   insert into neighborhoods (name, slug, tagline, city, categories)
   values (req.name, req.slug, req.tagline, req.city, coalesce(req.categories, '[]'::jsonb))
   returning id into new_id;
 
-  insert into admin_invites (neighborhood_id, email)
-  values (new_id, req.contact_email);
+  select id into existing_user_id from auth.users where lower(email) = lower(req.contact_email);
+
+  if existing_user_id is not null then
+    insert into neighborhood_admins (neighborhood_id, user_id)
+    values (new_id, existing_user_id)
+    on conflict do nothing;
+  else
+    insert into admin_invites (neighborhood_id, email)
+    values (new_id, req.contact_email);
+  end if;
 
   update neighborhood_requests
   set status = 'approved', reviewed_at = now(), reviewed_by = auth.uid()

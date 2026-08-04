@@ -337,9 +337,18 @@ export default function PlatformAdmin() {
               </p>
               <p className="message-text">
                 Contact: {r.contact_name ? `${r.contact_name} — ` : ''}{r.contact_email}
+                {' '}
+                <span className={`badge ${r.email_verified ? 'badge-active' : 'badge-inactive'}`}>
+                  {r.email_verified ? 'Email verified' : 'Awaiting email verification'}
+                </span>
               </p>
               <div className="message-actions">
-                <button className="btn-secondary" disabled={busyRequestId === r.id} onClick={() => approveRequest(r)}>
+                <button
+                  className="btn-secondary"
+                  disabled={busyRequestId === r.id || !r.email_verified}
+                  title={r.email_verified ? undefined : "Can't approve until the requester verifies their email"}
+                  onClick={() => approveRequest(r)}
+                >
                   {busyRequestId === r.id ? 'Approving…' : 'Approve'}
                 </button>
                 <button className="btn-ghost danger" disabled={busyRequestId === r.id} onClick={() => { setRejectTarget(r); setRejectNote('') }}>Reject</button>
