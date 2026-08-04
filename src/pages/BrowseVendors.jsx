@@ -5,8 +5,11 @@ import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
+import Pagination from '../components/Pagination.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { useLanguage } from '../context/LanguageContext.jsx'
+
+const PAGE_SIZE = 25
 
 export default function BrowseVendors() {
   const { t } = useLanguage()
@@ -18,6 +21,7 @@ export default function BrowseVendors() {
   const [category, setCategory] = useState(null)
   const [status, setStatus] = useState(null)
   const [neighborhoodFilter, setNeighborhoodFilter] = useState(null)
+  const [page, setPage] = useState(1)
   const [view, setView] = useVendorView()
 
   useEffect(() => {
@@ -84,6 +88,16 @@ export default function BrowseVendors() {
       })
   }, [vendors, status, category, city, neighborhoodFilter, search, neighborhoodById])
 
+  useEffect(() => {
+    setPage(1)
+  }, [status, category, city, neighborhoodFilter, search])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageItems = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
+  )
+
   const cityCount = new Set(neighborhoods.map((n) => n.city).filter(Boolean)).size
 
   return (
@@ -144,7 +158,7 @@ export default function BrowseVendors() {
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
-          {filtered.map((v) => (
+          {pageItems.map((v) => (
             <VendorCard
               key={v.id}
               vendor={v}
@@ -155,6 +169,8 @@ export default function BrowseVendors() {
           ))}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
 
       <footer className="site-footer">
         {t('footer.tagline')}

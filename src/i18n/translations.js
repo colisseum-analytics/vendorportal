@@ -129,6 +129,11 @@ export const translations = {
       chooseStateFirst: 'Choose a state first',
       noCities: 'No cities over 100k in this state',
     },
+    pagination: {
+      prev: '‹ Prev',
+      next: 'Next ›',
+      pageOf: 'Page {page} of {total}',
+    },
     createNeighborhood: {
       title: 'Start a directory',
       subtitle: "No account needed yet — submit the basics below for review. Once a platform admin approves it, you'll create an account and become the first admin.",
@@ -165,6 +170,17 @@ export const translations = {
       errorNeedEmail: "Add the email you'll use to sign in once this is approved.",
       errorNeedCity: 'Add the city this neighborhood is in.',
       errorSlugTaken: "That web address is already taken — try another.",
+      categoryLabels: {
+        'Home Repair & Trades': 'Home Repair & Trades',
+        'Cleaning': 'Cleaning',
+        'Auto & Transportation': 'Auto & Transportation',
+        'Personal Care': 'Personal Care',
+        'Health & Wellness': 'Health & Wellness',
+        'Pet Care': 'Pet Care',
+        'Insurance': 'Insurance',
+        'Food': 'Food',
+        'Professional Services': 'Professional Services',
+      },
     },
     login: {
       title: 'Log in',
@@ -345,6 +361,11 @@ export const translations = {
       chooseStateFirst: 'Elige un estado primero',
       noCities: 'Ninguna ciudad con más de 100k en este estado',
     },
+    pagination: {
+      prev: '‹ Anterior',
+      next: 'Siguiente ›',
+      pageOf: 'Página {page} de {total}',
+    },
     createNeighborhood: {
       title: 'Crear un directorio',
       subtitle: 'Aún no necesitas cuenta — envía lo básico a continuación para revisión. Una vez que un administrador de la plataforma lo apruebe, crearás una cuenta y serás el primer administrador.',
@@ -381,6 +402,17 @@ export const translations = {
       errorNeedEmail: 'Agrega el correo que usarás para iniciar sesión una vez aprobado.',
       errorNeedCity: 'Agrega la ciudad donde está este vecindario.',
       errorSlugTaken: 'Esa dirección web ya está en uso — prueba con otra.',
+      categoryLabels: {
+        'Home Repair & Trades': 'Reparaciones del Hogar y Oficios',
+        'Cleaning': 'Limpieza',
+        'Auto & Transportation': 'Auto y Transporte',
+        'Personal Care': 'Cuidado Personal',
+        'Health & Wellness': 'Salud y Bienestar',
+        'Pet Care': 'Cuidado de Mascotas',
+        'Insurance': 'Seguros',
+        'Food': 'Comida',
+        'Professional Services': 'Servicios Profesionales',
+      },
     },
     login: {
       title: 'Iniciar sesión',

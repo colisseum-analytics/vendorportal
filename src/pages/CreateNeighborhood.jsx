@@ -154,7 +154,7 @@ export default function CreateNeighborhood() {
               {DEFAULT_CATEGORIES.map((c) => (
                 <label key={c} className="category-checkbox">
                   <input type="checkbox" checked={categories.includes(c)} onChange={() => toggleCategory(c)} />
-                  {c}
+                  {t(`createNeighborhood.categoryLabels.${c}`)}
                 </label>
               ))}
             </div>

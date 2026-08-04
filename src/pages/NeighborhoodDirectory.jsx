@@ -7,9 +7,12 @@ import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
+import Pagination from '../components/Pagination.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { colorForCategory } from '../utils/categoryColor'
 import { relativeTime } from '../utils/relativeTime'
+
+const PAGE_SIZE = 25
 
 export default function NeighborhoodDirectory() {
   const { slug } = useParams()
@@ -23,6 +26,7 @@ export default function NeighborhoodDirectory() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const [status, setStatus] = useState('All')
+  const [page, setPage] = useState(1)
   const [view, setView] = useVendorView()
   const [contactOpen, setContactOpen] = useState(false)
 
@@ -80,6 +84,16 @@ export default function NeighborhoodDirectory() {
         return hay.includes(search.toLowerCase())
       })
   }, [vendors, category, status, search])
+
+  useEffect(() => {
+    setPage(1)
+  }, [category, status, search])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageItems = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
+  )
 
   if (loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>{t('directory.loadingDirectory')}</div></div>
   if (notFound) {
@@ -162,9 +176,11 @@ export default function NeighborhoodDirectory() {
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
-          {filtered.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} />)}
+          {pageItems.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} />)}
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
 
       <footer className="site-footer">
         {t('directory.footerAskAdmin')}{' '}
