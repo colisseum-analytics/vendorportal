@@ -13,10 +13,12 @@ import AdminSettings from './pages/AdminSettings.jsx'
 import PlatformAdmin from './pages/PlatformAdmin.jsx'
 import ThemeToggle from './components/ThemeToggle.jsx'
 import LanguageToggle from './components/LanguageToggle.jsx'
+import BrandLogo from './components/BrandLogo.jsx'
 
 export default function App() {
   return (
     <>
+      <BrandLogo />
       <div className="theme-toggle-corner">
         <LanguageToggle />
         <ThemeToggle />

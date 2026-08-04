@@ -295,7 +295,7 @@ export default function PlatformAdmin() {
     <div className="wrap">
       <div className="masthead">
         <div>
-          <p className="eyebrow"><Link to="/">Neighborhood Directory</Link> · Platform Admin</p>
+          <p className="eyebrow"><Link to="/">LoopListing</Link> · Platform Admin</p>
           <h1>Platform overview</h1>
           <p className="tagline">Review new directory requests and oversee every directory already on the platform.</p>
         </div>

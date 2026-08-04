@@ -31,7 +31,7 @@ export const translations = {
         'Vendors listed here are recommendations submitted by individual residents and do not constitute an official legal endorsement, vetting, or warranty of any kind by this platform.',
     },
     home: {
-      eyebrow: 'Neighborhood Directory',
+      eyebrow: 'LoopListing',
       title: 'Find your neighborhood',
       subtitle: "Browse local vendor directories run by residents, or start one for a neighborhood that doesn't have one yet.",
       ctaTitle: "Don't see your neighborhood?",
@@ -277,7 +277,7 @@ export const translations = {
         'Los proveedores aquí listados son recomendaciones enviadas por residentes individuales y no constituyen un aval legal oficial, verificación ni garantía de ningún tipo por parte de esta plataforma.',
     },
     home: {
-      eyebrow: 'Directorio del Vecindario',
+      eyebrow: 'LoopListing',
       title: 'Encuentra tu vecindario',
       subtitle: 'Explora directorios de proveedores locales administrados por residentes, o crea uno para un vecindario que aún no tenga.',
       ctaTitle: '¿No encuentras tu vecindario?',
