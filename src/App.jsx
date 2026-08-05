@@ -11,18 +11,12 @@ import NeighborhoodDirectory from './pages/NeighborhoodDirectory.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
 import PlatformAdmin from './pages/PlatformAdmin.jsx'
-import ThemeToggle from './components/ThemeToggle.jsx'
-import LanguageToggle from './components/LanguageToggle.jsx'
-import BrandLogo from './components/BrandLogo.jsx'
+import SiteHeader from './components/SiteHeader.jsx'
 
 export default function App() {
   return (
     <>
-      <BrandLogo />
-      <div className="theme-toggle-corner">
-        <LanguageToggle />
-        <ThemeToggle />
-      </div>
+      <SiteHeader />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

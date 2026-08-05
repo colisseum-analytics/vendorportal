@@ -73,12 +73,17 @@ a { color: var(--blue); }
   transition: all .15s ease;
 }
 .theme-toggle:hover{ border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
-.theme-toggle-corner{ position: fixed; top: 18px; right: 20px; z-index: 60; display:flex; gap:8px; align-items:center; }
-.brand-logo{ position: fixed; top: 14px; left: 20px; z-index: 60; display:inline-flex; align-items:center; }
-.brand-logo img{ height: 32px; width: auto; display:block; }
+.site-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 16px 28px; border-bottom: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+.site-header-logo{ display:inline-flex; align-items:center; }
+.site-header-logo img{ height: 52px; width:auto; display:block; }
+.site-header-actions{ display:flex; gap:8px; align-items:center; }
 @media (max-width: 560px){
-  .brand-logo{ top: 12px; left: 12px; }
-  .brand-logo img{ height: 26px; }
+  .site-header{ padding: 10px 16px; }
+  .site-header-logo img{ height: 38px; }
 }
 .lang-toggle{
   height: 34px; padding: 0 11px; border-radius: 17px; flex-shrink: 0;
