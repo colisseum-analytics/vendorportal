@@ -6,11 +6,13 @@ import VendorFormModal from '../components/VendorFormModal.jsx'
 import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
 import { downloadVendorsCsv } from '../utils/vendorCsvExport'
 import ViewToggle from '../components/ViewToggle.jsx'
+import FilterPill from '../components/FilterPill.jsx'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { useAuth } from '../context/AuthContext.jsx'
-import { colorForCategory } from '../utils/categoryColor'
 import { relativeTime } from '../utils/relativeTime'
+
+const STATUS_OPTIONS = ['Verified', 'Unknown']
 
 export default function AdminDashboard() {
   const { slug } = useParams()
@@ -31,8 +33,8 @@ export default function AdminDashboard() {
   const [importMsg, setImportMsg] = useState('')
   const [view, setView] = useVendorView()
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('All')
-  const [status, setStatus] = useState('All')
+  const [category, setCategory] = useState(null)
+  const [status, setStatus] = useState(null)
 
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteMsg, setInviteMsg] = useState('')
@@ -61,8 +63,8 @@ export default function AdminDashboard() {
 
   const filtered = useMemo(() => {
     return vendors
-      .filter((v) => category === 'All' || v.category === category)
-      .filter((v) => status === 'All' || v.status === status)
+      .filter((v) => !category || v.category === category)
+      .filter((v) => !status || v.status === status)
       .filter((v) => {
         if (!search) return true
         const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
@@ -240,19 +242,15 @@ export default function AdminDashboard() {
         <div className="search-box search-box-compact">
           <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <div className="status-toggle">
-          {['All', 'Verified', 'Unknown'].map((s) => (
-            <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{s}</button>
-          ))}
+        <div className="filter-pill-row">
+          <FilterPill label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
+          <FilterPill label="Category" options={categories} value={category} onChange={setCategory} />
+          {status || category ? (
+            <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
+              Reset ×
+            </button>
+          ) : null}
         </div>
-      </div>
-      <div className="chip-row">
-        {['All', ...categories].map((c) => (
-          <span key={c} className={`chip ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>
-            {c !== 'All' ? <span className="chip-dot" style={{ background: colorForCategory(categories, c) }} /> : null}
-            {c}
-          </span>
-        ))}
       </div>
 
       <div className="count-row-with-action">

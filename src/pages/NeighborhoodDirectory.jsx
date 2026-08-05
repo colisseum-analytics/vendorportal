@@ -8,9 +8,11 @@ import ViewToggle from '../components/ViewToggle.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 import Pagination from '../components/Pagination.jsx'
+import FilterPill from '../components/FilterPill.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
-import { colorForCategory } from '../utils/categoryColor'
 import { relativeTime } from '../utils/relativeTime'
+
+const STATUS_OPTIONS = ['Verified', 'Unknown']
 
 const PAGE_SIZE = 25
 
@@ -24,8 +26,8 @@ export default function NeighborhoodDirectory() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('All')
-  const [status, setStatus] = useState('All')
+  const [category, setCategory] = useState(null)
+  const [status, setStatus] = useState(null)
   const [page, setPage] = useState(1)
   const [view, setView] = useVendorView()
   const [contactOpen, setContactOpen] = useState(false)
@@ -76,8 +78,8 @@ export default function NeighborhoodDirectory() {
 
   const filtered = useMemo(() => {
     return vendors
-      .filter((v) => category === 'All' || v.category === category)
-      .filter((v) => status === 'All' || v.status === status)
+      .filter((v) => !category || v.category === category)
+      .filter((v) => !status || v.status === status)
       .filter((v) => {
         if (!search) return true
         const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
@@ -148,19 +150,15 @@ export default function NeighborhoodDirectory() {
         <div className="search-box search-box-compact">
           <input type="text" placeholder={t('directory.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <div className="status-toggle">
-          {['All', 'Verified', 'Unknown'].map((s) => (
-            <button key={s} className={status === s ? 'active' : ''} onClick={() => setStatus(s)}>{t(`directory.status${s}`)}</button>
-          ))}
+        <div className="filter-pill-row">
+          <FilterPill label={t('browse.filterStatus')} options={STATUS_OPTIONS} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
+          <FilterPill label={t('browse.filterCategory')} options={categories} value={category} onChange={setCategory} />
+          {status || category ? (
+            <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
+              {t('browse.reset')} ×
+            </button>
+          ) : null}
         </div>
-      </div>
-      <div className="chip-row">
-        {['All', ...categories].map((c) => (
-          <span key={c} className={`chip ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>
-            {c !== 'All' ? <span className="chip-dot" style={{ background: colorForCategory(categories, c) }} /> : null}
-            {c === 'All' ? t('directory.statusAll') : c}
-          </span>
-        ))}
       </div>
       <div className="count-row-with-action">
         <div className="count-row">
