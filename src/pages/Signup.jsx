@@ -64,6 +64,7 @@ export default function Signup() {
       <div className="auth-card">
         <h1>{t('signup.title')}</h1>
         <p className="sub">{t('signup.subtitle')}</p>
+        <p className="hint" style={{ marginBottom: 14 }}>{t('signup.verifyNotice')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
 
         {OAUTH_PROVIDERS.map((p) => (

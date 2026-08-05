@@ -136,7 +136,7 @@ export const translations = {
     },
     createNeighborhood: {
       title: 'Start a directory',
-      subtitle: "No account needed yet — submit the basics below for review. Once a platform admin approves it, you'll create an account and become the first admin.",
+      subtitle: "Submit the basics below, then verify your email to activate your account. A platform admin will review it, and once approved you'll be its first admin.",
       nameLabel: 'Neighborhood name *',
       namePlaceholder: 'Sandpiper Cove',
       webAddressLabel: 'Web address',
@@ -149,7 +149,7 @@ export const translations = {
       yourFullName: 'Your full name *',
       yourFullNamePlaceholder: 'Jane Rodriguez',
       yourEmail: 'Your email *',
-      onceApproved: 'Once approved, sign up with this exact email to become the admin.',
+      onceApproved: "We'll send a verification link to this email right after you submit — you'll need to confirm it before your request can be approved.",
       submit: 'Submit for approval',
       submitting: 'Submitting…',
       alreadyAdmin: 'Already an admin somewhere?',
@@ -194,6 +194,7 @@ export const translations = {
     signup: {
       title: 'Create an account',
       subtitle: "You'll need this to start or manage a neighborhood directory.",
+      verifyNotice: "You'll need to verify your email address before you can log in.",
       emailLabel: 'Email',
       passwordLabel: 'Password',
       submit: 'Create account',
@@ -382,7 +383,7 @@ export const translations = {
     },
     createNeighborhood: {
       title: 'Crear un directorio',
-      subtitle: 'Aún no necesitas cuenta — envía lo básico a continuación para revisión. Una vez que un administrador de la plataforma lo apruebe, crearás una cuenta y serás el primer administrador.',
+      subtitle: 'Envía lo básico a continuación y luego verifica tu correo para activar tu cuenta. Un administrador de la plataforma lo revisará, y una vez aprobado serás su primer administrador.',
       nameLabel: 'Nombre del vecindario *',
       namePlaceholder: 'Sandpiper Cove',
       webAddressLabel: 'Dirección web',
@@ -395,7 +396,7 @@ export const translations = {
       yourFullName: 'Tu nombre completo *',
       yourFullNamePlaceholder: 'Jane Rodríguez',
       yourEmail: 'Tu correo electrónico *',
-      onceApproved: 'Una vez aprobado, regístrate con este correo exacto para convertirte en administrador.',
+      onceApproved: 'Te enviaremos un enlace de verificación a este correo justo después de enviar el formulario — deberás confirmarlo antes de que tu solicitud pueda ser aprobada.',
       submit: 'Enviar para aprobación',
       submitting: 'Enviando…',
       alreadyAdmin: '¿Ya eres administrador en algún lugar?',
@@ -440,6 +441,7 @@ export const translations = {
     signup: {
       title: 'Crear una cuenta',
       subtitle: 'La necesitarás para crear o administrar un directorio de vecindario.',
+      verifyNotice: 'Deberás verificar tu correo electrónico antes de poder iniciar sesión.',
       emailLabel: 'Correo electrónico',
       passwordLabel: 'Contraseña',
       submit: 'Crear cuenta',
