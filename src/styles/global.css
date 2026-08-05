@@ -311,6 +311,7 @@ a { color: var(--blue); }
 .status-verified{ background: var(--green-soft); color: var(--green); }
 .status-unknown{ background: var(--blue-soft); color: var(--ink-soft); }
 .card-top-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.grid:not(.list-view) .card-top-actions{ flex-direction: column-reverse; align-items:flex-end; gap:6px; }
 .copy-btn{
   width:26px; height:26px; border-radius:7px; border:1px solid var(--line); background: var(--paper-raised);
   color: var(--ink-soft); cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center;
