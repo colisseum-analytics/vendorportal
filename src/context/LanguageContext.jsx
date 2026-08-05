@@ -24,16 +24,22 @@ export function LanguageProvider({ children }) {
 
   const toggle = () => setLang(lang === 'en' ? 'es' : 'en')
 
-  const t = (key, vars) => {
-    let str = lookup(translations[lang], key) ?? lookup(translations.en, key) ?? key
+  const t = (key, vars, fallback) => {
+    let str = lookup(translations[lang], key) ?? lookup(translations.en, key) ?? fallback ?? key
     if (vars) {
       for (const [k, v] of Object.entries(vars)) str = str.replaceAll(`{${k}}`, v)
     }
     return str
   }
 
+  // Vendor category names are free-text data (admin-entered), not fixed
+  // UI copy — only the 9 standard categories have translations. Anything
+  // else falls back to the raw category string instead of an ugly
+  // untranslated key path.
+  const tCategory = (category) => t(`createNeighborhood.categoryLabels.${category}`, null, category)
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, toggle, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, toggle, t, tCategory }}>
       {children}
     </LanguageContext.Provider>
   )

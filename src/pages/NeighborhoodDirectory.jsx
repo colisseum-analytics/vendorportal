@@ -19,7 +19,7 @@ const PAGE_SIZE = 25
 export default function NeighborhoodDirectory() {
   const { slug } = useParams()
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { t, tCategory } = useLanguage()
   const [neighborhood, setNeighborhood] = useState(null)
   const [vendors, setVendors] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
@@ -152,7 +152,7 @@ export default function NeighborhoodDirectory() {
         </div>
         <div className="filter-pill-row">
           <FilterPill label={t('browse.filterStatus')} options={STATUS_OPTIONS} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
-          <FilterPill label={t('browse.filterCategory')} options={categories} value={category} onChange={setCategory} />
+          <FilterPill label={t('browse.filterCategory')} options={categories} value={category} onChange={setCategory} renderOption={tCategory} />
           {status || category ? (
             <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
               {t('browse.reset')} ×

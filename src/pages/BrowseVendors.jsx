@@ -12,7 +12,7 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 const PAGE_SIZE = 25
 
 export default function BrowseVendors() {
-  const { t } = useLanguage()
+  const { t, tCategory } = useLanguage()
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -128,7 +128,7 @@ export default function BrowseVendors() {
         <div className="filter-pill-row">
           <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
           <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
-          <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} />
+          <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} renderOption={tCategory} />
           <FilterPill label={t('browse.filterNeighborhood')} options={neighborhoodOptions} value={neighborhoodFilter} onChange={setNeighborhoodFilter} />
           {status || city || category || neighborhoodFilter ? (
             <button
