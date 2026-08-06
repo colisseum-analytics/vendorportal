@@ -119,6 +119,10 @@ a { color: var(--blue); }
   line-height: 1.05;
 }
 .masthead .tagline{ color: var(--ink-soft); font-size: 15px; max-width: 46ch; margin: 0; }
+.masthead .tagline-strong{ color: var(--ink); font-weight:600; }
+.tagline-list{ list-style:none; margin:8px 0 0; padding:0; display:flex; flex-direction:column; gap:4px; max-width:46ch; }
+.tagline-list li{ font-size:14px; color: var(--ink-soft); padding-left:18px; position:relative; }
+.tagline-list li::before{ content:'✓'; position:absolute; left:0; color: var(--green); font-weight:600; }
 .eyebrow{
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase;
@@ -371,9 +375,6 @@ a { color: var(--blue); }
 }
 .cta-banner h2{ font-family:'Fraunces', serif; font-weight:600; font-size:20px; margin:0 0 4px; }
 .cta-banner p{ margin:0; font-size:13.5px; color:rgba(255,255,255,0.85); max-width:44ch; }
-.cta-banner-list{ list-style:none; margin:8px 0 0; padding:0; display:flex; flex-direction:column; gap:4px; max-width:44ch; }
-.cta-banner-list li{ font-size:13.5px; color:rgba(255,255,255,0.85); padding-left:18px; position:relative; }
-.cta-banner-list li::before{ content:'✓'; position:absolute; left:0; color:#fff; font-weight:600; }
 .ad-banner{ background: linear-gradient(135deg, #B5622B, #8A3E9E); }
 .ad-banner h2{ max-width:40ch; }
 .ad-banner-solo{ font-size:14px; font-weight:600; color:#fff; max-width:40ch; }

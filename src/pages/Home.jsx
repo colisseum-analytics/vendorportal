@@ -53,7 +53,12 @@ export default function Home() {
         <div>
           <p className="eyebrow">{t('home.eyebrow')}</p>
           <h1>{t('home.title')}</h1>
-          <p className="tagline">{t('home.subtitle')}</p>
+          <p className="tagline tagline-strong">{t('home.subtitle')}</p>
+          <ul className="tagline-list">
+            <li>{t('home.subtitleBullet1')}</li>
+            <li>{t('home.subtitleBullet2')}</li>
+            <li>{t('home.subtitleBullet3')}</li>
+          </ul>
         </div>
         <div className="admin-corner">
           {user ? (
@@ -72,11 +77,7 @@ export default function Home() {
         <div className="cta-banner">
           <div>
             <h2>{t('home.ctaTitle')}</h2>
-            <ul className="cta-banner-list">
-              <li>{t('home.ctaBullet1')}</li>
-              <li>{t('home.ctaBullet2')}</li>
-              <li>{t('home.ctaBullet3')}</li>
-            </ul>
+            <p>{t('home.ctaBody')}</p>
           </div>
           <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
         </div>
