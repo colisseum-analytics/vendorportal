@@ -8,6 +8,11 @@ export const translations = {
       logIn: 'Log in',
       logOut: 'Log out',
       platformAdmin: 'Platform admin',
+      vendors: 'Vendors',
+      hoaContacts: 'HOA Contacts',
+      communityServices: 'Community Services',
+      emergency: 'Emergency',
+      faq: 'Community FAQ',
     },
     common: {
       backToAllNeighborhoods: 'All neighborhoods',
@@ -77,6 +82,11 @@ export const translations = {
       footerAskAdmin: 'Run by neighborhood volunteers. See something out of date?',
       footerAskAdminLink: 'Ask an admin',
       footerAskAdminSuffix: 'to fix it.',
+    },
+    infoSection: {
+      emptyTitle: 'Nothing here yet',
+      emptyBody: 'Check back soon — admins are still adding this info.',
+      viewInDirectory: 'View in directory',
     },
     browse: {
       eyebrow: 'Browse Vendors',
@@ -258,6 +268,11 @@ export const translations = {
       logIn: 'Iniciar sesión',
       logOut: 'Cerrar sesión',
       platformAdmin: 'Administrador de la plataforma',
+      vendors: 'Proveedores',
+      hoaContacts: 'Contactos de la HOA',
+      communityServices: 'Servicios Comunitarios',
+      emergency: 'Emergencia',
+      faq: 'Preguntas Frecuentes',
     },
     common: {
       backToAllNeighborhoods: 'Todos los vecindarios',
@@ -327,6 +342,11 @@ export const translations = {
       footerAskAdmin: 'Administrado por voluntarios del vecindario. ¿Ves algo desactualizado?',
       footerAskAdminLink: 'Pregúntale a un administrador',
       footerAskAdminSuffix: 'para corregirlo.',
+    },
+    infoSection: {
+      emptyTitle: 'Todavía no hay nada aquí',
+      emptyBody: 'Vuelve pronto — los administradores todavía están agregando esta información.',
+      viewInDirectory: 'Ver en el directorio',
     },
     browse: {
       eyebrow: 'Ver Proveedores',
