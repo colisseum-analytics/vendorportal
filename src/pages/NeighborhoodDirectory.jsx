@@ -71,15 +71,6 @@ export default function NeighborhoodDirectory() {
 
   return (
     <div>
-      <div className="stats-row stats-row-right">
-        <div className="stats-compact">
-          <span><strong>{vendors.length}</strong> {vendors.length === 1 ? t('directory.statVendors') : t('directory.statVendorsPlural')}</span>
-          <span><strong>{categories.length}</strong> {categories.length === 1 ? t('directory.statCategory') : t('directory.statCategoriesPlural')}</span>
-          <span><strong>{residentCount}</strong> {t('directory.statResidentRecommended')}</span>
-          {lastAdded ? <span><strong>{relativeTime(lastAdded)}</strong> {t('directory.statLastAdded')}</span> : null}
-        </div>
-      </div>
-
       <div className="controls controls-compact">
         <div className="search-box search-box-compact">
           <input type="text" placeholder={t('directory.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -92,6 +83,12 @@ export default function NeighborhoodDirectory() {
               {t('browse.reset')} ×
             </button>
           ) : null}
+        </div>
+        <div className="stats-compact stats-compact-inline">
+          <span><strong>{vendors.length}</strong> {vendors.length === 1 ? t('directory.statVendors') : t('directory.statVendorsPlural')}</span>
+          <span><strong>{categories.length}</strong> {categories.length === 1 ? t('directory.statCategory') : t('directory.statCategoriesPlural')}</span>
+          <span><strong>{residentCount}</strong> {t('directory.statResidentRecommended')}</span>
+          {lastAdded ? <span><strong>{relativeTime(lastAdded)}</strong> {t('directory.statLastAdded')}</span> : null}
         </div>
       </div>
       <div className="count-row-with-action">
