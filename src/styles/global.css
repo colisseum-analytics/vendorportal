@@ -472,20 +472,19 @@ a { color: var(--blue); }
 
 /* ---------- neighborhood nav + info sections ---------- */
 .neighborhood-nav{
-  display:flex; flex-direction:row; flex-wrap:wrap; gap:4px 6px;
-  border-bottom:1px solid var(--line); margin-bottom:22px;
+  display:flex; flex-direction:row; flex-wrap:wrap; gap:8px;
+  margin-bottom:22px;
 }
 .neighborhood-nav-link{
-  display:block; white-space:nowrap; font-family:'Inter'; font-size:13.5px; font-weight:500; color: var(--ink-soft);
-  background:none; border:none; border-bottom:2px solid transparent; padding:9px 4px; margin-bottom:-1px;
-  cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; white-space:nowrap;
+  font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.02em; font-weight:500;
+  color: var(--ink-soft); background: var(--paper-raised); border:1px solid var(--line);
+  border-radius: 20px; padding: 8px 14px; cursor:pointer; text-decoration:none; transition: all .15s ease;
 }
-.neighborhood-nav-link:hover{ color: var(--ink); }
-.neighborhood-nav-link-active{ color: var(--ink); font-weight:600; border-bottom-color: var(--blue); }
+.neighborhood-nav-link:hover{ border-color: var(--blue); color: var(--blue); }
+.neighborhood-nav-link-active{ background: var(--ink); border-color: var(--ink); color: var(--paper-raised); font-weight:600; }
+.neighborhood-nav-link-active:hover{ border-color: var(--blue); }
 .neighborhood-content{ min-width:0; }
-@media (max-width: 700px){
-  .neighborhood-nav{ gap:2px 12px; }
-}
 
 .info-item-list{ display:flex; flex-direction:column; gap:8px; }
 .info-item-card{

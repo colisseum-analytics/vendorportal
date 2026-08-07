@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import VendorCard from '../components/VendorCard.jsx'
@@ -16,10 +16,11 @@ const PAGE_SIZE = 25
 export default function NeighborhoodDirectory() {
   const { neighborhood } = useOutletContext()
   const { t, tCategory } = useLanguage()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [category, setCategory] = useState(null)
+  const [category, setCategory] = useState(() => searchParams.get('category') || null)
   const [status, setStatus] = useState(null)
   const [page, setPage] = useState(1)
   const [view, setView] = useVendorView()

@@ -34,7 +34,7 @@ export default function NeighborhoodInfoSection({ section }) {
       setLoading(true)
       const { data } = await supabase
         .from('neighborhood_info_items')
-        .select('*, vendor:vendor_id(id, name, category, specialty, phone, website)')
+        .select('*')
         .eq('neighborhood_id', neighborhood.id)
         .eq('section', section)
         .order('subsection', { ascending: true, nullsFirst: false })
@@ -66,14 +66,10 @@ export default function NeighborhoodInfoSection({ section }) {
           <div key={item.id} className="faq-item">
             <h3 className="faq-question">{item.title}</h3>
             {item.body ? <p className="faq-answer">{item.body}</p> : null}
-            {item.vendor ? (
-              <Link to={`/n/${neighborhood.slug}`} className="faq-vendor-card">
-                <strong>{item.vendor.name}</strong>
-                <span className="faq-vendor-card-meta">
-                  {item.vendor.category}{item.vendor.specialty ? ` · ${item.vendor.specialty}` : ''}
-                  {item.vendor.phone ? ` · ${item.vendor.phone}` : ''}
-                </span>
-                <span className="faq-vendor-card-cta">{t('infoSection.viewInDirectory')} →</span>
+            {item.category ? (
+              <Link to={`/n/${neighborhood.slug}?category=${encodeURIComponent(item.category)}`} className="faq-vendor-card">
+                <strong>{item.category}</strong>
+                <span className="faq-vendor-card-cta">{t('infoSection.viewCategoryInDirectory')} →</span>
               </Link>
             ) : null}
           </div>

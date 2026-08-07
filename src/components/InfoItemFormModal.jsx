@@ -6,7 +6,7 @@ const SUGGESTED_SUBSECTIONS = {
   emergency: ['After-hours maintenance', 'Security company', 'Irrigation emergency', 'Water leak'],
 }
 
-export default function InfoItemFormModal({ section, vendors, existing, onCancel, onSave }) {
+export default function InfoItemFormModal({ section, categories, existing, onCancel, onSave }) {
   const isFaq = section === 'faq'
   const suggestions = SUGGESTED_SUBSECTIONS[section] || []
 
@@ -17,7 +17,7 @@ export default function InfoItemFormModal({ section, vendors, existing, onCancel
     phone: existing?.phone || '',
     email: existing?.email || '',
     website: existing?.website || '',
-    vendor_id: existing?.vendor_id || '',
+    category: existing?.category || '',
   })
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -41,7 +41,7 @@ export default function InfoItemFormModal({ section, vendors, existing, onCancel
         phone: form.phone.trim() || null,
         email: form.email.trim() || null,
         website: form.website.trim() || null,
-        vendor_id: form.vendor_id || null,
+        category: form.category || null,
       })
     } catch (err) {
       setError(err.message || "Couldn't save — try again.")
@@ -59,7 +59,7 @@ export default function InfoItemFormModal({ section, vendors, existing, onCancel
         <form onSubmit={submit}>
           {!isFaq ? (
             <div className="field">
-              <label>Category (e.g. {suggestions[0] || 'a category'})</label>
+              <label>Subsection (e.g. {suggestions[0] || 'a group'})</label>
               <input type="text" list="subsection-suggestions" value={form.subsection} onChange={update('subsection')} placeholder={suggestions.join(', ')} />
               <datalist id="subsection-suggestions">
                 {suggestions.map((s) => <option key={s} value={s} />)}
@@ -76,10 +76,10 @@ export default function InfoItemFormModal({ section, vendors, existing, onCancel
           </div>
           {isFaq ? (
             <div className="field">
-              <label>Link to a vendor (optional)</label>
-              <select value={form.vendor_id} onChange={update('vendor_id')}>
+              <label>Link to a vendor category (optional)</label>
+              <select value={form.category} onChange={update('category')}>
                 <option value="">— None —</option>
-                {vendors.map((v) => <option key={v.id} value={v.id}>{v.name} ({v.category})</option>)}
+                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           ) : (

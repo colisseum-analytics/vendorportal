@@ -33,7 +33,6 @@ export default function AdminCommunityInfo() {
 
   const [activeSection, setActiveSection] = useState('hoa_contacts')
   const [items, setItems] = useState([])
-  const [vendors, setVendors] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -42,13 +41,9 @@ export default function AdminCommunityInfo() {
     if (!neighborhood || !isAdmin) return
     let active = true
     async function load() {
-      const [{ data: i }, { data: v }] = await Promise.all([
-        supabase.from('neighborhood_info_items').select('*').eq('neighborhood_id', neighborhood.id).order('subsection').order('sort_order'),
-        supabase.from('vendors').select('id, name, category').eq('neighborhood_id', neighborhood.id).order('name'),
-      ])
+      const { data: i } = await supabase.from('neighborhood_info_items').select('*').eq('neighborhood_id', neighborhood.id).order('subsection').order('sort_order')
       if (!active) return
       setItems(i || [])
-      setVendors(v || [])
     }
     load()
     return () => { active = false }
@@ -162,8 +157,8 @@ export default function AdminCommunityInfo() {
                 <span className="message-from">{item.title}</span>
               </div>
               {item.body ? <p className="message-text">{item.body}</p> : null}
-              {item.vendor_id ? (
-                <p className="message-text">Linked vendor: {vendors.find((v) => v.id === item.vendor_id)?.name || '(removed)'}</p>
+              {item.category ? (
+                <p className="message-text">Linked category: {item.category}</p>
               ) : null}
               <div className="message-actions">
                 <button className="btn-ghost" onClick={() => { setEditingItem(item); setModalOpen(true) }}>Edit</button>
@@ -201,7 +196,7 @@ export default function AdminCommunityInfo() {
       {modalOpen ? (
         <InfoItemFormModal
           section={activeSection}
-          vendors={vendors}
+          categories={neighborhood.categories || []}
           existing={editingItem}
           onCancel={() => { setModalOpen(false); setEditingItem(null) }}
           onSave={saveItem}

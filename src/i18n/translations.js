@@ -86,7 +86,7 @@ export const translations = {
     infoSection: {
       emptyTitle: 'Nothing here yet',
       emptyBody: 'Check back soon — admins are still adding this info.',
-      viewInDirectory: 'View in directory',
+      viewCategoryInDirectory: 'Browse vendors in this category',
     },
     browse: {
       eyebrow: 'Browse Vendors',
@@ -346,7 +346,7 @@ export const translations = {
     infoSection: {
       emptyTitle: 'Todavía no hay nada aquí',
       emptyBody: 'Vuelve pronto — los administradores todavía están agregando esta información.',
-      viewInDirectory: 'Ver en el directorio',
+      viewCategoryInDirectory: 'Ver proveedores de esta categoría',
     },
     browse: {
       eyebrow: 'Ver Proveedores',
