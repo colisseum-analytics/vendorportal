@@ -71,11 +71,20 @@ export default function NeighborhoodDirectory() {
 
   return (
     <div>
-      <div className="stats-row">
-        <div className="stat-item"><strong>{vendors.length}</strong><span>{vendors.length === 1 ? t('directory.statVendors') : t('directory.statVendorsPlural')}</span></div>
-        <div className="stat-item"><strong>{categories.length}</strong><span>{categories.length === 1 ? t('directory.statCategory') : t('directory.statCategoriesPlural')}</span></div>
-        <div className="stat-item"><strong>{residentCount}</strong><span>{t('directory.statResidentRecommended')}</span></div>
-        {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>{t('directory.statLastAdded')}</span></div> : null}
+      <div className="stats-row stats-row-right">
+        <div className="stats-compact">
+          <span><strong>{vendors.length}</strong> {vendors.length === 1 ? t('directory.statVendors') : t('directory.statVendorsPlural')}</span>
+          <span className="stat-sep">·</span>
+          <span><strong>{categories.length}</strong> {categories.length === 1 ? t('directory.statCategory') : t('directory.statCategoriesPlural')}</span>
+          <span className="stat-sep">·</span>
+          <span><strong>{residentCount}</strong> {t('directory.statResidentRecommended')}</span>
+          {lastAdded ? (
+            <>
+              <span className="stat-sep">·</span>
+              <span><strong>{relativeTime(lastAdded)}</strong> {t('directory.statLastAdded')}</span>
+            </>
+          ) : null}
+        </div>
       </div>
 
       <div className="controls controls-compact">

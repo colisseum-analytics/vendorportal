@@ -150,6 +150,17 @@ a { color: var(--blue); }
 
 /* ---------- neighborhood stats ---------- */
 .stats-row{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom: 22px; }
+.stats-row-right{ justify-content:flex-end; }
+.stats-compact{
+  display:inline-flex; align-items:center; flex-wrap:wrap; gap:7px;
+  background: var(--paper-raised); border:1px solid var(--line); border-radius: 20px;
+  padding: 8px 16px; font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--ink-soft);
+}
+.stats-compact strong{ font-family:'Fraunces', serif; font-weight:600; font-size:13px; color: var(--ink); }
+.stats-compact .stat-sep{ color: var(--ink-faint); }
+@media (max-width: 560px){
+  .stats-row-right{ justify-content:flex-start; }
+}
 .stat-item{
   display:flex; flex-direction:column; gap:2px; background: var(--paper-raised); border:1px solid var(--line);
   border-radius: 10px; padding: 10px 16px; min-width: 100px;
