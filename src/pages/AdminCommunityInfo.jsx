@@ -6,7 +6,7 @@ import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const SECTIONS = [
-  { key: 'hoa_contacts', label: 'HOA Contacts' },
+  { key: 'hoa_contacts', label: 'Association Contacts' },
   { key: 'community_services', label: 'Community Services' },
   { key: 'emergency', label: 'Emergency' },
   { key: 'faq', label: 'Community FAQ' },
@@ -126,7 +126,7 @@ export default function AdminCommunityInfo() {
           <div>
             <p className="eyebrow"><Link to={`/n/${slug}/admin`}>{neighborhood.name} · Admin</Link></p>
             <h1>Community info</h1>
-            <p className="tagline">HOA contacts, community services, emergency numbers, and FAQ — shown on the left nav of the public directory.</p>
+            <p className="tagline">Association contacts, community services, emergency numbers, and FAQ — shown on the nav of the public directory.</p>
           </div>
         </div>
         <div className="admin-corner">
