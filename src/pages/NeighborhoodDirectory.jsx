@@ -74,16 +74,9 @@ export default function NeighborhoodDirectory() {
       <div className="stats-row stats-row-right">
         <div className="stats-compact">
           <span><strong>{vendors.length}</strong> {vendors.length === 1 ? t('directory.statVendors') : t('directory.statVendorsPlural')}</span>
-          <span className="stat-sep">·</span>
           <span><strong>{categories.length}</strong> {categories.length === 1 ? t('directory.statCategory') : t('directory.statCategoriesPlural')}</span>
-          <span className="stat-sep">·</span>
           <span><strong>{residentCount}</strong> {t('directory.statResidentRecommended')}</span>
-          {lastAdded ? (
-            <>
-              <span className="stat-sep">·</span>
-              <span><strong>{relativeTime(lastAdded)}</strong> {t('directory.statLastAdded')}</span>
-            </>
-          ) : null}
+          {lastAdded ? <span><strong>{relativeTime(lastAdded)}</strong> {t('directory.statLastAdded')}</span> : null}
         </div>
       </div>
 
