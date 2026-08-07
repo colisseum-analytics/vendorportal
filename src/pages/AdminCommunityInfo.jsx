@@ -136,7 +136,7 @@ export default function AdminCommunityInfo() {
         </div>
       </div>
 
-      <div className="neighborhood-nav" style={{ marginBottom: 22, flexDirection: 'row', flexWrap: 'wrap', position: 'static' }}>
+      <div className="neighborhood-nav">
         {SECTIONS.map((s) => (
           <button
             key={s.key}

@@ -94,11 +94,9 @@ export default function NeighborhoodLayout() {
         </div>
       </div>
 
-      <div className="neighborhood-body">
-        <NeighborhoodNav slug={slug} />
-        <div className="neighborhood-content">
-          <Outlet context={{ neighborhood, isAdmin }} />
-        </div>
+      <NeighborhoodNav slug={slug} />
+      <div className="neighborhood-content">
+        <Outlet context={{ neighborhood, isAdmin }} />
       </div>
 
       <footer className="site-footer">
