@@ -206,19 +206,20 @@ export default function PlatformAdmin() {
     await loadAll()
   }
 
-  const sendPasswordReset = async (u) => {
+  const sendSignInCode = async (u) => {
     setBusyUserId(u.user_id)
     setUserError('')
     setUserMsg('')
-    const { error } = await supabase.auth.resetPasswordForEmail(u.email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+    const { error } = await supabase.auth.signInWithOtp({
+      email: u.email,
+      options: { shouldCreateUser: false },
     })
     setBusyUserId(null)
     if (error) {
       setUserError(error.message)
       return
     }
-    setUserMsg(`Password reset link sent to ${u.email}.`)
+    setUserMsg(`Sign-in code sent to ${u.email}.`)
   }
 
   const toggleBanned = async (u) => {
@@ -371,8 +372,8 @@ export default function PlatformAdmin() {
         <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => startEditEmail(u)}>
           Edit email
         </button>
-        <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => sendPasswordReset(u)}>
-          Send password reset
+        <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => sendSignInCode(u)}>
+          Send sign-in code
         </button>
         <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => togglePlatformAdmin(u)}>
           {u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin'}
