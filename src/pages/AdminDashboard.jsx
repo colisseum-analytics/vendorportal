@@ -11,6 +11,7 @@ import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const STATUS_OPTIONS = ['Verified', 'Unknown']
 
@@ -18,6 +19,7 @@ export default function AdminDashboard() {
   const { slug } = useParams()
   const { user, authLoading, neighborhood, isAdmin, loading, notFound } = useNeighborhoodAccess(slug)
   const { signOut } = useAuth()
+  usePageMeta({ title: neighborhood ? `${neighborhood.name} · Admin` : 'Admin', noindex: true })
 
   const [vendors, setVendors] = useState([])
   const [invites, setInvites] = useState([])

@@ -2,12 +2,20 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
+
+const STATUS_TITLE_KEY = {
+  verifying: 'verifyRequest.verifyingTitle',
+  done: 'verifyRequest.doneTitle',
+  error: 'verifyRequest.errorTitle',
+}
 
 export default function VerifyRequest() {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const [status, setStatus] = useState('verifying') // verifying | done | error
   const [errorMsg, setErrorMsg] = useState('')
+  usePageMeta({ title: t(STATUS_TITLE_KEY[status]), noindex: true })
 
   useEffect(() => {
     let active = true

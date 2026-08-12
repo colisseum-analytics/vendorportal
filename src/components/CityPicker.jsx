@@ -7,7 +7,7 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 // consistent city name instead of typing one (avoids typos and near-duplicates
 // like "Miami" vs "miami " vs "Miami, FL"). Only the city name is stored —
 // the state selector is just a filter to narrow the city list.
-export default function CityPicker({ value, onChange, restrictTo }) {
+export default function CityPicker({ value, onChange }) {
   const { t } = useLanguage()
   const [state, setState] = useState(() => stateForCity(value))
 
@@ -29,7 +29,7 @@ export default function CityPicker({ value, onChange, restrictTo }) {
       >
         <option value="">{t('cityPicker.state')}</option>
         {US_STATES.map((s) => (
-          <option key={s.code} value={s.code} disabled={restrictTo ? !restrictTo.includes(s.code) : false}>
+          <option key={s.code} value={s.code}>
             {s.name}
           </option>
         ))}

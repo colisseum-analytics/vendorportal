@@ -8,11 +8,13 @@ import FooterExtras from '../components/FooterExtras.jsx'
 import Pagination from '../components/Pagination.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const PAGE_SIZE = 25
 
 export default function BrowseVendors() {
   const { t, tCategory } = useLanguage()
+  usePageMeta({ title: t('browse.title'), description: t('browse.subtitle') })
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)

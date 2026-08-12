@@ -5,10 +5,12 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 import { stateForCity } from '../utils/usCities'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function Home() {
   const { user, signOut } = useAuth()
   const { t } = useLanguage()
+  usePageMeta({ title: t('home.title'), description: t('home.subtitle') })
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendorCounts, setVendorCounts] = useState({})
   const [loading, setLoading] = useState(true)

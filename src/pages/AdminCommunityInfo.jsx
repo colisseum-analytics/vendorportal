@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import InfoItemFormModal from '../components/InfoItemFormModal.jsx'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useAuth } from '../context/AuthContext.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const SECTIONS = [
   { key: 'hoa_contacts', label: 'Association Contacts' },
@@ -30,6 +31,7 @@ export default function AdminCommunityInfo() {
   const { slug } = useParams()
   const { user, authLoading, neighborhood, isAdmin, loading, notFound } = useNeighborhoodAccess(slug)
   const { signOut } = useAuth()
+  usePageMeta({ title: neighborhood ? `${neighborhood.name} · Community Info` : 'Community Info', noindex: true })
 
   const [activeSection, setActiveSection] = useState('hoa_contacts')
   const [items, setItems] = useState([])

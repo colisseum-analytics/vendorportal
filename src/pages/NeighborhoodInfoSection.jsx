@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
+
+const SECTION_LABEL_KEY = {
+  hoa_contacts: 'nav.hoaContacts',
+  community_services: 'nav.communityServices',
+  emergency: 'nav.emergency',
+  faq: 'nav.faq',
+}
 
 function normalizeUrl(u) {
   if (!u) return ''
@@ -25,6 +33,11 @@ function groupBySubsection(items) {
 export default function NeighborhoodInfoSection({ section }) {
   const { neighborhood } = useOutletContext()
   const { t } = useLanguage()
+  usePageMeta({
+    title: `${t(SECTION_LABEL_KEY[section])} · ${neighborhood.name}`,
+    description: neighborhood.tagline || t('directory.metaDescriptionFallback', { name: neighborhood.name }),
+    image: neighborhood.logo_url,
+  })
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
 

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /verify-request
+Disallow: /platform-admin
+Disallow: /n/*/admin

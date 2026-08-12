@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
 import CityPicker from '../components/CityPicker.jsx'
-import ContactAdminModal from '../components/ContactAdminModal.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
-
-const LAUNCH_STATES = ['FL']
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const DEFAULT_CATEGORIES = [
   'Home Repair & Trades',
@@ -27,6 +25,7 @@ function slugify(str) {
 
 export default function CreateNeighborhood() {
   const { t } = useLanguage()
+  usePageMeta({ title: t('createNeighborhood.title'), description: t('createNeighborhood.subtitle') })
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
@@ -38,7 +37,6 @@ export default function CreateNeighborhood() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [outOfStateContactOpen, setOutOfStateContactOpen] = useState(false)
 
   const onNameChange = (e) => {
     const val = e.target.value
@@ -151,13 +149,8 @@ export default function CreateNeighborhood() {
           </div>
           <div className="field">
             <label>{t('createNeighborhood.cityLabel')}</label>
-            <CityPicker value={city} onChange={setCity} restrictTo={LAUNCH_STATES} />
-            <div className="hint">
-              {t('createNeighborhood.cityHint')}{' '}
-              <button type="button" className="footer-link" onClick={() => setOutOfStateContactOpen(true)}>
-                {t('createNeighborhood.cityOutOfState')}
-              </button>
-            </div>
+            <CityPicker value={city} onChange={setCity} />
+            <div className="hint">{t('createNeighborhood.cityHint')}</div>
           </div>
           <div className="field">
             <label>{t('createNeighborhood.categoriesLabel')}</label>
@@ -198,14 +191,6 @@ export default function CreateNeighborhood() {
           {t('createNeighborhood.downloadTemplateButton')}
         </button>
       </div>
-
-      {outOfStateContactOpen ? (
-        <ContactAdminModal
-          title={t('createNeighborhood.outOfStateModalTitle')}
-          description={t('createNeighborhood.outOfStateModalDescription')}
-          onCancel={() => setOutOfStateContactOpen(false)}
-        />
-      ) : null}
     </div>
   )
 }

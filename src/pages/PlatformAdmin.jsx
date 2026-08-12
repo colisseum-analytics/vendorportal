@@ -4,9 +4,11 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
 import CityPicker from '../components/CityPicker.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function PlatformAdmin() {
   const { user, loading: authLoading } = useAuth()
+  usePageMeta({ title: 'Platform admin', noindex: true })
   const [checked, setChecked] = useState(false)
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
 

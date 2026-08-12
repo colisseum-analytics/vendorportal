@@ -8,6 +8,7 @@ import Pagination from '../components/Pagination.jsx'
 import FilterPill from '../components/FilterPill.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { relativeTime } from '../utils/relativeTime'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const STATUS_OPTIONS = ['Verified', 'Unknown']
 
@@ -16,6 +17,11 @@ const PAGE_SIZE = 25
 export default function NeighborhoodDirectory() {
   const { neighborhood } = useOutletContext()
   const { t, tCategory } = useLanguage()
+  usePageMeta({
+    title: neighborhood.name,
+    description: neighborhood.tagline || t('directory.metaDescriptionFallback', { name: neighborhood.name }),
+    image: neighborhood.logo_url,
+  })
   const [searchParams, setSearchParams] = useSearchParams()
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)

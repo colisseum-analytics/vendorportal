@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 // To turn on Google / Apple / Microsoft login once you've enabled the
 // provider in Supabase Dashboard → Authentication → Providers, just
@@ -11,6 +12,7 @@ const OAUTH_PROVIDERS = []
 
 export default function Login() {
   const { t } = useLanguage()
+  usePageMeta({ title: t('login.title'), description: t('login.subtitle'), noindex: true })
   const [step, setStep] = useState('email') // email | code
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')

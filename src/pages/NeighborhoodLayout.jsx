@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 import NeighborhoodNav from '../components/NeighborhoodNav.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function NeighborhoodLayout() {
   const { slug } = useParams()
@@ -54,6 +55,8 @@ export default function NeighborhoodLayout() {
     load()
     return () => { active = false }
   }, [slug, user])
+
+  usePageMeta({ title: t('directory.notFoundTitle'), noindex: true, skip: !notFound })
 
   if (loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>{t('directory.loadingDirectory')}</div></div>
 

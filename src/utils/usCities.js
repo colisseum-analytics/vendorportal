@@ -137,8 +137,8 @@ export const CITIES_BY_STATE = {
 
 // Reverse lookup used to display a state next to a stored city name
 // (e.g. neighborhood banners) — not guaranteed unique across all US
-// cities (a few names repeat across states), but fine for this app's
-// Florida-only launch data.
+// cities (a few names repeat across states), so this returns the first
+// match rather than trying to disambiguate.
 export function stateForCity(city) {
   if (!city) return ''
   const hit = Object.entries(CITIES_BY_STATE).find(([, cities]) => cities.includes(city))

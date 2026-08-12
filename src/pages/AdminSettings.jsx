@@ -4,10 +4,12 @@ import { supabase } from '../supabaseClient'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import CityPicker from '../components/CityPicker.jsx'
 import CategoryManager from '../components/CategoryManager.jsx'
+import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function AdminSettings() {
   const { slug } = useParams()
   const { user, authLoading, neighborhood, isAdmin, loading, notFound, reload } = useNeighborhoodAccess(slug)
+  usePageMeta({ title: neighborhood ? `${neighborhood.name} · Settings` : 'Settings', noindex: true })
 
   const [name, setName] = useState('')
   const [tagline, setTagline] = useState('')
