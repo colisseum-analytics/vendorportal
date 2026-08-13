@@ -133,6 +133,7 @@ export default function AdminCommunityInfo() {
           <div className="admin-pill"><span className="dot" />{user.email}</div><br />
           <button className="btn-ghost" onClick={() => { setImportMsg(''); setImportOpen(true) }}>Import from document</button>{' '}
           <Link className="btn-ghost" to={`/n/${slug}/admin`}>Vendors</Link>{' '}
+          <Link className="btn-ghost" to={`/n/${slug}/admin/board`}>Service Board</Link>{' '}
           <button className="btn-ghost" onClick={signOut}>Log out</button>
         </div>
       </div>

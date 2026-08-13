@@ -12,6 +12,7 @@ import NeedDetail from './pages/NeedDetail.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminCommunityInfo from './pages/AdminCommunityInfo.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
+import AdminServicePanel from './pages/AdminServicePanel.jsx'
 import PlatformAdmin from './pages/PlatformAdmin.jsx'
 import SiteHeader from './components/SiteHeader.jsx'
 
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/n/:slug/admin" element={<AdminDashboard />} />
         <Route path="/n/:slug/admin/info" element={<AdminCommunityInfo />} />
         <Route path="/n/:slug/admin/settings" element={<AdminSettings />} />
+        <Route path="/n/:slug/admin/board" element={<AdminServicePanel />} />
         <Route path="/platform-admin" element={<PlatformAdmin />} />
         <Route path="*" element={<Home />} />
       </Routes>

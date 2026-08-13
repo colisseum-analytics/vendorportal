@@ -8,19 +8,20 @@ import FilterPill from '../components/FilterPill.jsx'
 import Pagination from '../components/Pagination.jsx'
 import NeedCard from '../components/NeedCard.jsx'
 import PostNeedModal from '../components/PostNeedModal.jsx'
+import BroadcastBanner from '../components/BroadcastBanner.jsx'
 import { NEED_CATEGORIES, SEVERITIES, STATUSES, SEVERITY_LABEL_KEY, STATUS_LABEL_KEY } from '../utils/needConstants'
 
 const PAGE_SIZE = 25
 
-// Phase 4 of the Needs/Broadcast/Members feature adds support (the "upvote
-// / I have this issue too" signal — same underlying table, see
-// need_supporters in the migration) and the Recent/Most-upvoted sort.
-// Vendor referrals and the need-detail page land in later phases.
+// Phase 4 added support (the "upvote / I have this issue too" signal —
+// same underlying table, see need_supporters in the migration) and the
+// Recent/Most-upvoted sort. Phase 6 pins the neighborhood's most recent
+// broadcast at the top of the board.
 export default function ServiceBoard() {
   const { slug } = useParams()
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { neighborhood, isMember, membershipUnit, reloadMembership } = useOutletContext()
+  const { neighborhood, isAdmin, isMember, membershipUnit, reloadMembership } = useOutletContext()
   usePageMeta({ title: t('serviceBoard.title'), noindex: true })
 
   const [unit, setUnit] = useState('')
@@ -30,6 +31,7 @@ export default function ServiceBoard() {
 
   const [needs, setNeeds] = useState([])
   const [supporterRows, setSupporterRows] = useState([])
+  const [latestBroadcast, setLatestBroadcast] = useState(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(null)
@@ -40,13 +42,22 @@ export default function ServiceBoard() {
   const [postOpen, setPostOpen] = useState(false)
 
   const loadAll = async () => {
-    const { data } = await supabase
-      .from('needs')
-      .select('*')
-      .eq('neighborhood_id', neighborhood.id)
-      .order('created_at', { ascending: false })
+    const [{ data }, { data: broadcasts }] = await Promise.all([
+      supabase
+        .from('needs')
+        .select('*')
+        .eq('neighborhood_id', neighborhood.id)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('broadcasts')
+        .select('*')
+        .eq('neighborhood_id', neighborhood.id)
+        .order('created_at', { ascending: false })
+        .limit(1),
+    ])
     const list = data || []
     setNeeds(list)
+    setLatestBroadcast(broadcasts?.[0] || null)
     if (list.length) {
       const { data: supporters } = await supabase
         .from('need_supporters')
@@ -59,7 +70,7 @@ export default function ServiceBoard() {
   }
 
   useEffect(() => {
-    if (!isMember) return
+    if (!isMember && !isAdmin) return
     let active = true
     async function load() {
       setLoading(true)
@@ -69,7 +80,7 @@ export default function ServiceBoard() {
     }
     load()
     return () => { active = false }
-  }, [neighborhood.id, isMember])
+  }, [neighborhood.id, isMember, isAdmin])
 
   const supporterCounts = useMemo(() => {
     const counts = {}
@@ -163,7 +174,7 @@ export default function ServiceBoard() {
     )
   }
 
-  if (!isMember) {
+  if (!isMember && !isAdmin) {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
@@ -195,6 +206,7 @@ export default function ServiceBoard() {
 
   return (
     <div>
+      {latestBroadcast ? <BroadcastBanner broadcast={latestBroadcast} /> : null}
       <div className="controls controls-compact">
         <div className="search-box search-box-compact">
           <input type="text" placeholder={t('serviceBoard.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />

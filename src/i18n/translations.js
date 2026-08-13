@@ -159,6 +159,7 @@ export const translations = {
       referSubmitting: 'Saving…',
       errorPickVendor: 'Pick a vendor before saving.',
       noVendorsToRefer: 'This neighborhood doesn’t have any vendors listed yet to refer.',
+      officialUpdate: 'Official update',
     },
     browse: {
       eyebrow: 'Browse Vendors',
@@ -447,6 +448,7 @@ export const translations = {
       referSubmitting: 'Guardando…',
       errorPickVendor: 'Elige un proveedor antes de guardar.',
       noVendorsToRefer: 'Este vecindario todavía no tiene proveedores listados para recomendar.',
+      officialUpdate: 'Actualización oficial',
     },
     browse: {
       eyebrow: 'Ver Proveedores',

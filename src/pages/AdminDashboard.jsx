@@ -220,6 +220,7 @@ export default function AdminDashboard() {
         <div className="admin-corner">
           <div className="admin-pill"><span className="dot" />{user.email}</div><br />
           <Link className="btn-ghost" to={`/n/${slug}/admin/info`}>Community info</Link>{' '}
+          <Link className="btn-ghost" to={`/n/${slug}/admin/board`}>Service Board</Link>{' '}
           <Link className="btn-ghost" to={`/n/${slug}/admin/settings`}>Settings</Link>{' '}
           <button className="btn-ghost" onClick={signOut}>Log out</button>
         </div>

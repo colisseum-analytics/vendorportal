@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import ReferVendorModal from '../components/ReferVendorModal.jsx'
+import BroadcastBanner from '../components/BroadcastBanner.jsx'
 import { SEVERITY_LABEL_KEY, SEVERITY_BADGE_CLASS, STATUS_LABEL_KEY, STATUS_BADGE_CLASS } from '../utils/needConstants'
 import { relativeTime } from '../utils/relativeTime'
 
@@ -16,7 +17,7 @@ export default function NeedDetail() {
   const { slug, needId } = useParams()
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { neighborhood, isMember, reloadMembership } = useOutletContext()
+  const { neighborhood, isAdmin, isMember, reloadMembership } = useOutletContext()
 
   const [unit, setUnit] = useState('')
   const [role, setRole] = useState('owner')
@@ -31,6 +32,7 @@ export default function NeedDetail() {
   const [referrals, setReferrals] = useState([])
   const [referOpen, setReferOpen] = useState(false)
   const [referError, setReferError] = useState('')
+  const [broadcasts, setBroadcasts] = useState([])
 
   usePageMeta({ title: need?.title, noindex: true })
 
@@ -46,18 +48,20 @@ export default function NeedDetail() {
       return
     }
     setNeed(n)
-    const [{ data: supporters }, { data: v }, { data: refs }] = await Promise.all([
+    const [{ data: supporters }, { data: v }, { data: refs }, { data: bc }] = await Promise.all([
       supabase.from('need_supporters').select('user_id').eq('need_id', needId),
       supabase.from('vendors').select('id, name, category, phone, website').eq('neighborhood_id', neighborhood.id).order('name'),
       supabase.from('need_vendor_referrals').select('*').eq('need_id', needId).order('created_at', { ascending: false }),
+      supabase.from('broadcasts').select('*').eq('need_id', needId).order('created_at', { ascending: false }),
     ])
+    setBroadcasts(bc || [])
     setSupporterIds((supporters || []).map((s) => s.user_id))
     setVendors(v || [])
     setReferrals(refs || [])
   }
 
   useEffect(() => {
-    if (!isMember) return
+    if (!isMember && !isAdmin) return
     let active = true
     async function load() {
       setLoading(true)
@@ -66,7 +70,7 @@ export default function NeedDetail() {
     }
     load()
     return () => { active = false }
-  }, [neighborhood.id, needId, isMember])
+  }, [neighborhood.id, needId, isMember, isAdmin])
 
   const join = async (e) => {
     e.preventDefault()
@@ -122,7 +126,7 @@ export default function NeedDetail() {
     )
   }
 
-  if (!isMember) {
+  if (!isMember && !isAdmin) {
     return (
       <div className="wrap-narrow">
         <div className="auth-card">
@@ -166,6 +170,8 @@ export default function NeedDetail() {
   return (
     <div>
       <p className="eyebrow"><Link to={`/n/${slug}/board`}>{t('serviceBoard.backToBoard')}</Link></p>
+
+      {broadcasts.map((b) => <BroadcastBanner key={b.id} broadcast={b} />)}
 
       <div className="card" style={{ marginBottom: 20 }}>
         <div className="card-top">
