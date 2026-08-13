@@ -10,8 +10,8 @@ data model, permission model, and how the pieces fit together — this file
 is just setup/deploy steps.
 
 - **Public**: browse, search, and filter vendors — no login required.
-- **Neighborhood admins**: email/password login (Google/Apple/Microsoft can
-  be turned on later with no code changes) to manage vendors, settings, and
+- **Neighborhood admins**: email OTP (6-digit code) login (Google/Apple/Microsoft
+  can be turned on later with no code changes) to manage vendors, settings, and
   co-admins for their own neighborhood.
 - **Platform admins**: oversee every neighborhood — approve/reject new
   directory requests, activate/deactivate/delete neighborhoods, manage user
@@ -104,7 +104,7 @@ app), so neighborhoods never see or affect each other's data.
 
 Platform admins oversee the whole platform, not any one neighborhood:
 reviewing directory requests, activating/deactivating/renaming/deleting
-any neighborhood, and managing every user account (password resets,
+any neighborhood, and managing every user account (sending sign-in codes,
 disabling accounts, editing emails). There's intentionally no self-serve
 way to become one — grant it to an existing account by email:
 
@@ -155,6 +155,28 @@ setup, invites still work (the person is still recorded and promoted on
 signup) — they just won't get an email telling them, so you'd need to let
 them know some other way in the meantime.
 
+## Setting up "Import from document" (community info)
+
+On the Community Info admin page, admins can upload a PDF, Word doc, or
+text file (a welcome packet, HOA handbook, FAQ doc) and have it parsed
+into HOA-contact/service/emergency/FAQ entries they review and edit before
+anything's added — see `src/components/ImportInfoItemsModal.jsx`. This
+also runs through a Supabase Edge Function, since calling an LLM needs an
+API key that must never reach the browser:
+
+1. Create an API key at [console.anthropic.com](https://console.anthropic.com).
+2. From this project's root (after the `supabase login` / `supabase link`
+   steps above):
+   ```
+   supabase functions deploy extract-info-items
+   supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key-here
+   ```
+
+If you skip this setup, the "Import from document" button still appears
+but returns a clear error telling the admin it isn't configured yet —
+adding items one at a time via **+ Add entry** always works regardless.
+Scanned/image-only PDFs (no text layer) aren't supported.
+
 ## Adding Google / Apple / Microsoft login later
 
 1. In the Supabase Dashboard, go to **Authentication → Providers**, and
@@ -184,7 +206,7 @@ deployed the frontend change yet; see
 
 ## A few things worth knowing
 
-- **The admin password model is real, not a stand-in.** Unlike a
+- **The admin access model is real, not a stand-in.** Unlike a
   single-file prototype, admin access is enforced by the database itself
   (Postgres row-level security), not just by hiding buttons in the UI —
   so it holds up even if someone pokes at the API directly.
@@ -204,9 +226,6 @@ deployed the frontend change yet; see
   dashboard (name, tagline, and categories — the web address/slug is
   intentionally not editable there, to avoid breaking links people
   already have to it).
-- **Passwords require 10+ characters with upper/lower/number/special
-  character**, enforced client-side at signup and password reset — see
-  `src/utils/passwordPolicy.js` if that needs to change.
 - **"Disable account" (platform admin) is a real login ban**, not just a
   UI restriction — it writes directly to Supabase's own `auth.users`
   table, which the auth server checks on every login. See

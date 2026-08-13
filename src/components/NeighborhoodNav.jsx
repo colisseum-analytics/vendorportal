@@ -10,6 +10,7 @@ export default function NeighborhoodNav({ slug }) {
     { to: `/n/${slug}/community-services`, label: t('nav.communityServices') },
     { to: `/n/${slug}/emergency`, label: t('nav.emergency') },
     { to: `/n/${slug}/faq`, label: t('nav.faq') },
+    { to: `/n/${slug}/board`, label: t('nav.serviceBoard') },
   ]
 
   return (

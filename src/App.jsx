@@ -7,6 +7,7 @@ import BrowseVendors from './pages/BrowseVendors.jsx'
 import NeighborhoodLayout from './pages/NeighborhoodLayout.jsx'
 import NeighborhoodDirectory from './pages/NeighborhoodDirectory.jsx'
 import NeighborhoodInfoSection from './pages/NeighborhoodInfoSection.jsx'
+import ServiceBoard from './pages/ServiceBoard.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminCommunityInfo from './pages/AdminCommunityInfo.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="community-services" element={<NeighborhoodInfoSection section="community_services" />} />
           <Route path="emergency" element={<NeighborhoodInfoSection section="emergency" />} />
           <Route path="faq" element={<NeighborhoodInfoSection section="faq" />} />
+          <Route path="board" element={<ServiceBoard />} />
         </Route>
         <Route path="/n/:slug/admin" element={<AdminDashboard />} />
         <Route path="/n/:slug/admin/info" element={<AdminCommunityInfo />} />

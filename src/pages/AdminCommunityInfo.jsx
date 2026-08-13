@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import InfoItemFormModal from '../components/InfoItemFormModal.jsx'
+import ImportInfoItemsModal from '../components/ImportInfoItemsModal.jsx'
 import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
@@ -38,6 +39,8 @@ export default function AdminCommunityInfo() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importMsg, setImportMsg] = useState('')
 
   useEffect(() => {
     if (!neighborhood || !isAdmin) return
@@ -128,6 +131,7 @@ export default function AdminCommunityInfo() {
         </div>
         <div className="admin-corner">
           <div className="admin-pill"><span className="dot" />{user.email}</div><br />
+          <button className="btn-ghost" onClick={() => { setImportMsg(''); setImportOpen(true) }}>Import from document</button>{' '}
           <Link className="btn-ghost" to={`/n/${slug}/admin`}>Vendors</Link>{' '}
           <button className="btn-ghost" onClick={signOut}>Log out</button>
         </div>
@@ -145,6 +149,7 @@ export default function AdminCommunityInfo() {
           </button>
         ))}
       </div>
+      {importMsg ? <div className="success-msg">{importMsg}</div> : null}
 
       {sectionItems.length === 0 ? (
         <div className="empty">
@@ -202,6 +207,18 @@ export default function AdminCommunityInfo() {
           existing={editingItem}
           onCancel={() => { setModalOpen(false); setEditingItem(null) }}
           onSave={saveItem}
+        />
+      ) : null}
+
+      {importOpen ? (
+        <ImportInfoItemsModal
+          neighborhood={neighborhood}
+          onCancel={() => setImportOpen(false)}
+          onImported={async (count) => {
+            setImportOpen(false)
+            setImportMsg(`Imported ${count} item${count === 1 ? '' : 's'}.`)
+            await refreshItems()
+          }}
         />
       ) : null}
 

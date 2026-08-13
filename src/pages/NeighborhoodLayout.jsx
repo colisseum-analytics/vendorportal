@@ -14,9 +14,13 @@ export default function NeighborhoodLayout() {
   const { t } = useLanguage()
   const [neighborhood, setNeighborhood] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [isMember, setIsMember] = useState(false)
+  const [membershipRole, setMembershipRole] = useState(null)
+  const [membershipUnit, setMembershipUnit] = useState(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
+  const [membershipReloadKey, setMembershipReloadKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -37,7 +41,7 @@ export default function NeighborhoodLayout() {
       setNeighborhood(n)
 
       if (user) {
-        const [{ data: admin }, { data: platformAdmin }] = await Promise.all([
+        const [{ data: admin }, { data: platformAdmin }, { data: member }] = await Promise.all([
           supabase
             .from('neighborhood_admins')
             .select('user_id')
@@ -45,16 +49,32 @@ export default function NeighborhoodLayout() {
             .eq('user_id', user.id)
             .maybeSingle(),
           supabase.rpc('is_platform_admin'),
+          supabase
+            .from('neighborhood_members')
+            .select('unit, role')
+            .eq('neighborhood_id', n.id)
+            .eq('user_id', user.id)
+            .maybeSingle(),
         ])
-        if (active) setIsAdmin(!!admin || !!platformAdmin)
+        if (active) {
+          setIsAdmin(!!admin || !!platformAdmin)
+          setIsMember(!!member)
+          setMembershipRole(member?.role ?? null)
+          setMembershipUnit(member?.unit ?? null)
+        }
       } else {
         setIsAdmin(false)
+        setIsMember(false)
+        setMembershipRole(null)
+        setMembershipUnit(null)
       }
       setLoading(false)
     }
     load()
     return () => { active = false }
-  }, [slug, user])
+  }, [slug, user, membershipReloadKey])
+
+  const reloadMembership = () => setMembershipReloadKey((k) => k + 1)
 
   usePageMeta({ title: t('directory.notFoundTitle'), noindex: true, skip: !notFound })
 
@@ -99,7 +119,7 @@ export default function NeighborhoodLayout() {
 
       <NeighborhoodNav slug={slug} />
       <div className="neighborhood-content">
-        <Outlet context={{ neighborhood, isAdmin }} />
+        <Outlet context={{ neighborhood, isAdmin, isMember, membershipRole, membershipUnit, reloadMembership }} />
       </div>
 
       <footer className="site-footer">
