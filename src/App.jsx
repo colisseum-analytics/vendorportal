@@ -8,6 +8,7 @@ import NeighborhoodLayout from './pages/NeighborhoodLayout.jsx'
 import NeighborhoodDirectory from './pages/NeighborhoodDirectory.jsx'
 import NeighborhoodInfoSection from './pages/NeighborhoodInfoSection.jsx'
 import ServiceBoard from './pages/ServiceBoard.jsx'
+import NeedDetail from './pages/NeedDetail.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminCommunityInfo from './pages/AdminCommunityInfo.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="emergency" element={<NeighborhoodInfoSection section="emergency" />} />
           <Route path="faq" element={<NeighborhoodInfoSection section="faq" />} />
           <Route path="board" element={<ServiceBoard />} />
+          <Route path="board/:needId" element={<NeedDetail />} />
         </Route>
         <Route path="/n/:slug/admin" element={<AdminDashboard />} />
         <Route path="/n/:slug/admin/info" element={<AdminCommunityInfo />} />

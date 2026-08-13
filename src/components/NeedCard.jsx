@@ -1,3 +1,4 @@
+import { Link, useParams } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { colorForCategory } from '../utils/categoryColor'
 import { relativeTime } from '../utils/relativeTime'
@@ -5,6 +6,7 @@ import { NEED_CATEGORIES, SEVERITY_LABEL_KEY, SEVERITY_BADGE_CLASS, STATUS_LABEL
 
 export default function NeedCard({ need, supportCount = 0, supported = false, onToggleSupport }) {
   const { t } = useLanguage()
+  const { slug } = useParams()
   const n = need
 
   return (
@@ -12,7 +14,9 @@ export default function NeedCard({ need, supportCount = 0, supported = false, on
       <span className="pin" style={{ background: colorForCategory(NEED_CATEGORIES, n.category) }} />
       <div className="card-top">
         <div className="card-top-name">
-          <h3 title={n.description || undefined}>{n.title}</h3>
+          <h3 title={n.description || undefined}>
+            <Link to={`/n/${slug}/board/${n.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{n.title}</Link>
+          </h3>
           <div className="category">{n.category}</div>
         </div>
         <div className="card-top-actions">
