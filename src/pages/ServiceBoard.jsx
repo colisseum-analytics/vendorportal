@@ -231,7 +231,7 @@ export default function ServiceBoard() {
           <button type="button" className={sort === 'recent' ? 'active' : ''} onClick={() => setSort('recent')}>{t('serviceBoard.sortRecent')}</button>
           <button type="button" className={sort === 'popular' ? 'active' : ''} onClick={() => setSort('popular')}>{t('serviceBoard.sortPopular')}</button>
         </div>
-        <button type="button" className="btn-primary" onClick={() => setPostOpen(true)}>{t('serviceBoard.postButton')}</button>
+        <button type="button" className="btn-ghost" onClick={() => setPostOpen(true)}>{t('serviceBoard.postButton')}</button>
       </div>
 
       {filtered.length === 0 ? (
