@@ -137,6 +137,9 @@ export const translations = {
       emptyBodyNoMatch: 'No needs match your search or filters.',
       showingOne: 'Showing {shown} of {total} need',
       showingOther: 'Showing {shown} of {total} needs',
+      sortRecent: 'Recent',
+      sortPopular: 'Most upvoted',
+      supportButton: 'I have this issue too',
     },
     browse: {
       eyebrow: 'Browse Vendors',
@@ -403,6 +406,9 @@ export const translations = {
       emptyBodyNoMatch: 'Ninguna necesidad coincide con tu búsqueda o filtros.',
       showingOne: 'Mostrando {shown} de {total} necesidad',
       showingOther: 'Mostrando {shown} de {total} necesidades',
+      sortRecent: 'Recientes',
+      sortPopular: 'Más votadas',
+      supportButton: 'Yo también tengo este problema',
     },
     browse: {
       eyebrow: 'Ver Proveedores',

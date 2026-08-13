@@ -12,9 +12,10 @@ import { NEED_CATEGORIES, SEVERITIES, STATUSES, SEVERITY_LABEL_KEY, STATUS_LABEL
 
 const PAGE_SIZE = 25
 
-// Phase 3 of the Needs/Broadcast/Members feature: the needs list + post
-// flow. Upvoting, vendor referrals, and the need-detail page land in
-// later phases.
+// Phase 4 of the Needs/Broadcast/Members feature adds support (the "upvote
+// / I have this issue too" signal — same underlying table, see
+// need_supporters in the migration) and the Recent/Most-upvoted sort.
+// Vendor referrals and the need-detail page land in later phases.
 export default function ServiceBoard() {
   const { slug } = useParams()
   const { user } = useAuth()
@@ -28,39 +29,66 @@ export default function ServiceBoard() {
   const [joining, setJoining] = useState(false)
 
   const [needs, setNeeds] = useState([])
+  const [supporterRows, setSupporterRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(null)
   const [severity, setSeverity] = useState(null)
   const [status, setStatus] = useState(null)
+  const [sort, setSort] = useState('recent')
   const [page, setPage] = useState(1)
   const [postOpen, setPostOpen] = useState(false)
+
+  const loadAll = async () => {
+    const { data } = await supabase
+      .from('needs')
+      .select('*')
+      .eq('neighborhood_id', neighborhood.id)
+      .order('created_at', { ascending: false })
+    const list = data || []
+    setNeeds(list)
+    if (list.length) {
+      const { data: supporters } = await supabase
+        .from('need_supporters')
+        .select('need_id, user_id')
+        .in('need_id', list.map((n) => n.id))
+      setSupporterRows(supporters || [])
+    } else {
+      setSupporterRows([])
+    }
+  }
 
   useEffect(() => {
     if (!isMember) return
     let active = true
     async function load() {
       setLoading(true)
-      const { data } = await supabase
-        .from('needs')
-        .select('*')
-        .eq('neighborhood_id', neighborhood.id)
-        .order('created_at', { ascending: false })
+      await loadAll()
       if (!active) return
-      setNeeds(data || [])
       setLoading(false)
     }
     load()
     return () => { active = false }
   }, [neighborhood.id, isMember])
 
-  const refreshNeeds = async () => {
-    const { data } = await supabase
-      .from('needs')
-      .select('*')
-      .eq('neighborhood_id', neighborhood.id)
-      .order('created_at', { ascending: false })
-    setNeeds(data || [])
+  const supporterCounts = useMemo(() => {
+    const counts = {}
+    for (const row of supporterRows) counts[row.need_id] = (counts[row.need_id] || 0) + 1
+    return counts
+  }, [supporterRows])
+
+  const mySupportedIds = useMemo(
+    () => new Set(supporterRows.filter((r) => r.user_id === user?.id).map((r) => r.need_id)),
+    [supporterRows, user]
+  )
+
+  const toggleSupport = async (needId) => {
+    if (mySupportedIds.has(needId)) {
+      await supabase.from('need_supporters').delete().eq('need_id', needId).eq('user_id', user.id)
+    } else {
+      await supabase.from('need_supporters').insert({ need_id: needId, user_id: user.id })
+    }
+    await loadAll()
   }
 
   const join = async (e) => {
@@ -91,7 +119,7 @@ export default function ServiceBoard() {
     })
     if (error) throw error
     setPostOpen(false)
-    await refreshNeeds()
+    await loadAll()
   }
 
   const filtered = useMemo(() => {
@@ -106,14 +134,19 @@ export default function ServiceBoard() {
       })
   }, [needs, category, severity, status, search])
 
+  const sorted = useMemo(() => {
+    if (sort !== 'popular') return filtered
+    return [...filtered].sort((a, b) => (supporterCounts[b.id] || 0) - (supporterCounts[a.id] || 0))
+  }, [filtered, sort, supporterCounts])
+
   useEffect(() => {
     setPage(1)
-  }, [category, severity, status, search])
+  }, [category, severity, status, search, sort])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
   const pageItems = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
+    () => sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [sorted, page]
   )
 
   if (!user) {
@@ -182,6 +215,10 @@ export default function ServiceBoard() {
         <div className="count-row">
           {t(needs.length === 1 ? 'serviceBoard.showingOne' : 'serviceBoard.showingOther', { shown: filtered.length, total: needs.length })}
         </div>
+        <div className="status-toggle">
+          <button type="button" className={sort === 'recent' ? 'active' : ''} onClick={() => setSort('recent')}>{t('serviceBoard.sortRecent')}</button>
+          <button type="button" className={sort === 'popular' ? 'active' : ''} onClick={() => setSort('popular')}>{t('serviceBoard.sortPopular')}</button>
+        </div>
         <button type="button" className="btn-primary" onClick={() => setPostOpen(true)}>{t('serviceBoard.postButton')}</button>
       </div>
 
@@ -192,7 +229,15 @@ export default function ServiceBoard() {
         </div>
       ) : (
         <div className="grid">
-          {pageItems.map((n) => <NeedCard key={n.id} need={n} />)}
+          {pageItems.map((n) => (
+            <NeedCard
+              key={n.id}
+              need={n}
+              supportCount={supporterCounts[n.id] || 0}
+              supported={mySupportedIds.has(n.id)}
+              onToggleSupport={toggleSupport}
+            />
+          ))}
         </div>
       )}
 
