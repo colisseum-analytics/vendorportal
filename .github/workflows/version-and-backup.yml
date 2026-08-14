@@ -1,0 +1,30 @@
+name: Version and backup
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  version-and-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - id: run
+        run: node scripts/version-and-backup.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platform-backup-v${{ steps.run.outputs.version }}
+          path: ${{ steps.run.outputs.filename }}
+          retention-days: 90

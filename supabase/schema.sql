@@ -749,7 +749,7 @@ declare
   result jsonb;
   counts jsonb;
 begin
-  if not is_platform_admin() then
+  if not (is_platform_admin() or current_user = 'service_role') then
     raise exception 'Only platform admins can export a backup';
   end if;
 

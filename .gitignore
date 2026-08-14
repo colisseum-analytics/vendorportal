@@ -5,3 +5,7 @@ dist
 .DS_Store
 .claude
 *.csv
+
+# Full-platform backups contain user PII (emails, contact messages) —
+# never commit these, download them from the backup workflow instead.
+backup/
