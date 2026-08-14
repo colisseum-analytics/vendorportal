@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
@@ -7,7 +7,6 @@ import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
 import { downloadVendorsCsv } from '../utils/vendorCsvExport'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
-import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
@@ -17,8 +16,8 @@ const STATUS_OPTIONS = ['Verified', 'Unknown']
 
 export default function AdminDashboard() {
   const { slug } = useParams()
-  const { user, authLoading, neighborhood, isAdmin, loading, notFound } = useNeighborhoodAccess(slug)
-  const { signOut } = useAuth()
+  const { user } = useAuth()
+  const { neighborhood, isAdmin } = useOutletContext()
   usePageMeta({ title: neighborhood ? `${neighborhood.name} · Admin` : 'Admin', noindex: true })
 
   const [vendors, setVendors] = useState([])
@@ -159,8 +158,6 @@ export default function AdminDashboard() {
     setCurrentAdmins((list) => list.filter((a) => a.user_id !== userId))
   }
 
-  if (authLoading || loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
-
   if (!user) {
     return (
       <div className="wrap-narrow">
@@ -168,17 +165,6 @@ export default function AdminDashboard() {
           <h1>Admin login required</h1>
           <p className="sub">Log in to manage vendors for this neighborhood.</p>
           <Link className="btn-primary" to={`/login?redirect=/n/${slug}/admin`} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>Log in</Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (notFound) {
-    return (
-      <div className="wrap">
-        <div className="empty" style={{ marginTop: 60 }}>
-          <strong>Neighborhood not found</strong>
-          <Link to="/">← Back to all neighborhoods</Link>
         </div>
       </div>
     )
@@ -206,24 +192,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="wrap">
-      <div className="masthead">
-        <div className="masthead-with-logo">
-          {neighborhood.logo_url ? (
-            <img src={neighborhood.logo_url} alt="" className="masthead-logo" />
-          ) : null}
-          <div>
-            <p className="eyebrow"><Link to={`/n/${slug}`}>{neighborhood.name}</Link> · Admin</p>
-            <h1>Manage vendors</h1>
-            <p className="tagline">Changes here appear on the public directory immediately.</p>
-          </div>
-        </div>
-        <div className="admin-corner">
-          <div className="admin-pill"><span className="dot" />{user.email}</div><br />
-          <Link className="btn-ghost" to={`/n/${slug}/admin/info`}>Community info</Link>{' '}
-          <Link className="btn-ghost" to={`/n/${slug}/admin/board`}>Service Board</Link>{' '}
-          <Link className="btn-ghost" to={`/n/${slug}/admin/settings`}>Settings</Link>{' '}
-          <button className="btn-ghost" onClick={signOut}>Log out</button>
-        </div>
+      <div style={{ margin: '20px 0 10px' }}>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Manage vendors</h1>
+        <p className="tagline">Changes here appear on the public directory immediately.</p>
       </div>
 
       <div className="stats-row">

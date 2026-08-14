@@ -17,7 +17,7 @@ export default function NeedDetail() {
   const { slug, needId } = useParams()
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { neighborhood, isAdmin, isMember, reloadMembership } = useOutletContext()
+  const { neighborhood, isAdmin, isMember, reloadNeighborhood } = useOutletContext()
 
   const [unit, setUnit] = useState('')
   const [role, setRole] = useState('owner')
@@ -85,7 +85,7 @@ export default function NeedDetail() {
       setJoinError(error.message)
       return
     }
-    reloadMembership()
+    reloadNeighborhood()
   }
 
   const toggleSupport = async () => {

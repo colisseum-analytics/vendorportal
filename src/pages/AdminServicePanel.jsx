@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import { relativeTime } from '../utils/relativeTime'
@@ -20,8 +19,8 @@ const MEMBER_ROLE_LABELS = { owner: 'Owner', renter: 'Renter', board_member: 'Bo
 
 export default function AdminServicePanel() {
   const { slug } = useParams()
-  const { user, authLoading, neighborhood, isAdmin, loading, notFound } = useNeighborhoodAccess(slug)
-  const { signOut } = useAuth()
+  const { user } = useAuth()
+  const { neighborhood, isAdmin } = useOutletContext()
   usePageMeta({ title: neighborhood ? `${neighborhood.name} · Service Board Admin` : 'Service Board Admin', noindex: true })
 
   const [activeSection, setActiveSection] = useState('needs')
@@ -109,8 +108,6 @@ export default function AdminServicePanel() {
     await loadMembers()
   }
 
-  if (authLoading || loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
-
   if (!user) {
     return (
       <div className="wrap-narrow">
@@ -118,17 +115,6 @@ export default function AdminServicePanel() {
           <h1>Admin login required</h1>
           <p className="sub">Log in to manage this neighborhood's Service Board.</p>
           <Link className="btn-primary" to={`/login?redirect=/n/${slug}/admin/board`} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>Log in</Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (notFound) {
-    return (
-      <div className="wrap">
-        <div className="empty" style={{ marginTop: 60 }}>
-          <strong>Neighborhood not found</strong>
-          <Link to="/">← Back to all neighborhoods</Link>
         </div>
       </div>
     )
@@ -148,21 +134,9 @@ export default function AdminServicePanel() {
 
   return (
     <div className="wrap">
-      <div className="masthead">
-        <div className="masthead-with-logo">
-          {neighborhood.logo_url ? <img src={neighborhood.logo_url} alt="" className="masthead-logo" /> : null}
-          <div>
-            <p className="eyebrow"><Link to={`/n/${slug}/admin`}>{neighborhood.name} · Admin</Link></p>
-            <h1>Service Board</h1>
-            <p className="tagline">Manage resident-posted needs, broadcast official updates, and the member roster.</p>
-          </div>
-        </div>
-        <div className="admin-corner">
-          <div className="admin-pill"><span className="dot" />{user.email}</div><br />
-          <Link className="btn-ghost" to={`/n/${slug}/admin`}>Vendors</Link>{' '}
-          <Link className="btn-ghost" to={`/n/${slug}/admin/info`}>Community info</Link>{' '}
-          <button className="btn-ghost" onClick={signOut}>Log out</button>
-        </div>
+      <div style={{ margin: '20px 0 10px' }}>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Service Board</h1>
+        <p className="tagline">Manage resident-posted needs, broadcast official updates, and the member roster.</p>
       </div>
 
       <div className="neighborhood-nav">

@@ -1,0 +1,62 @@
+import { NavLink, useParams } from 'react-router-dom'
+import { useLanguage } from '../context/LanguageContext.jsx'
+
+// Admin labels are plain English, matching the existing convention that
+// admin pages aren't localized (see AdminDashboard.jsx etc).
+const ADMIN_ITEMS = [
+  { path: 'admin', label: 'Vendors', icon: '🛠', end: true },
+  { path: 'admin/info', label: 'Community Info', icon: '📋' },
+  { path: 'admin/board', label: 'Service Board', icon: '🛎' },
+  { path: 'admin/settings', label: 'Settings', icon: '⚙' },
+]
+
+export default function NeighborhoodSidebar({ isAdmin, onContactAdmins }) {
+  const { slug } = useParams()
+  const { t } = useLanguage()
+
+  const directoryItems = [
+    { to: `/n/${slug}`, label: t('nav.vendors'), icon: '🛠', end: true },
+    { to: `/n/${slug}/hoa-contacts`, label: t('nav.hoaContacts'), icon: '☎' },
+    { to: `/n/${slug}/community-services`, label: t('nav.communityServices'), icon: '🧰' },
+    { to: `/n/${slug}/emergency`, label: t('nav.emergency'), icon: '⚠' },
+    { to: `/n/${slug}/faq`, label: t('nav.faq'), icon: '❓' },
+    { to: `/n/${slug}/board`, label: t('nav.serviceBoard'), icon: '🛎' },
+  ]
+
+  return (
+    <nav className="neighborhood-sidebar">
+      <div className="sidebar-group">
+        <p className="sidebar-group-label">Directory</p>
+        {directoryItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
+          >
+            <span className="sidebar-link-icon">{item.icon}</span>{item.label}
+          </NavLink>
+        ))}
+        <button type="button" className="sidebar-link" onClick={onContactAdmins}>
+          <span className="sidebar-link-icon">💬</span>{t('directory.contactAdmins')}
+        </button>
+      </div>
+
+      {isAdmin ? (
+        <div className="sidebar-group">
+          <p className="sidebar-group-label">Admin</p>
+          {ADMIN_ITEMS.map((item) => (
+            <NavLink
+              key={item.path}
+              to={`/n/${slug}/${item.path}`}
+              end={item.end}
+              className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
+            >
+              <span className="sidebar-link-icon">{item.icon}</span>{item.label}
+            </NavLink>
+          ))}
+        </div>
+      ) : null}
+    </nav>
+  )
+}

@@ -81,6 +81,11 @@ a { color: var(--blue); }
 .site-header-logo{ display:inline-flex; align-items:center; }
 .site-header-logo img{ height: 52px; width:auto; display:block; }
 .site-header-actions{ display:flex; gap:8px; align-items:center; }
+.account-badge{
+  width:30px; height:30px; border-radius:50%; flex-shrink:0;
+  background: var(--blue-soft); color: var(--blue); font-family:'Inter'; font-weight:700; font-size:12px;
+  display:inline-flex; align-items:center; justify-content:center;
+}
 @media (max-width: 560px){
   .site-header{ padding: 10px 16px; }
   .site-header-logo img{ height: 38px; }
@@ -492,6 +497,43 @@ a { color: var(--blue); }
 .neighborhood-nav-link:hover{ border-color: var(--blue); color: var(--blue); }
 .neighborhood-nav-link-active{ background: var(--ink); border-color: var(--ink); color: var(--paper-raised); font-weight:600; }
 .neighborhood-nav-link-active:hover{ border-color: var(--blue); }
+
+/* ---------- neighborhood sidebar shell ---------- */
+.neighborhood-shell{ display:grid; grid-template-columns: 220px 1fr; align-items:start; }
+.neighborhood-shell-content{ min-width:0; }
+.neighborhood-sidebar{
+  display:flex; flex-direction:column; gap:20px;
+  padding: 24px 16px; border-right: 1px solid var(--line);
+  position: sticky; top: 0; align-self: start;
+}
+.sidebar-group{ display:flex; flex-direction:column; gap:2px; }
+.sidebar-group-label{
+  font-family:'IBM Plex Mono', monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase;
+  color: var(--ink-faint); margin: 0 0 6px 10px;
+}
+.sidebar-link{
+  display:flex; align-items:center; gap:10px;
+  font-family:'Inter'; font-size:13.5px; color: var(--ink-soft); text-decoration:none;
+  padding: 8px 10px; border-radius: 8px; transition: all .15s ease;
+}
+button.sidebar-link{ background:none; border:none; width:100%; text-align:left; cursor:pointer; }
+.sidebar-link:hover{ background: var(--paper); color: var(--ink); }
+.sidebar-link-active{ background: var(--ink); color: var(--paper-raised); font-weight:600; }
+.sidebar-link-active:hover{ background: var(--ink); color: var(--paper-raised); }
+.sidebar-link-icon{ width:18px; text-align:center; flex-shrink:0; }
+
+@media (max-width: 720px){
+  .neighborhood-shell{ grid-template-columns: 1fr; }
+  .neighborhood-sidebar{
+    flex-direction:row; gap:6px; overflow-x:auto; position:static;
+    padding: 10px 16px; border-right:none; border-bottom: 1px solid var(--line);
+  }
+  .sidebar-group{ flex-direction:row; gap:6px; align-items:center; }
+  .sidebar-group-label{ display:none; }
+  .sidebar-link{ white-space:nowrap; padding: 7px 12px; border-radius:20px; border:1px solid var(--line); }
+  .sidebar-link-active{ border-color: var(--ink); }
+}
+
 .neighborhood-content{ min-width:0; }
 
 .info-item-list{ display:flex; flex-direction:column; gap:8px; }

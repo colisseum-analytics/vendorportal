@@ -3,7 +3,7 @@ import { Link, Outlet, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
-import NeighborhoodNav from '../components/NeighborhoodNav.jsx'
+import NeighborhoodSidebar from '../components/NeighborhoodSidebar.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
@@ -20,7 +20,7 @@ export default function NeighborhoodLayout() {
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
-  const [membershipReloadKey, setMembershipReloadKey] = useState(0)
+  const [neighborhoodReloadKey, setMembershipReloadKey] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -72,9 +72,9 @@ export default function NeighborhoodLayout() {
     }
     load()
     return () => { active = false }
-  }, [slug, user, membershipReloadKey])
+  }, [slug, user, neighborhoodReloadKey])
 
-  const reloadMembership = () => setMembershipReloadKey((k) => k + 1)
+  const reloadNeighborhood = () => setMembershipReloadKey((k) => k + 1)
 
   usePageMeta({ title: t('directory.notFoundTitle'), noindex: true, skip: !notFound })
 
@@ -92,45 +92,47 @@ export default function NeighborhoodLayout() {
   }
 
   return (
-    <div className="wrap">
-      <div className="masthead">
-        <div className="masthead-with-logo">
-          {neighborhood.logo_url ? (
-            <img src={neighborhood.logo_url} alt="" className="masthead-logo" />
-          ) : null}
-          <div>
-            <p className="eyebrow"><Link to="/">{t('common.backToAllNeighborhoods')}</Link> · {t('directory.eyebrow')}</p>
-            <h1>{neighborhood.name}</h1>
-            {neighborhood.tagline ? <p className="tagline">{neighborhood.tagline}</p> : null}
+    <div className="neighborhood-shell">
+      <NeighborhoodSidebar isAdmin={isAdmin} onContactAdmins={() => setContactOpen(true)} />
+      <div className="neighborhood-shell-content">
+        <div className="wrap">
+          <div className="masthead">
+            <div className="masthead-with-logo">
+              {neighborhood.logo_url ? (
+                <img src={neighborhood.logo_url} alt="" className="masthead-logo" />
+              ) : null}
+              <div>
+                <p className="eyebrow"><Link to="/">{t('common.backToAllNeighborhoods')}</Link> · {t('directory.eyebrow')}</p>
+                <h1>{neighborhood.name}</h1>
+                {neighborhood.tagline ? <p className="tagline">{neighborhood.tagline}</p> : null}
+              </div>
+            </div>
+            {!isAdmin ? (
+              <div className="admin-corner">
+                {user ? (
+                  <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.requestAdminAccess')}</Link>
+                ) : (
+                  <Link className="btn-ghost" to={`/login?redirect=/n/${slug}/admin`}>{t('directory.adminLogin')}</Link>
+                )}
+              </div>
+            ) : null}
           </div>
-        </div>
-        <div className="admin-corner">
-          {isAdmin ? (
-            <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.adminDashboard')}</Link>
-          ) : user ? (
-            <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.requestAdminAccess')}</Link>
-          ) : (
-            <Link className="btn-ghost" to={`/login?redirect=/n/${slug}/admin`}>{t('directory.adminLogin')}</Link>
-          )}
-          <br />
-          <button className="btn-ghost" style={{ marginTop: 8 }} onClick={() => setContactOpen(true)}>{t('directory.contactAdmins')}</button>
+
+          <div className="neighborhood-content">
+            <Outlet context={{ neighborhood, isAdmin, isMember, membershipRole, membershipUnit, reloadNeighborhood }} />
+          </div>
+
+          <footer className="site-footer">
+            {t('directory.footerAskAdmin')}{' '}
+            <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>{t('directory.footerAskAdminLink')}</button> {t('directory.footerAskAdminSuffix')}
+            <FooterExtras />
+          </footer>
+
+          {contactOpen ? (
+            <ContactAdminModal neighborhood={neighborhood} onCancel={() => setContactOpen(false)} />
+          ) : null}
         </div>
       </div>
-
-      <NeighborhoodNav slug={slug} />
-      <div className="neighborhood-content">
-        <Outlet context={{ neighborhood, isAdmin, isMember, membershipRole, membershipUnit, reloadMembership }} />
-      </div>
-
-      <footer className="site-footer">
-        {t('directory.footerAskAdmin')}{' '}
-        <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>{t('directory.footerAskAdminLink')}</button> {t('directory.footerAskAdminSuffix')}
-        <FooterExtras />
-      </footer>
-
-      {contactOpen ? (
-        <ContactAdminModal neighborhood={neighborhood} onCancel={() => setContactOpen(false)} />
-      ) : null}
     </div>
   )
 }

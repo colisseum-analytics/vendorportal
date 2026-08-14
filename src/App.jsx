@@ -35,11 +35,11 @@ export default function App() {
           <Route path="faq" element={<NeighborhoodInfoSection section="faq" />} />
           <Route path="board" element={<ServiceBoard />} />
           <Route path="board/:needId" element={<NeedDetail />} />
+          <Route path="admin" element={<AdminDashboard />} />
+          <Route path="admin/info" element={<AdminCommunityInfo />} />
+          <Route path="admin/settings" element={<AdminSettings />} />
+          <Route path="admin/board" element={<AdminServicePanel />} />
         </Route>
-        <Route path="/n/:slug/admin" element={<AdminDashboard />} />
-        <Route path="/n/:slug/admin/info" element={<AdminCommunityInfo />} />
-        <Route path="/n/:slug/admin/settings" element={<AdminSettings />} />
-        <Route path="/n/:slug/admin/board" element={<AdminServicePanel />} />
         <Route path="/platform-admin" element={<PlatformAdmin />} />
         <Route path="*" element={<Home />} />
       </Routes>

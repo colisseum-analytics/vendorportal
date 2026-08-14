@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
+import { useAuth } from '../context/AuthContext.jsx'
 import CityPicker from '../components/CityPicker.jsx'
 import CategoryManager from '../components/CategoryManager.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function AdminSettings() {
   const { slug } = useParams()
-  const { user, authLoading, neighborhood, isAdmin, loading, notFound, reload } = useNeighborhoodAccess(slug)
+  const { user } = useAuth()
+  const { neighborhood, isAdmin, reloadNeighborhood: reload } = useOutletContext()
   usePageMeta({ title: neighborhood ? `${neighborhood.name} · Settings` : 'Settings', noindex: true })
 
   const [name, setName] = useState('')
@@ -70,8 +71,6 @@ export default function AdminSettings() {
     reload()
   }
 
-  if (authLoading || loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
-
   if (!user) {
     return (
       <div className="wrap-narrow">
@@ -79,17 +78,6 @@ export default function AdminSettings() {
           <h1>Admin login required</h1>
           <p className="sub">Log in to edit this neighborhood's settings.</p>
           <Link className="btn-primary" to={`/login?redirect=/n/${slug}/admin/settings`} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>Log in</Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (notFound) {
-    return (
-      <div className="wrap">
-        <div className="empty" style={{ marginTop: 60 }}>
-          <strong>Neighborhood not found</strong>
-          <Link to="/">← Back to all neighborhoods</Link>
         </div>
       </div>
     )
@@ -131,12 +119,9 @@ export default function AdminSettings() {
 
   return (
     <div className="wrap">
-      <div className="masthead">
-        <div>
-          <p className="eyebrow"><Link to={`/n/${slug}/admin`}>{neighborhood.name}</Link> · Settings</p>
-          <h1>Directory settings</h1>
-          <p className="tagline">These changes are visible to everyone browsing the public directory.</p>
-        </div>
+      <div style={{ margin: '20px 0 10px' }}>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Directory settings</h1>
+        <p className="tagline">These changes are visible to everyone browsing the public directory.</p>
       </div>
 
       <div className="auth-card" style={{ maxWidth: 520 }}>
@@ -194,8 +179,6 @@ export default function AdminSettings() {
         <p className="sub" style={{ marginBottom: 14 }}>Changes here save immediately.</p>
         <CategoryManager neighborhood={neighborhood} onChanged={reload} />
       </div>
-
-      <p style={{ marginTop: 20 }}><Link className="btn-ghost" to={`/n/${slug}/admin`}>← Back to manage vendors</Link></p>
     </div>
   )
 }

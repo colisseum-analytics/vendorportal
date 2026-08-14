@@ -21,7 +21,7 @@ export default function ServiceBoard() {
   const { slug } = useParams()
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { neighborhood, isAdmin, isMember, membershipUnit, reloadMembership } = useOutletContext()
+  const { neighborhood, isAdmin, isMember, membershipUnit, reloadNeighborhood } = useOutletContext()
   usePageMeta({ title: t('serviceBoard.title'), noindex: true })
 
   const [unit, setUnit] = useState('')
@@ -115,7 +115,7 @@ export default function ServiceBoard() {
       setJoinError(error.message)
       return
     }
-    reloadMembership()
+    reloadNeighborhood()
   }
 
   const postNeed = async (form) => {

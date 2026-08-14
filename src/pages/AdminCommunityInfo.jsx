@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import InfoItemFormModal from '../components/InfoItemFormModal.jsx'
 import ImportInfoItemsModal from '../components/ImportInfoItemsModal.jsx'
-import { useNeighborhoodAccess } from '../hooks/useNeighborhoodAccess.js'
 import { useAuth } from '../context/AuthContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
@@ -30,8 +29,8 @@ function groupBySubsection(items) {
 
 export default function AdminCommunityInfo() {
   const { slug } = useParams()
-  const { user, authLoading, neighborhood, isAdmin, loading, notFound } = useNeighborhoodAccess(slug)
-  const { signOut } = useAuth()
+  const { user } = useAuth()
+  const { neighborhood, isAdmin } = useOutletContext()
   usePageMeta({ title: neighborhood ? `${neighborhood.name} · Community Info` : 'Community Info', noindex: true })
 
   const [activeSection, setActiveSection] = useState('hoa_contacts')
@@ -78,8 +77,6 @@ export default function AdminCommunityInfo() {
     await refreshItems()
   }
 
-  if (authLoading || loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>Loading…</div></div>
-
   if (!user) {
     return (
       <div className="wrap-narrow">
@@ -87,17 +84,6 @@ export default function AdminCommunityInfo() {
           <h1>Admin login required</h1>
           <p className="sub">Log in to manage this neighborhood's community info.</p>
           <Link className="btn-primary" to={`/login?redirect=/n/${slug}/admin/info`} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>Log in</Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (notFound) {
-    return (
-      <div className="wrap">
-        <div className="empty" style={{ marginTop: 60 }}>
-          <strong>Neighborhood not found</strong>
-          <Link to="/">← Back to all neighborhoods</Link>
         </div>
       </div>
     )
@@ -120,35 +106,25 @@ export default function AdminCommunityInfo() {
 
   return (
     <div className="wrap">
-      <div className="masthead">
-        <div className="masthead-with-logo">
-          {neighborhood.logo_url ? <img src={neighborhood.logo_url} alt="" className="masthead-logo" /> : null}
-          <div>
-            <p className="eyebrow"><Link to={`/n/${slug}/admin`}>{neighborhood.name} · Admin</Link></p>
-            <h1>Community info</h1>
-            <p className="tagline">Association contacts, community services, emergency numbers, and FAQ — shown on the nav of the public directory.</p>
-          </div>
-        </div>
-        <div className="admin-corner">
-          <div className="admin-pill"><span className="dot" />{user.email}</div><br />
-          <button className="btn-ghost" onClick={() => { setImportMsg(''); setImportOpen(true) }}>Import from document</button>{' '}
-          <Link className="btn-ghost" to={`/n/${slug}/admin`}>Vendors</Link>{' '}
-          <Link className="btn-ghost" to={`/n/${slug}/admin/board`}>Service Board</Link>{' '}
-          <button className="btn-ghost" onClick={signOut}>Log out</button>
-        </div>
+      <div style={{ margin: '20px 0 10px' }}>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Community info</h1>
+        <p className="tagline">Association contacts, community services, emergency numbers, and FAQ — shown on the nav of the public directory.</p>
       </div>
 
-      <div className="neighborhood-nav">
-        {SECTIONS.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            className={`neighborhood-nav-link ${activeSection === s.key ? 'neighborhood-nav-link-active' : ''}`}
-            onClick={() => setActiveSection(s.key)}
-          >
-            {s.label}
-          </button>
-        ))}
+      <div className="count-row-with-action">
+        <div className="neighborhood-nav">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              className={`neighborhood-nav-link ${activeSection === s.key ? 'neighborhood-nav-link-active' : ''}`}
+              onClick={() => setActiveSection(s.key)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <button className="btn-ghost" onClick={() => { setImportMsg(''); setImportOpen(true) }}>Import from document</button>
       </div>
       {importMsg ? <div className="success-msg">{importMsg}</div> : null}
 
