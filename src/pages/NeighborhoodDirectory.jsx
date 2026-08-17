@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { colorForCategory } from '../utils/categoryColor'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import Pagination from '../components/Pagination.jsx'
@@ -73,6 +74,13 @@ export default function NeighborhoodDirectory() {
   const residentCount = vendors.filter((v) => v.is_resident).length
   const lastAdded = vendors.reduce((max, v) => (!max || v.created_at > max ? v.created_at : max), null)
 
+  const renderCategoryOption = (cat) => (
+    <>
+      <span className="filter-pill-dot" style={{ background: colorForCategory(categories, cat) }} />
+      {tCategory(cat)}
+    </>
+  )
+
   if (loading) return <div className="empty" style={{ marginTop: 20 }}>{t('directory.loadingDirectory')}</div>
 
   return (
@@ -83,7 +91,7 @@ export default function NeighborhoodDirectory() {
         </div>
         <div className="filter-pill-row">
           <FilterPill label={t('browse.filterStatus')} options={STATUS_OPTIONS} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
-          <FilterPill label={t('browse.filterCategory')} options={categories} value={category} onChange={setCategory} renderOption={tCategory} />
+          <FilterPill label={t('browse.filterCategory')} options={categories} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
           {status || category ? (
             <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
               {t('browse.reset')} ×

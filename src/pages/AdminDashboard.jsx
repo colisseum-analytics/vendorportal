@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient'
 import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
 import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
+import { colorForCategory } from '../utils/categoryColor'
 import { downloadVendorsCsv } from '../utils/vendorCsvExport'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
@@ -176,6 +177,12 @@ export default function AdminDashboard() {
   }
 
   const categories = neighborhood.categories || []
+  const renderCategoryOption = (cat) => (
+    <>
+      <span className="filter-pill-dot" style={{ background: colorForCategory(categories, cat) }} />
+      {cat}
+    </>
+  )
   const residentCount = vendors.filter((v) => v.is_resident).length
   const lastAdded = vendors.reduce((max, v) => (!max || v.created_at > max ? v.created_at : max), null)
 
@@ -204,7 +211,7 @@ export default function AdminDashboard() {
         </div>
         <div className="filter-pill-row">
           <FilterPill label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
-          <FilterPill label="Category" options={categories} value={category} onChange={setCategory} />
+          <FilterPill label="Category" options={categories} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
           {status || category ? (
             <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
               Reset ×
