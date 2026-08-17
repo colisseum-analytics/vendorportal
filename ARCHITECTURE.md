@@ -11,8 +11,9 @@ change workflow).
 - **Frontend**: React 18 + Vite, plain CSS (no framework), React Router
   for client-side routing.
 - **Backend**: Supabase — Postgres (with Row Level Security as the real
-  authorization layer, not just UI-level hiding), Auth (email/password,
-  extensible to OAuth), Storage (neighborhood logos).
+  authorization layer, not just UI-level hiding), Auth (email OTP —
+  6-digit sign-in codes, no passwords — extensible to OAuth), Storage
+  (neighborhood logos).
 - **Hosting**: static build on Vercel, auto-deploys on push to `main`.
   No custom backend server — the browser talks to Supabase directly
   using the public anon key; RLS is what makes that safe.
@@ -150,16 +151,18 @@ insert); only that neighborhood's admins or a platform admin can read/
 resolve/delete. `AdminDashboard.jsx` shows a per-neighborhood inbox,
 `PlatformAdmin.jsx` shows every neighborhood's messages in one place.
 
-**Password reset**: two paths, both built on Supabase's *built-in*
-auth email (not the custom Resend setup — this works with zero extra
-configuration). Self-service via `ForgotPassword.jsx` →
-`supabase.auth.resetPasswordForEmail()` → emailed link → `ResetPassword.jsx`
-picks up the recovery session and calls `supabase.auth.updateUser()`.
-Admin-triggered: same `resetPasswordForEmail()` call, fired from
-`PlatformAdmin.jsx`'s "Send password reset" button for any user.
-Password complexity (10+ chars, upper/lower/number/special) is enforced
-client-side in `src/utils/passwordPolicy.js`, shared by `Signup.jsx`
-and `ResetPassword.jsx`.
+**Sign-in**: passwordless, one flow for both login and signup.
+`Login.jsx` calls `supabase.auth.signInWithOtp({ email, options: {
+shouldCreateUser: true } })` to email a 6-digit code (Supabase's
+*built-in* auth email, not the custom Resend setup — works with zero
+extra configuration), then `supabase.auth.verifyOtp({ email, token,
+type: 'email' })` to complete the session — same code path whether the
+email is brand new or returning. Admin-triggered: `PlatformAdmin.jsx`'s
+"Send sign-in code" button calls the same `signInWithOtp()`, but with
+`shouldCreateUser: false` so it can only be used on an existing
+account. There's no password anywhere in the app — `Signup.jsx`,
+`ForgotPassword.jsx`, `ResetPassword.jsx`, and
+`src/utils/passwordPolicy.js` were all deleted when this shipped.
 
 **Account disable**: `set_user_banned()` writes
 `auth.users.banned_until` directly. Supabase's own auth server checks
@@ -186,7 +189,7 @@ src/
   utils/              csv.js, vendorCsvTemplate.js, categoryColor.js
                      (deterministic color per category, used for the
                      dot on vendor cards and filter chips), 
-                     passwordPolicy.js, relativeTime.js.
+                     relativeTime.js.
   supabaseClient.js   Single supabase-js client instance, reads
                      VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY.
 ```
