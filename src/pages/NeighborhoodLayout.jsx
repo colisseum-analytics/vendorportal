@@ -93,7 +93,7 @@ export default function NeighborhoodLayout() {
 
   return (
     <div className="neighborhood-shell">
-      <NeighborhoodSidebar isAdmin={isAdmin} onContactAdmins={() => setContactOpen(true)} />
+      <NeighborhoodSidebar isAdmin={isAdmin} user={user} onContactAdmins={() => setContactOpen(true)} />
       <div className="neighborhood-shell-content">
         <div className="wrap">
           <div className="masthead">

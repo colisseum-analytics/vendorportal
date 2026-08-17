@@ -15,6 +15,7 @@ export const translations = {
       emergency: 'Emergency',
       faq: 'Community FAQ',
       serviceBoard: 'Service Board',
+      settings: 'Settings',
     },
     common: {
       backToAllNeighborhoods: 'All neighborhoods',
@@ -218,6 +219,8 @@ export const translations = {
     accountSettings: {
       title: 'Account settings',
       subtitle: 'Update your info — visible to admins of neighborhoods you belong to.',
+      loginRequiredTitle: 'Log in to manage your account',
+      loginRequiredBody: 'Log in to update your name, email, and unit.',
       nameLabel: 'Name',
       namePlaceholder: 'Your name',
       nameSaved: 'Name saved.',
@@ -331,6 +334,7 @@ export const translations = {
       emergency: 'Emergencia',
       faq: 'Preguntas Frecuentes',
       serviceBoard: 'Tablón de Servicios',
+      settings: 'Configuración',
     },
     common: {
       backToAllNeighborhoods: 'Todos los vecindarios',
@@ -534,6 +538,8 @@ export const translations = {
     accountSettings: {
       title: 'Configuración de la cuenta',
       subtitle: 'Actualiza tu información — visible para los administradores de los vecindarios a los que perteneces.',
+      loginRequiredTitle: 'Inicia sesión para administrar tu cuenta',
+      loginRequiredBody: 'Inicia sesión para actualizar tu nombre, correo electrónico y unidad.',
       nameLabel: 'Nombre',
       namePlaceholder: 'Tu nombre',
       nameSaved: 'Nombre guardado.',

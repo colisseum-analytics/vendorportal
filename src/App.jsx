@@ -14,6 +14,8 @@ import AdminMessages from './pages/AdminMessages.jsx'
 import AdminCommunityInfo from './pages/AdminCommunityInfo.jsx'
 import AdminSettings from './pages/AdminSettings.jsx'
 import AdminServicePanel from './pages/AdminServicePanel.jsx'
+import AdminResidents from './pages/AdminResidents.jsx'
+import AccountSettings from './pages/AccountSettings.jsx'
 import PlatformAdmin from './pages/PlatformAdmin.jsx'
 import SiteHeader from './components/SiteHeader.jsx'
 
@@ -36,11 +38,13 @@ export default function App() {
           <Route path="faq" element={<NeighborhoodInfoSection section="faq" />} />
           <Route path="board" element={<ServiceBoard />} />
           <Route path="board/:needId" element={<NeedDetail />} />
+          <Route path="settings" element={<AccountSettings />} />
           <Route path="admin" element={<AdminDashboard />} />
           <Route path="admin/messages" element={<AdminMessages />} />
           <Route path="admin/info" element={<AdminCommunityInfo />} />
           <Route path="admin/settings" element={<AdminSettings />} />
           <Route path="admin/board" element={<AdminServicePanel />} />
+          <Route path="admin/residents" element={<AdminResidents />} />
         </Route>
         <Route path="/platform-admin" element={<PlatformAdmin />} />
         <Route path="*" element={<Home />} />

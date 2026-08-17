@@ -10,7 +10,7 @@ export default function AdminSettings() {
   const { slug } = useParams()
   const { user } = useAuth()
   const { neighborhood, isAdmin, reloadNeighborhood: reload } = useOutletContext()
-  usePageMeta({ title: neighborhood ? `${neighborhood.name} · Settings` : 'Settings', noindex: true })
+  usePageMeta({ title: neighborhood ? `${neighborhood.name} · Configuration` : 'Configuration', noindex: true })
 
   const [name, setName] = useState('')
   const [tagline, setTagline] = useState('')
@@ -120,7 +120,7 @@ export default function AdminSettings() {
   return (
     <div className="wrap">
       <div style={{ margin: '20px 0 10px' }}>
-        <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Directory settings</h1>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Directory configuration</h1>
         <p className="tagline">These changes are visible to everyone browsing the public directory.</p>
       </div>
 

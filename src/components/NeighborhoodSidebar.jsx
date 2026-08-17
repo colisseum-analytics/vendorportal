@@ -6,12 +6,13 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 const ADMIN_ITEMS = [
   { path: 'admin', label: 'Vendors', icon: '🛠', end: true },
   { path: 'admin/messages', label: 'Messages', icon: '✉' },
+  { path: 'admin/residents', label: 'Residents', icon: '👥' },
   { path: 'admin/info', label: 'Community Info', icon: '📋' },
   { path: 'admin/board', label: 'Service Board', icon: '🛎' },
-  { path: 'admin/settings', label: 'Settings', icon: '⚙' },
+  { path: 'admin/settings', label: 'Configuration', icon: '⚙' },
 ]
 
-export default function NeighborhoodSidebar({ isAdmin, onContactAdmins }) {
+export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) {
   const { slug } = useParams()
   const { t } = useLanguage()
 
@@ -22,6 +23,7 @@ export default function NeighborhoodSidebar({ isAdmin, onContactAdmins }) {
     { to: `/n/${slug}/emergency`, label: t('nav.emergency'), icon: '⚠' },
     { to: `/n/${slug}/faq`, label: t('nav.faq'), icon: '❓' },
     { to: `/n/${slug}/board`, label: t('nav.serviceBoard'), icon: '🛎' },
+    ...(user ? [{ to: `/n/${slug}/settings`, label: t('nav.settings'), icon: '👤' }] : []),
   ]
 
   return (
