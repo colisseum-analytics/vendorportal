@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 // admin pages aren't localized (see AdminDashboard.jsx etc).
 const ADMIN_ITEMS = [
   { path: 'admin', label: 'Vendors', icon: '🛠', end: true },
+  { path: 'admin/messages', label: 'Messages', icon: '✉' },
   { path: 'admin/info', label: 'Community Info', icon: '📋' },
   { path: 'admin/board', label: 'Service Board', icon: '🛎' },
   { path: 'admin/settings', label: 'Settings', icon: '⚙' },

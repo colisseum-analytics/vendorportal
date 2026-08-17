@@ -129,7 +129,7 @@ export default function NeighborhoodLayout() {
           </footer>
 
           {contactOpen ? (
-            <ContactAdminModal neighborhood={neighborhood} onCancel={() => setContactOpen(false)} />
+            <ContactAdminModal neighborhood={neighborhood} membershipUnit={membershipUnit} onCancel={() => setContactOpen(false)} />
           ) : null}
         </div>
       </div>
