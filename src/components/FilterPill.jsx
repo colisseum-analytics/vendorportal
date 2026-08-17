@@ -19,10 +19,11 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
   }, [open])
 
   const selectedOption = options.find((o) => (typeof o === 'string' ? o : o.value) === value)
+  const selectedPlainLabel = selectedOption ? (typeof selectedOption === 'string' ? selectedOption : selectedOption.label) : null
   const selectedLabel = selectedOption
     ? renderOption
       ? renderOption(selectedOption)
-      : typeof selectedOption === 'string' ? selectedOption : selectedOption.label
+      : selectedPlainLabel
     : null
 
   return (
@@ -31,7 +32,7 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
         type="button"
         className={`filter-pill-btn ${value ? 'filter-pill-btn-active' : ''}`}
         onClick={() => setOpen((o) => !o)}
-        title={value ? `${label}: ${selectedLabel}` : label}
+        title={value ? `${label}: ${selectedPlainLabel}` : label}
       >
         {value ? (
           <>
@@ -61,7 +62,7 @@ export default function FilterPill({ label, options, value, onChange, renderOpti
                   key={optValue}
                   className={`filter-pill-option ${optValue === value ? 'filter-pill-option-selected' : ''}`}
                   onClick={() => { onChange(optValue); setOpen(false) }}
-                  title={renderOption ? renderOption(o) : optLabel}
+                  title={optLabel}
                 >
                   {renderOption ? renderOption(o) : optLabel}
                 </button>

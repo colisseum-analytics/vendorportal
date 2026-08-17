@@ -67,13 +67,13 @@ export default function AdminMessages() {
         <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>
           Messages {unresolvedCount > 0 ? <span className="badge badge-inactive">{unresolvedCount} new</span> : null}
         </h1>
-        <p className="tagline">Issues and ideas submitted through this neighborhood's "Contact admins" form.</p>
+        <p className="tagline">Issues and ideas submitted through this neighborhood's "Feedback" form.</p>
       </div>
 
       {messages.length === 0 ? (
         <div className="empty">
           <strong>Nothing here yet</strong>
-          Suggestions and concerns from the public directory's "Contact admins" form will show up here.
+          Suggestions and concerns from the public directory's "Feedback" form will show up here.
         </div>
       ) : (
         <div className="message-list">
