@@ -54,6 +54,9 @@ export default function PlatformAdmin() {
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState('')
 
+  const [collapsed, setCollapsed] = useState({})
+  const toggleSection = (key) => setCollapsed((c) => ({ ...c, [key]: !c[key] }))
+
   useEffect(() => {
     if (authLoading) return
     if (!user) { setChecked(true); return }
@@ -445,7 +448,10 @@ export default function PlatformAdmin() {
           <button
             type="button"
             className="stat-item stat-alert stat-item-clickable"
-            onClick={() => document.getElementById('platform-messages')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            onClick={() => {
+              setCollapsed((c) => ({ ...c, messages: false }))
+              document.getElementById('platform-messages')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
           >
             <strong>{unresolvedMessageCount}</strong><span>New message{unresolvedMessageCount === 1 ? '' : 's'}</span>
           </button>
@@ -454,10 +460,13 @@ export default function PlatformAdmin() {
 
       <div className="overview-grid">
         <div className="overview-card" id="platform-messages">
-          <h2 className="section-title">
-            Messages {unresolvedMessageCount > 0 ? <span className="badge badge-inactive">{unresolvedMessageCount} new</span> : null}
-          </h2>
-          {messages.length === 0 ? (
+          <button type="button" className="overview-card-header" aria-expanded={!collapsed.messages} onClick={() => toggleSection('messages')}>
+            <h2 className="section-title">
+              Messages {unresolvedMessageCount > 0 ? <span className="badge badge-inactive">{unresolvedMessageCount} new</span> : null}
+            </h2>
+            <span className={`overview-card-chevron ${collapsed.messages ? '' : 'overview-card-chevron-open'}`}>▾</span>
+          </button>
+          {collapsed.messages ? null : messages.length === 0 ? (
             <p className="sub">Nothing yet — suggestions and concerns submitted across every neighborhood will show up here.</p>
           ) : (
             <div className="message-list">
@@ -481,9 +490,14 @@ export default function PlatformAdmin() {
         </div>
 
         <div className="overview-card">
-          <h2 className="section-title">
-            Pending requests {requests.length > 0 ? <span className="badge badge-inactive">{requests.length}</span> : null}
-          </h2>
+          <button type="button" className="overview-card-header" aria-expanded={!collapsed.requests} onClick={() => toggleSection('requests')}>
+            <h2 className="section-title">
+              Pending requests {requests.length > 0 ? <span className="badge badge-inactive">{requests.length}</span> : null}
+            </h2>
+            <span className={`overview-card-chevron ${collapsed.requests ? '' : 'overview-card-chevron-open'}`}>▾</span>
+          </button>
+          {collapsed.requests ? null : (
+          <>
           {requestError ? <div className="error-msg">{requestError}</div> : null}
           {loading ? null : requests.length === 0 ? (
             <p className="sub">No new directory requests right now.</p>
@@ -521,11 +535,16 @@ export default function PlatformAdmin() {
               ))}
             </div>
           )}
+          </>
+          )}
         </div>
 
         <div className="overview-card">
-          <h2 className="section-title">Neighborhoods by city</h2>
-          {loading ? (
+          <button type="button" className="overview-card-header" aria-expanded={!collapsed.neighborhoods} onClick={() => toggleSection('neighborhoods')}>
+            <h2 className="section-title">Neighborhoods by city</h2>
+            <span className={`overview-card-chevron ${collapsed.neighborhoods ? '' : 'overview-card-chevron-open'}`}>▾</span>
+          </button>
+          {collapsed.neighborhoods ? null : loading ? (
             <div className="empty">Loading…</div>
           ) : neighborhoods.length === 0 ? (
             <div className="empty"><strong>No neighborhoods yet</strong></div>
@@ -568,7 +587,12 @@ export default function PlatformAdmin() {
         </div>
 
         <div className="overview-card">
-          <h2 className="section-title">Users by neighborhood</h2>
+          <button type="button" className="overview-card-header" aria-expanded={!collapsed.users} onClick={() => toggleSection('users')}>
+            <h2 className="section-title">Users by neighborhood</h2>
+            <span className={`overview-card-chevron ${collapsed.users ? '' : 'overview-card-chevron-open'}`}>▾</span>
+          </button>
+          {collapsed.users ? null : (
+          <>
           <form className="invite-row" onSubmit={addAdmin}>
             <input type="email" placeholder="Grant platform admin by email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
             <button type="submit" className="btn-secondary" disabled={adminSending}>{adminSending ? 'Adding…' : 'Grant'}</button>
@@ -606,12 +630,19 @@ export default function PlatformAdmin() {
               ) : null}
             </>
           )}
+          </>
+          )}
         </div>
       </div>
 
       <div className="overview-grid">
         <div className="overview-card">
-          <h2 className="section-title">Disaster recovery backup</h2>
+          <button type="button" className="overview-card-header" aria-expanded={!collapsed.backup} onClick={() => toggleSection('backup')}>
+            <h2 className="section-title">Disaster recovery backup</h2>
+            <span className={`overview-card-chevron ${collapsed.backup ? '' : 'overview-card-chevron-open'}`}>▾</span>
+          </button>
+          {collapsed.backup ? null : (
+          <>
           <p className="sub">Exports every table on the platform as one JSON file you can store off-site.</p>
           {exportError ? <div className="error-msg">{exportError}</div> : null}
           <button type="button" className="btn-primary" disabled={exporting} onClick={exportBackup}>
@@ -633,10 +664,17 @@ export default function PlatformAdmin() {
           ) : (
             <p className="sub" style={{ marginTop: 12 }}>No backups taken yet.</p>
           )}
+          </>
+          )}
         </div>
 
         <div className="overview-card">
-          <h2 className="section-title">Version history</h2>
+          <button type="button" className="overview-card-header" aria-expanded={!collapsed.changelog} onClick={() => toggleSection('changelog')}>
+            <h2 className="section-title">Version history</h2>
+            <span className={`overview-card-chevron ${collapsed.changelog ? '' : 'overview-card-chevron-open'}`}>▾</span>
+          </button>
+          {collapsed.changelog ? null : (
+          <>
           <p className="sub">Track what shipped and when, for your own reference.</p>
           <form className="invite-row" onSubmit={addChangelogEntry} style={{ flexWrap: 'wrap' }}>
             <input type="text" placeholder="Version (e.g. 1.4.0)" value={changelogVersion} onChange={(e) => setChangelogVersion(e.target.value)} style={{ maxWidth: 140 }} />
@@ -661,6 +699,8 @@ export default function PlatformAdmin() {
                 </div>
               ))}
             </div>
+          )}
+          </>
           )}
         </div>
       </div>
