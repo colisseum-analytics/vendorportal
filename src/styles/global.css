@@ -85,7 +85,9 @@ a { color: var(--blue); }
   width:30px; height:30px; border-radius:50%; flex-shrink:0;
   background: var(--blue-soft); color: var(--blue); font-family:'Inter'; font-weight:700; font-size:12px;
   display:inline-flex; align-items:center; justify-content:center;
+  border:none; cursor:pointer; transition: filter .15s ease;
 }
+.account-badge:hover{ filter: brightness(0.9); }
 @media (max-width: 560px){
   .site-header{ padding: 10px 16px; }
   .site-header-logo img{ height: 38px; }
