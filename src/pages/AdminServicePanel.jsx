@@ -9,13 +9,10 @@ import { SEVERITIES, STATUSES } from '../utils/needConstants'
 const SECTIONS = [
   { key: 'needs', label: 'Needs' },
   { key: 'broadcast', label: 'Broadcast' },
-  { key: 'members', label: 'Members' },
 ]
 
-const MEMBER_ROLES = ['owner', 'renter', 'board_member']
 const SEVERITY_LABELS = { low: 'Low', medium: 'Medium', high: 'High', emergency: 'Emergency' }
 const STATUS_LABELS = { open: 'Open', under_review: 'Under Review', resolved: 'Resolved' }
-const MEMBER_ROLE_LABELS = { owner: 'Owner', renter: 'Renter', board_member: 'Board Member' }
 
 export default function AdminServicePanel() {
   const { slug } = useParams()
@@ -26,7 +23,6 @@ export default function AdminServicePanel() {
   const [activeSection, setActiveSection] = useState('needs')
   const [needs, setNeeds] = useState([])
   const [broadcasts, setBroadcasts] = useState([])
-  const [members, setMembers] = useState([])
   const [busyId, setBusyId] = useState(null)
 
   const [broadcastForm, setBroadcastForm] = useState({ need_id: '', title: '', message: '' })
@@ -41,16 +37,10 @@ export default function AdminServicePanel() {
     const { data } = await supabase.from('broadcasts').select('*').eq('neighborhood_id', neighborhood.id).order('created_at', { ascending: false })
     setBroadcasts(data || [])
   }
-  const loadMembers = async () => {
-    const { data, error } = await supabase.rpc('list_neighborhood_members', { p_neighborhood_id: neighborhood.id })
-    if (!error) setMembers(data || [])
-  }
-
   useEffect(() => {
     if (!neighborhood || !isAdmin) return
     loadNeeds()
     loadBroadcasts()
-    loadMembers()
   }, [neighborhood, isAdmin])
 
   const updateNeedField = async (needId, field, value) => {
@@ -94,20 +84,6 @@ export default function AdminServicePanel() {
     await loadBroadcasts()
   }
 
-  const updateMemberRole = async (userId, role) => {
-    setBusyId(userId)
-    await supabase.from('neighborhood_members').update({ role }).eq('neighborhood_id', neighborhood.id).eq('user_id', userId)
-    setBusyId(null)
-    await loadMembers()
-  }
-
-  const removeMember = async (userId) => {
-    setBusyId(userId)
-    await supabase.from('neighborhood_members').delete().eq('neighborhood_id', neighborhood.id).eq('user_id', userId)
-    setBusyId(null)
-    await loadMembers()
-  }
-
   if (!user) {
     return (
       <div className="wrap-narrow">
@@ -136,7 +112,7 @@ export default function AdminServicePanel() {
     <div className="wrap">
       <div style={{ margin: '20px 0 10px' }}>
         <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Service Board</h1>
-        <p className="tagline">Manage resident-posted needs, broadcast official updates, and the member roster.</p>
+        <p className="tagline">Manage resident-posted needs and broadcast official updates.</p>
       </div>
 
       <div className="neighborhood-nav">
@@ -225,35 +201,6 @@ export default function AdminServicePanel() {
             </div>
           )}
         </>
-      ) : null}
-
-      {activeSection === 'members' ? (
-        members.length === 0 ? (
-          <div className="empty"><strong>No members yet</strong>Residents who join the Service Board will show up here.</div>
-        ) : (
-          <div className="user-list">
-            {members.map((m) => (
-              <div className="user-row" key={m.user_id}>
-                <div className="user-row-main">
-                  <strong>{m.email}</strong>
-                  <span className="user-row-meta">Unit {m.unit} · Joined {relativeTime(m.created_at)}</span>
-                </div>
-                <div className="user-row-roles">
-                  {m.is_admin ? (
-                    <span className="badge badge-active">Admin</span>
-                  ) : (
-                    <select value={m.role} disabled={busyId === m.user_id} onChange={(e) => updateMemberRole(m.user_id, e.target.value)}>
-                      {MEMBER_ROLES.map((r) => <option key={r} value={r}>{MEMBER_ROLE_LABELS[r]}</option>)}
-                    </select>
-                  )}
-                </div>
-                <div className="user-row-actions">
-                  <button className="btn-ghost danger" disabled={busyId === m.user_id} onClick={() => removeMember(m.user_id)}>Remove</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )
       ) : null}
     </div>
   )
