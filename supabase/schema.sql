@@ -75,6 +75,8 @@ create table contact_messages (
   name text,
   email text,
   message text not null,
+  category text check (category in ('issue', 'idea')),
+  unit text,
   resolved boolean not null default false,
   created_at timestamptz not null default now()
 );

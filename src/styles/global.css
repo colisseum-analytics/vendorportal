@@ -413,6 +413,16 @@ a { color: var(--blue); }
 .modal h2{ font-family:'Fraunces', serif; font-weight:600; font-size:21px; margin:0 0 4px; }
 .modal .sub{ font-size:13px; color:var(--ink-soft); margin:0 0 18px; }
 
+.contact-category-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:18px; }
+.contact-category-card{
+  display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center;
+  background: var(--paper); border:1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 12px; cursor:pointer; font-family:'Inter'; transition: all .15s ease;
+}
+.contact-category-card:hover{ border-color: var(--ink-soft); background: var(--paper-raised); }
+.contact-category-icon{ font-size:24px; }
+.contact-category-label{ font-weight:600; font-size:14px; color: var(--ink); }
+
 /* ---------- forms (shared by modal + auth pages) ---------- */
 .field{ margin-bottom: 13px; }
 .field label{ display:block; font-size:12px; font-weight:600; color: var(--ink-soft); margin-bottom: 5px; }
