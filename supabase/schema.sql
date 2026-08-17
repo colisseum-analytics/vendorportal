@@ -738,6 +738,8 @@ create policy "backup_log_platform_admin_read"
 
 grant select, insert, delete on app_changelog to authenticated;
 grant select on backup_log to authenticated;
+grant select, insert, delete on app_changelog to service_role;
+grant select on backup_log to service_role;
 
 create or replace function public.export_platform_backup()
 returns jsonb
@@ -749,7 +751,7 @@ declare
   result jsonb;
   counts jsonb;
 begin
-  if not (is_platform_admin() or current_user = 'service_role') then
+  if not (is_platform_admin() or auth.role() = 'service_role') then
     raise exception 'Only platform admins can export a backup';
   end if;
 
