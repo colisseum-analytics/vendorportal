@@ -27,4 +27,4 @@ jobs:
         with:
           name: platform-backup-v${{ steps.run.outputs.version }}
           path: ${{ steps.run.outputs.filename }}
-          retention-days: 90
+          retention-days: 30
