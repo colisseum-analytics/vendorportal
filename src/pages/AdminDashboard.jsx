@@ -22,7 +22,7 @@ export default function AdminDashboard() {
 
   const [vendors, setVendors] = useState([])
   const [invites, setInvites] = useState([])
-  const [messages, setMessages] = useState([])
+  const [unresolvedCount, setUnresolvedCount] = useState(0)
   const [currentAdmins, setCurrentAdmins] = useState([])
   const [adminsError, setAdminsError] = useState('')
   const [busyAdminId, setBusyAdminId] = useState(null)
@@ -46,16 +46,16 @@ export default function AdminDashboard() {
     if (!neighborhood || !isAdmin) return
     let active = true
     async function loadExtras() {
-      const [{ data: v }, { data: inv }, { data: msg }, { data: adm }] = await Promise.all([
+      const [{ data: v }, { data: inv }, { count: unresolved }, { data: adm }] = await Promise.all([
         supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name'),
         supabase.from('admin_invites').select('*').eq('neighborhood_id', neighborhood.id).order('created_at'),
-        supabase.from('contact_messages').select('*').eq('neighborhood_id', neighborhood.id).order('created_at', { ascending: false }),
+        supabase.from('contact_messages').select('*', { count: 'exact', head: true }).eq('neighborhood_id', neighborhood.id).eq('resolved', false),
         supabase.rpc('list_neighborhood_admins', { p_neighborhood_id: neighborhood.id }),
       ])
       if (!active) return
       setVendors(v || [])
       setInvites(inv || [])
-      setMessages(msg || [])
+      setUnresolvedCount(unresolved || 0)
       setCurrentAdmins(adm || [])
     }
     loadExtras()
@@ -72,16 +72,6 @@ export default function AdminDashboard() {
         return hay.includes(search.toLowerCase())
       })
   }, [vendors, category, status, search])
-
-  const toggleResolved = async (msg) => {
-    const { data } = await supabase.from('contact_messages').update({ resolved: !msg.resolved }).eq('id', msg.id).select().maybeSingle()
-    if (data) setMessages((list) => list.map((m) => (m.id === msg.id ? data : m)))
-  }
-
-  const deleteMessage = async (id) => {
-    await supabase.from('contact_messages').delete().eq('id', id)
-    setMessages((list) => list.filter((m) => m.id !== id))
-  }
 
   const refreshVendors = async () => {
     const { data } = await supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name')
@@ -188,7 +178,6 @@ export default function AdminDashboard() {
   const categories = neighborhood.categories || []
   const residentCount = vendors.filter((v) => v.is_resident).length
   const lastAdded = vendors.reduce((max, v) => (!max || v.created_at > max ? v.created_at : max), null)
-  const unresolvedCount = messages.filter((m) => !m.resolved).length
 
   return (
     <div className="wrap">
@@ -203,13 +192,9 @@ export default function AdminDashboard() {
         <div className="stat-item"><strong>{residentCount}</strong><span>Neighbor-recommended</span></div>
         {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>Last added</span></div> : null}
         {unresolvedCount > 0 ? (
-          <button
-            type="button"
-            className="stat-item stat-alert stat-item-clickable"
-            onClick={() => document.getElementById('messages')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          >
+          <Link to={`/n/${slug}/admin/messages`} className="stat-item stat-alert stat-item-clickable">
             <strong>{unresolvedCount}</strong><span>New message{unresolvedCount === 1 ? '' : 's'}</span>
-          </button>
+          </Link>
         ) : null}
       </div>
 
@@ -260,30 +245,6 @@ export default function AdminDashboard() {
               onEdit={(vv) => { setEditingVendor(vv); setModalOpen(true) }}
               onDelete={(vv) => setDeleteTarget(vv)}
             />
-          ))}
-        </div>
-      )}
-
-      <h2 className="section-title" id="messages">Messages {unresolvedCount > 0 ? <span className="badge badge-inactive">{unresolvedCount} new</span> : null}</h2>
-      {messages.length === 0 ? (
-        <p className="sub">Nothing yet — suggestions and concerns from the public directory's "Contact admins" form will show up here.</p>
-      ) : (
-        <div className="message-list">
-          {messages.map((m) => (
-            <div key={m.id} className={`message-item ${m.resolved ? 'message-resolved' : ''}`}>
-              <div className="message-item-head">
-                <span className="message-from">
-                  {m.category ? <span className={`badge ${m.category === 'issue' ? 'badge-inactive' : 'badge-active'}`}>{m.category === 'issue' ? 'Issue' : 'Idea'}</span> : null}
-                  {' '}{m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}{m.unit ? ` · Unit ${m.unit}` : ''}
-                </span>
-                <span className="message-time">{relativeTime(m.created_at)}</span>
-              </div>
-              <p className="message-text">{m.message}</p>
-              <div className="message-actions">
-                <button className="btn-ghost" onClick={() => toggleResolved(m)}>{m.resolved ? 'Reopen' : 'Mark resolved'}</button>
-                <button className="btn-ghost danger" onClick={() => deleteMessage(m.id)}>Delete</button>
-              </div>
-            </div>
           ))}
         </div>
       )}
