@@ -127,7 +127,7 @@ export default function AdminResidents() {
         {addMsg ? <div className="success-msg">{addMsg}</div> : null}
         <form onSubmit={addResident} className="invite-row" style={{ flexWrap: 'wrap' }}>
           <input type="email" placeholder="resident@example.com" value={addEmail} onChange={(e) => setAddEmail(e.target.value)} style={{ flex: 2, minWidth: 180 }} />
-          <input type="text" placeholder="Unit" value={addUnit} onChange={(e) => setAddUnit(e.target.value)} style={{ flex: 1, minWidth: 90 }} />
+          <input type="text" placeholder="Unit/Address" value={addUnit} onChange={(e) => setAddUnit(e.target.value)} style={{ flex: 1, minWidth: 110 }} />
           <select value={addRole} onChange={(e) => setAddRole(e.target.value)}>
             {MEMBER_ROLES.map((r) => <option key={r} value={r}>{MEMBER_ROLE_LABELS[r]}</option>)}
           </select>

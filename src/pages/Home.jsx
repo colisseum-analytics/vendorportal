@@ -1,21 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 import { stateForCity } from '../utils/usCities'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function Home() {
-  const { user, signOut } = useAuth()
   const { t } = useLanguage()
   usePageMeta({ title: t('home.title'), description: t('home.subtitle') })
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendorCounts, setVendorCounts] = useState({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
   const [adMessage] = useState(() => (Math.random() < 0.5 ? 'adMessage1' : 'adMessage2'))
 
   useEffect(() => {
@@ -36,15 +33,6 @@ export default function Home() {
     return () => { active = false }
   }, [])
 
-  useEffect(() => {
-    if (!user) { setIsPlatformAdmin(false); return }
-    let active = true
-    supabase.rpc('is_platform_admin').then(({ data }) => {
-      if (active) setIsPlatformAdmin(!!data)
-    })
-    return () => { active = false }
-  }, [user])
-
   const filtered = neighborhoods.filter((n) =>
     (n.name + ' ' + (n.tagline || '')).toLowerCase().includes(search.toLowerCase())
   )
@@ -61,17 +49,6 @@ export default function Home() {
             <li>{t('home.subtitleBullet2')}</li>
             <li>{t('home.subtitleBullet3')}</li>
           </ul>
-        </div>
-        <div className="admin-corner">
-          {user ? (
-            <>
-              <div className="admin-pill"><span className="dot" />{user.email}</div><br />
-              {isPlatformAdmin ? <Link className="btn-ghost" to="/platform-admin" style={{ marginRight: 6 }}>{t('nav.platformAdmin')}</Link> : null}
-              <button className="btn-ghost" onClick={signOut}>{t('nav.logOut')}</button>
-            </>
-          ) : (
-            <Link className="btn-ghost" to="/login">{t('nav.logIn')}</Link>
-          )}
         </div>
       </div>
 
