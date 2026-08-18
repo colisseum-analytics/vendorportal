@@ -24,6 +24,7 @@ export default function ServiceBoard() {
   const { neighborhood, isAdmin, isMember, membershipUnit, reloadNeighborhood } = useOutletContext()
   usePageMeta({ title: t('serviceBoard.title'), noindex: true })
 
+  const [name, setName] = useState(user?.user_metadata?.full_name || '')
   const [unit, setUnit] = useState('')
   const [role, setRole] = useState('owner')
   const [joinError, setJoinError] = useState('')
@@ -104,9 +105,16 @@ export default function ServiceBoard() {
 
   const join = async (e) => {
     e.preventDefault()
+    if (!name.trim()) {
+      setJoinError(t('serviceBoard.errorName'))
+      return
+    }
     if (!unit.trim()) return
     setJoining(true)
     setJoinError('')
+    if (name.trim() !== (user.user_metadata?.full_name || '')) {
+      await supabase.auth.updateUser({ data: { full_name: name.trim() } })
+    }
     const { error } = await supabase
       .from('neighborhood_members')
       .insert({ neighborhood_id: neighborhood.id, user_id: user.id, unit: unit.trim(), role })
@@ -183,8 +191,12 @@ export default function ServiceBoard() {
           {joinError ? <div className="error-msg">{joinError}</div> : null}
           <form onSubmit={join}>
             <div className="field">
+              <label>{t('serviceBoard.nameLabel')}</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('serviceBoard.namePlaceholder')} autoFocus />
+            </div>
+            <div className="field">
               <label>{t('serviceBoard.unitLabel')}</label>
-              <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={t('serviceBoard.unitPlaceholder')} autoFocus />
+              <input type="text" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={t('serviceBoard.unitPlaceholder')} />
             </div>
             <div className="field">
               <label>{t('serviceBoard.roleLabel')}</label>
