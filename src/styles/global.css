@@ -654,6 +654,22 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
 .user-row-checkbox{ flex-shrink:0; width:16px; height:16px; cursor:pointer; accent-color: var(--blue); }
 .select-all-row{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color: var(--ink-soft); cursor:pointer; margin-bottom:8px; }
 .select-all-row input{ cursor:pointer; accent-color: var(--blue); }
+
+.changelog-group-toggle{
+  display:flex; align-items:center; gap:8px; background:none; border:none; padding:0;
+  cursor:pointer; width:100%; text-align:left;
+}
+.changelog-group-chevron{ display:inline-block; color: var(--ink-faint); transition: transform .15s ease; font-size:11px; }
+.changelog-group-chevron-open{ transform: rotate(90deg); }
+.changelog-cluster-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.changelog-cluster-list li{ display:flex; align-items:baseline; gap:8px; font-size:13.5px; }
+.changelog-version-tag{ font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--ink-faint); flex-shrink:0; }
+.changelog-summary-text{ flex:1; color: var(--ink); }
+.changelog-delete-btn{
+  background:none; border:none; color: var(--ink-faint); cursor:pointer; font-size:14px;
+  line-height:1; padding:0 2px; flex-shrink:0;
+}
+.changelog-delete-btn:hover{ color: var(--red); }
 .btn-ghost.danger:hover{ border-color: var(--red); color: var(--red); }
 
 @media (max-width: 720px){
