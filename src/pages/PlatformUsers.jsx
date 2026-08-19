@@ -6,6 +6,10 @@ import { relativeTime } from '../utils/relativeTime'
 import ActionMenu from '../components/ActionMenu.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
 export default function PlatformUsers() {
   usePageMeta({ title: 'Platform admin · Users', noindex: true })
   const { user } = useAuth()
@@ -23,6 +27,42 @@ export default function PlatformUsers() {
   const [deleteUserTarget, setDeleteUserTarget] = useState(null)
   const [editEmailTarget, setEditEmailTarget] = useState(null)
   const [editEmailValue, setEditEmailValue] = useState('')
+
+  const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
+  const toggleSelected = (id) => {
+    setSelectedIds((set) => {
+      const next = new Set(set)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = (ids) => {
+    setSelectedIds((set) => {
+      const allSelected = ids.every((id) => set.has(id))
+      const next = new Set(set)
+      ids.forEach((id) => (allSelected ? next.delete(id) : next.add(id)))
+      return next
+    })
+  }
+
+  const bulkDeleteSelected = async () => {
+    setBulkDeleting(true)
+    setUserError('')
+    const { error } = await supabase.rpc('delete_user_accounts', { p_user_ids: [...selectedIds] })
+    setBulkDeleting(false)
+    if (error) {
+      setUserError(error.message)
+      return
+    }
+    setConfirmBulkDelete(false)
+    setSelectedIds(new Set())
+    await reloadCore()
+  }
 
   const addAdmin = async (e) => {
     e.preventDefault()
@@ -135,14 +175,27 @@ export default function PlatformUsers() {
   const usersByNeighborhood = neighborhoods
     .map((n) => ({ neighborhood: n, users: filteredUsers.filter((u) => (u.admin_of || []).some((a) => a.id === n.id)) }))
     .filter((g) => g.users.length > 0)
-  const unassignedUsers = filteredUsers.filter((u) => !u.is_platform_admin && (u.admin_of || []).length === 0)
+  const noRoleUsers = filteredUsers.filter((u) => !u.is_platform_admin && (u.admin_of || []).length === 0)
+  const residentUsers = noRoleUsers.filter((u) => (u.member_of || []).length > 0)
+  const neverSignedInUsers = noRoleUsers.filter((u) => (u.member_of || []).length === 0 && !u.last_sign_in_at)
+  const noActivityUsers = noRoleUsers.filter((u) => (u.member_of || []).length === 0 && u.last_sign_in_at)
+  const lingeringCount = neverSignedInUsers.length + noActivityUsers.length
 
-  const renderUserRow = (u) => (
+  const renderUserRow = (u, { selectable = false } = {}) => (
     <div className={`user-row ${u.is_banned ? 'user-row-banned' : ''}`} key={u.user_id}>
+      {selectable ? (
+        <input
+          type="checkbox"
+          className="user-row-checkbox"
+          checked={selectedIds.has(u.user_id)}
+          onChange={() => toggleSelected(u.user_id)}
+          aria-label={`Select ${u.email}`}
+        />
+      ) : null}
       <div className="user-row-main">
         <strong>{u.email}{u.user_id === user.id ? ' (you)' : ''}</strong>
         <span className="user-row-meta">
-          Joined {relativeTime(u.created_at)} · Last sign-in {u.last_sign_in_at ? relativeTime(u.last_sign_in_at) : 'never'}
+          Joined {formatDate(u.created_at)} · {relativeTime(u.created_at)} · Last sign-in {u.last_sign_in_at ? relativeTime(u.last_sign_in_at) : 'never'}
         </span>
       </div>
       <div className="user-row-roles">
@@ -160,6 +213,9 @@ export default function PlatformUsers() {
               aria-label={`Remove admin access to ${n.name}`}
             >×</button>
           </span>
+        ))}
+        {(u.member_of || []).map((n) => (
+          <span className="badge badge-neutral" key={n.id} title={`Resident of ${n.name}`}>{n.name}</span>
         ))}
       </div>
       <div className="user-row-actions">
@@ -199,19 +255,60 @@ export default function PlatformUsers() {
           {platformAdminUsers.length > 0 ? (
             <div className="overview-subgroup">
               <h3 className="overview-subgroup-title">Platform admins <span className="badge badge-neutral">{platformAdminUsers.length}</span></h3>
-              <div className="user-list">{platformAdminUsers.map(renderUserRow)}</div>
+              <div className="user-list">{platformAdminUsers.map((u) => renderUserRow(u))}</div>
             </div>
           ) : null}
           {usersByNeighborhood.map(({ neighborhood: n, users: group }) => (
             <div key={n.id} className="overview-subgroup">
               <h3 className="overview-subgroup-title">{n.name} <span className="badge badge-neutral">{group.length}</span></h3>
-              <div className="user-list">{group.map(renderUserRow)}</div>
+              <div className="user-list">{group.map((u) => renderUserRow(u))}</div>
             </div>
           ))}
-          {unassignedUsers.length > 0 ? (
+          {residentUsers.length > 0 ? (
             <div className="overview-subgroup">
-              <h3 className="overview-subgroup-title">No neighborhood <span className="badge badge-neutral">{unassignedUsers.length}</span></h3>
-              <div className="user-list">{unassignedUsers.map(renderUserRow)}</div>
+              <h3 className="overview-subgroup-title">Residents (no admin role) <span className="badge badge-neutral">{residentUsers.length}</span></h3>
+              <div className="user-list">{residentUsers.map((u) => renderUserRow(u))}</div>
+            </div>
+          ) : null}
+          {lingeringCount > 0 ? (
+            <div className="overview-subgroup">
+              <h3 className="overview-subgroup-title" style={{ justifyContent: 'space-between' }}>
+                <span>No neighborhood <span className="badge badge-neutral">{lingeringCount}</span></span>
+                {selectedIds.size > 0 ? (
+                  <button type="button" className="btn-ghost danger" onClick={() => setConfirmBulkDelete(true)}>
+                    Delete selected ({selectedIds.size})
+                  </button>
+                ) : null}
+              </h3>
+              <p className="sub" style={{ marginTop: -4, marginBottom: 12 }}>
+                Verified accounts with no membership or admin role anywhere — usually someone who logged in (e.g. to leave feedback) but never followed through. Harmless, but safe to bulk-delete once they've been sitting for a while.
+              </p>
+              {neverSignedInUsers.length > 0 ? (
+                <div style={{ marginBottom: 14 }}>
+                  <label className="select-all-row">
+                    <input
+                      type="checkbox"
+                      checked={neverSignedInUsers.every((u) => selectedIds.has(u.user_id))}
+                      onChange={() => toggleSelectAll(neverSignedInUsers.map((u) => u.user_id))}
+                    />
+                    Never completed sign-in <span className="badge badge-neutral">{neverSignedInUsers.length}</span>
+                  </label>
+                  <div className="user-list">{neverSignedInUsers.map((u) => renderUserRow(u, { selectable: true }))}</div>
+                </div>
+              ) : null}
+              {noActivityUsers.length > 0 ? (
+                <div>
+                  <label className="select-all-row">
+                    <input
+                      type="checkbox"
+                      checked={noActivityUsers.every((u) => selectedIds.has(u.user_id))}
+                      onChange={() => toggleSelectAll(noActivityUsers.map((u) => u.user_id))}
+                    />
+                    Signed in, no activity <span className="badge badge-neutral">{noActivityUsers.length}</span>
+                  </label>
+                  <div className="user-list">{noActivityUsers.map((u) => renderUserRow(u, { selectable: true }))}</div>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </>
@@ -254,6 +351,22 @@ export default function PlatformUsers() {
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setDeleteUserTarget(null)}>Cancel</button>
               <button className="btn-primary" style={{ background: 'var(--red)' }} onClick={confirmDeleteUser}>Delete</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {confirmBulkDelete ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setConfirmBulkDelete(false) }}>
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <button className="close-x" onClick={() => setConfirmBulkDelete(false)}>×</button>
+            <h2>Delete {selectedIds.size} account{selectedIds.size === 1 ? '' : 's'}?</h2>
+            <p className="sub">This permanently deletes the selected accounts. This can't be undone.</p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setConfirmBulkDelete(false)}>Cancel</button>
+              <button className="btn-primary" style={{ background: 'var(--red)' }} disabled={bulkDeleting} onClick={bulkDeleteSelected}>
+                {bulkDeleting ? 'Deleting…' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>

@@ -651,6 +651,9 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
 .user-row-meta{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color: var(--ink-faint); }
 .user-row-roles{ display:flex; flex-wrap:wrap; gap:6px; flex: 1 1 200px; }
 .user-row-actions{ display:flex; flex-wrap:wrap; gap:8px; max-width:100%; margin-left:auto; }
+.user-row-checkbox{ flex-shrink:0; width:16px; height:16px; cursor:pointer; accent-color: var(--blue); }
+.select-all-row{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color: var(--ink-soft); cursor:pointer; margin-bottom:8px; }
+.select-all-row input{ cursor:pointer; accent-color: var(--blue); }
 
 .changelog-group-toggle{
   display:flex; align-items:center; gap:8px; background:none; border:none; padding:0;

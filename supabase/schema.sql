@@ -518,11 +518,13 @@ $$;
 
 -- ---------- user management ----------
 
--- Every registered account, with roles and which neighborhoods they
--- admin. Reads auth.users directly (the same trick get_user_id_by_email
--- above already relies on) so no service-role Edge Function is needed.
--- Platform-admin only.
-create or replace function public.list_all_users()
+-- Every registered account, with roles, which neighborhoods they admin,
+-- and which they're a plain (non-admin) member of — the last of those
+-- lets the Users page tell a real resident apart from an account with
+-- no footprint anywhere. Reads auth.users directly (the same trick
+-- get_user_id_by_email above already relies on) so no service-role Edge
+-- Function is needed. Platform-admin only.
+create function public.list_all_users()
 returns table (
   user_id uuid,
   email text,
@@ -530,6 +532,7 @@ returns table (
   last_sign_in_at timestamptz,
   is_platform_admin boolean,
   admin_of jsonb,
+  member_of jsonb,
   is_banned boolean
 )
 language sql
@@ -548,6 +551,13 @@ as $$
        from neighborhood_admins na
        join neighborhoods n on n.id = na.neighborhood_id
        where na.user_id = u.id),
+      '[]'::jsonb
+    ),
+    coalesce(
+      (select jsonb_agg(jsonb_build_object('id', n.id, 'name', n.name, 'slug', n.slug) order by n.name)
+       from neighborhood_members nm
+       join neighborhoods n on n.id = nm.neighborhood_id
+       where nm.user_id = u.id),
       '[]'::jsonb
     ),
     coalesce(u.banned_until, 'epoch'::timestamptz) > now()
@@ -574,6 +584,25 @@ begin
     raise exception 'You can''t delete your own account from here.';
   end if;
   delete from auth.users where id = p_user_id;
+end;
+$$;
+
+-- Bulk companion to delete_user_account(), for clearing out a batch of
+-- lingering no-footprint accounts in one action instead of one click each.
+create or replace function public.delete_user_accounts(p_user_ids uuid[])
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not is_platform_admin() then
+    raise exception 'Only a platform admin can delete accounts.';
+  end if;
+  if auth.uid() = any(p_user_ids) then
+    raise exception 'You can''t delete your own account from here.';
+  end if;
+  delete from auth.users where id = any(p_user_ids);
 end;
 $$;
 
