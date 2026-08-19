@@ -13,6 +13,21 @@ function majorVersion(version) {
   return Number.isFinite(n) ? n : null
 }
 
+// Entries are already sorted newest-first, so same-day runs are always
+// contiguous — this just clusters adjacent entries sharing a formatted
+// date into one card instead of a full-height card per push, which is
+// what actually made a busy day's history unreadable.
+function clusterByDay(entries) {
+  const clusters = []
+  for (const c of entries) {
+    const day = formatDate(c.created_at)
+    const last = clusters[clusters.length - 1]
+    if (last && last.day === day) last.entries.push(c)
+    else clusters.push({ day, entries: [c] })
+  }
+  return clusters
+}
+
 export default function PlatformHistory() {
   usePageMeta({ title: 'Platform admin · History', noindex: true })
   const { user } = useAuth()
@@ -22,6 +37,7 @@ export default function PlatformHistory() {
   const [changelogSummary, setChangelogSummary] = useState('')
   const [changelogError, setChangelogError] = useState('')
   const [changelogSaving, setChangelogSaving] = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState(null)
 
   const load = async () => {
     const { data } = await supabase.from('app_changelog').select('*').order('created_at', { ascending: false })
@@ -70,6 +86,21 @@ export default function PlatformHistory() {
     })
   })()
 
+  useEffect(() => {
+    if (expandedGroups === null && groups.length > 0) {
+      setExpandedGroups(new Set([groups[0][0]]))
+    }
+  }, [groups, expandedGroups])
+
+  const toggleGroup = (label) => {
+    setExpandedGroups((set) => {
+      const next = new Set(set || [])
+      if (next.has(label)) next.delete(label)
+      else next.add(label)
+      return next
+    })
+  }
+
   return (
     <div className="overview-card">
       <h2 className="section-title">Version history</h2>
@@ -83,25 +114,46 @@ export default function PlatformHistory() {
       {changelog.length === 0 ? (
         <p className="sub" style={{ marginTop: 12 }}>No entries yet.</p>
       ) : (
-        groups.map(([label, group]) => (
-          <div key={label} className="overview-subgroup" style={{ marginTop: 18 }}>
-            <h3 className="overview-subgroup-title">{label} <span className="badge badge-neutral">{group.entries.length}</span></h3>
-            <div className="message-list">
-              {group.entries.map((c) => (
-                <div key={c.id} className="message-item">
-                  <div className="message-item-head">
-                    <span className="message-from">v{c.version}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span className="message-time">{formatDate(c.created_at)} · {relativeTime(c.created_at)}</span>
-                      <button className="btn-ghost danger" onClick={() => deleteChangelogEntry(c.id)}>Delete</button>
+        groups.map(([label, group]) => {
+          const expanded = expandedGroups?.has(label)
+          return (
+            <div key={label} className="overview-subgroup" style={{ marginTop: 18 }}>
+              <button type="button" className="changelog-group-toggle" onClick={() => toggleGroup(label)}>
+                <span className={`changelog-group-chevron ${expanded ? 'changelog-group-chevron-open' : ''}`}>▸</span>
+                <h3 className="overview-subgroup-title" style={{ margin: 0 }}>
+                  {label} <span className="badge badge-neutral">{group.entries.length}</span>
+                </h3>
+              </button>
+              {expanded ? (
+                <div className="message-list" style={{ marginTop: 8 }}>
+                  {clusterByDay(group.entries).map((cluster) => (
+                    <div key={cluster.day + cluster.entries[0].id} className="message-item">
+                      <div className="message-item-head">
+                        <span className="message-from">{cluster.day}</span>
+                        <span className="message-time">{relativeTime(cluster.entries[0].created_at)}</span>
+                      </div>
+                      <ul className="changelog-cluster-list">
+                        {cluster.entries.map((c) => (
+                          <li key={c.id}>
+                            <span className="changelog-version-tag">v{c.version}</span>
+                            <span className="changelog-summary-text">{c.summary}</span>
+                            <button
+                              type="button"
+                              className="changelog-delete-btn"
+                              onClick={() => deleteChangelogEntry(c.id)}
+                              aria-label={`Delete v${c.version} entry`}
+                              title="Delete entry"
+                            >×</button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  </div>
-                  <p className="message-text">{c.summary}</p>
+                  ))}
                 </div>
-              ))}
+              ) : null}
             </div>
-          </div>
-        ))
+          )
+        })
       )}
     </div>
   )

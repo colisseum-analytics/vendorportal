@@ -29,6 +29,18 @@ function nextVersion(versions) {
   return (current + 0.1).toFixed(1)
 }
 
+// GitHub's default merge-commit message is "Merge pull request #N from
+// owner/branch-name" followed by a blank line and the PR title — the
+// boilerplate first line was getting logged as the changelog summary
+// instead of anything describing what actually changed. This drops that
+// line (a squash-merge commit, which has no such line, passes through
+// untouched) and falls back to it only if nothing else is left.
+function extractSummary(rawMessage) {
+  const lines = (rawMessage || '').split('\n').map((l) => l.trim())
+  const meaningful = lines.filter((l) => l && !/^Merge pull request #\d+ from /.test(l))
+  return (meaningful[0] || lines[0] || 'Automated deploy').slice(0, 500)
+}
+
 async function main() {
   const { data: existing, error: readError } = await supabase
     .from('app_changelog')
@@ -36,7 +48,7 @@ async function main() {
   if (readError) throw new Error(`Reading app_changelog failed: ${readError.message}`)
 
   const version = nextVersion((existing || []).map((r) => r.version))
-  const summary = (process.env.COMMIT_MESSAGE || 'Automated deploy').split('\n')[0].slice(0, 500)
+  const summary = extractSummary(process.env.COMMIT_MESSAGE)
 
   const { error: insertError } = await supabase
     .from('app_changelog')
