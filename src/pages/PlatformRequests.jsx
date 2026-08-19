@@ -9,6 +9,8 @@ export default function PlatformRequests() {
   const { reloadCore } = useOutletContext()
 
   const [requests, setRequests] = useState([])
+  const [reviewedRequests, setReviewedRequests] = useState([])
+  const [reviewedExpanded, setReviewedExpanded] = useState(false)
   const [loading, setLoading] = useState(true)
   const [requestError, setRequestError] = useState('')
   const [busyRequestId, setBusyRequestId] = useState(null)
@@ -16,8 +18,12 @@ export default function PlatformRequests() {
   const [rejectNote, setRejectNote] = useState('')
 
   const load = async () => {
-    const { data } = await supabase.from('neighborhood_requests').select('*').eq('status', 'pending').order('created_at')
-    setRequests(data || [])
+    const [{ data: pending }, { data: reviewed }] = await Promise.all([
+      supabase.from('neighborhood_requests').select('*').eq('status', 'pending').order('created_at'),
+      supabase.from('neighborhood_requests').select('*').neq('status', 'pending').order('reviewed_at', { ascending: false }),
+    ])
+    setRequests(pending || [])
+    setReviewedRequests(reviewed || [])
     setLoading(false)
   }
 
@@ -96,6 +102,35 @@ export default function PlatformRequests() {
           ))}
         </div>
       )}
+
+      {reviewedRequests.length > 0 ? (
+        <div className="overview-subgroup" style={{ marginTop: 18 }}>
+          <button type="button" className="changelog-group-toggle" onClick={() => setReviewedExpanded((v) => !v)}>
+            <span className={`changelog-group-chevron ${reviewedExpanded ? 'changelog-group-chevron-open' : ''}`}>▸</span>
+            <h3 className="overview-subgroup-title" style={{ margin: 0 }}>
+              Reviewed <span className="badge badge-neutral">{reviewedRequests.length}</span>
+            </h3>
+          </button>
+          {reviewedExpanded ? (
+            <div className="message-list" style={{ marginTop: 8 }}>
+              {reviewedRequests.map((r) => (
+                <div key={r.id} className="message-item">
+                  <div className="message-item-head">
+                    <span className="message-from">
+                      <span className={`badge ${r.status === 'approved' ? 'badge-active' : 'badge-inactive'}`}>
+                        {r.status === 'approved' ? 'Approved' : 'Rejected'}
+                      </span>
+                      {' '}{r.name} · /n/{r.slug}{r.city ? ` · ${r.city}` : ''}
+                    </span>
+                    <span className="message-time">{relativeTime(r.reviewed_at || r.created_at)}</span>
+                  </div>
+                  {r.review_note ? <p className="message-text">Note: {r.review_note}</p> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {rejectTarget ? (
         <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setRejectTarget(null) }}>

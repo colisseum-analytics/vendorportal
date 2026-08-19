@@ -15,6 +15,16 @@ export default function PlatformNeighborhoods() {
   const [renameCityValue, setRenameCityValue] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [busyId, setBusyId] = useState(null)
+  const [collapsedCities, setCollapsedCities] = useState(() => new Set())
+
+  const toggleCity = (city) => {
+    setCollapsedCities((set) => {
+      const next = new Set(set)
+      if (next.has(city)) next.delete(city)
+      else next.add(city)
+      return next
+    })
+  }
 
   const toggleActive = async (n) => {
     setBusyId(n.id)
@@ -63,10 +73,16 @@ export default function PlatformNeighborhoods() {
       {neighborhoods.length === 0 ? (
         <div className="empty"><strong>No neighborhoods yet</strong></div>
       ) : (
-        neighborhoodsByCity.map(([city, group]) => (
+        neighborhoodsByCity.map(([city, group]) => {
+          const expanded = !collapsedCities.has(city)
+          return (
           <div key={city} className="overview-subgroup">
-            <h3 className="overview-subgroup-title">{city} <span className="badge badge-neutral">{group.length}</span></h3>
-            <div className="user-list">
+            <button type="button" className="changelog-group-toggle" onClick={() => toggleCity(city)}>
+              <span className={`changelog-group-chevron ${expanded ? 'changelog-group-chevron-open' : ''}`}>▸</span>
+              <h3 className="overview-subgroup-title" style={{ margin: 0 }}>{city} <span className="badge badge-neutral">{group.length}</span></h3>
+            </button>
+            {expanded ? (
+            <div className="user-list" style={{ marginTop: 8 }}>
               {group.map((n) => (
                 <div className="user-row" key={n.id}>
                   <div className="user-row-main">
@@ -97,8 +113,10 @@ export default function PlatformNeighborhoods() {
                 </div>
               ))}
             </div>
+            ) : null}
           </div>
-        ))
+          )
+        })
       )}
 
       {renaming ? (
