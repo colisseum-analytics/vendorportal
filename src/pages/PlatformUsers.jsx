@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
+import ActionMenu from '../components/ActionMenu.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function PlatformUsers() {
@@ -162,29 +163,15 @@ export default function PlatformUsers() {
         ))}
       </div>
       <div className="user-row-actions">
-        <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => startEditEmail(u)}>
-          Edit email
-        </button>
-        <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => sendSignInCode(u)}>
-          Send sign-in code
-        </button>
-        <button className="btn-ghost" disabled={busyUserId === u.user_id} onClick={() => togglePlatformAdmin(u)}>
-          {u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin'}
-        </button>
-        <button
-          className="btn-ghost danger"
-          disabled={busyUserId === u.user_id || u.user_id === user.id}
-          onClick={() => toggleBanned(u)}
-        >
-          {u.is_banned ? 'Enable account' : 'Disable account'}
-        </button>
-        <button
-          className="btn-ghost danger"
-          disabled={busyUserId === u.user_id || u.user_id === user.id}
-          onClick={() => setDeleteUserTarget(u)}
-        >
-          Delete account
-        </button>
+        <ActionMenu
+          items={[
+            { label: 'Edit email', onClick: () => startEditEmail(u), disabled: busyUserId === u.user_id },
+            { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id },
+            { label: u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin', onClick: () => togglePlatformAdmin(u), disabled: busyUserId === u.user_id },
+            { label: u.is_banned ? 'Enable account' : 'Disable account', onClick: () => toggleBanned(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
+            { label: 'Delete account', onClick: () => setDeleteUserTarget(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
+          ]}
+        />
       </div>
     </div>
   )

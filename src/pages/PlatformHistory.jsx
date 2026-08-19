@@ -4,6 +4,15 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+function majorVersion(version) {
+  const n = parseInt(version, 10)
+  return Number.isFinite(n) ? n : null
+}
+
 export default function PlatformHistory() {
   usePageMeta({ title: 'Platform admin · History', noindex: true })
   const { user } = useAuth()
@@ -46,6 +55,21 @@ export default function PlatformHistory() {
     setChangelog((list) => list.filter((c) => c.id !== id))
   }
 
+  const groups = (() => {
+    const byMajor = {}
+    changelog.forEach((c) => {
+      const major = majorVersion(c.version)
+      const key = major === null ? 'Other' : `v${major}.x`
+      if (!byMajor[key]) byMajor[key] = { major, entries: [] }
+      byMajor[key].entries.push(c)
+    })
+    return Object.entries(byMajor).sort(([, a], [, b]) => {
+      if (a.major === null) return 1
+      if (b.major === null) return -1
+      return b.major - a.major
+    })
+  })()
+
   return (
     <div className="overview-card">
       <h2 className="section-title">Version history</h2>
@@ -59,20 +83,25 @@ export default function PlatformHistory() {
       {changelog.length === 0 ? (
         <p className="sub" style={{ marginTop: 12 }}>No entries yet.</p>
       ) : (
-        <div className="message-list" style={{ marginTop: 12 }}>
-          {changelog.map((c) => (
-            <div key={c.id} className="message-item">
-              <div className="message-item-head">
-                <span className="message-from">v{c.version}</span>
-                <span className="message-time">{relativeTime(c.created_at)}</span>
-              </div>
-              <p className="message-text">{c.summary}</p>
-              <div className="message-actions">
-                <button className="btn-ghost danger" onClick={() => deleteChangelogEntry(c.id)}>Delete</button>
-              </div>
+        groups.map(([label, group]) => (
+          <div key={label} className="overview-subgroup" style={{ marginTop: 18 }}>
+            <h3 className="overview-subgroup-title">{label} <span className="badge badge-neutral">{group.entries.length}</span></h3>
+            <div className="message-list">
+              {group.entries.map((c) => (
+                <div key={c.id} className="message-item">
+                  <div className="message-item-head">
+                    <span className="message-from">v{c.version}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="message-time">{formatDate(c.created_at)} · {relativeTime(c.created_at)}</span>
+                      <button className="btn-ghost danger" onClick={() => deleteChangelogEntry(c.id)}>Delete</button>
+                    </div>
+                  </div>
+                  <p className="message-text">{c.summary}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))
       )}
     </div>
   )

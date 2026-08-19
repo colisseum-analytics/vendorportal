@@ -3,6 +3,7 @@ import { Link, useOutletContext } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { relativeTime } from '../utils/relativeTime'
 import CityPicker from '../components/CityPicker.jsx'
+import ActionMenu from '../components/ActionMenu.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function PlatformNeighborhoods() {
@@ -85,11 +86,13 @@ export default function PlatformNeighborhoods() {
                     <span className="badge badge-neutral">{adminCounts[n.id] || 0} admin{(adminCounts[n.id] || 0) === 1 ? '' : 's'}</span>
                   </div>
                   <div className="user-row-actions">
-                    <button className="btn-ghost" disabled={busyId === n.id} onClick={() => startRename(n)}>Edit</button>
-                    <button className="btn-ghost" disabled={busyId === n.id} onClick={() => toggleActive(n)}>
-                      {n.active ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button className="btn-ghost danger" disabled={busyId === n.id} onClick={() => setDeleteTarget(n)}>Delete</button>
+                    <ActionMenu
+                      items={[
+                        { label: 'Edit', onClick: () => startRename(n), disabled: busyId === n.id },
+                        { label: n.active ? 'Deactivate' : 'Activate', onClick: () => toggleActive(n), disabled: busyId === n.id },
+                        { label: 'Delete', onClick: () => setDeleteTarget(n), disabled: busyId === n.id, danger: true },
+                      ]}
+                    />
                   </div>
                 </div>
               ))}

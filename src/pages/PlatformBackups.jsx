@@ -3,15 +3,20 @@ import { supabase } from '../supabaseClient'
 import { relativeTime } from '../utils/relativeTime'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
 export default function PlatformBackups() {
   usePageMeta({ title: 'Platform admin · Backups', noindex: true })
 
   const [backupLog, setBackupLog] = useState([])
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState('')
+  const [busyId, setBusyId] = useState(null)
 
   const load = async () => {
-    const { data } = await supabase.from('backup_log').select('*').order('created_at', { ascending: false }).limit(5)
+    const { data } = await supabase.from('backup_log').select('*').order('created_at', { ascending: false }).limit(20)
     setBackupLog(data || [])
   }
 
@@ -38,6 +43,13 @@ export default function PlatformBackups() {
     await load()
   }
 
+  const deleteBackupEntry = async (id) => {
+    setBusyId(id)
+    await supabase.from('backup_log').delete().eq('id', id)
+    setBusyId(null)
+    setBackupLog((list) => list.filter((b) => b.id !== id))
+  }
+
   return (
     <div className="overview-card">
       <h2 className="section-title">Disaster recovery backup</h2>
@@ -51,10 +63,13 @@ export default function PlatformBackups() {
           {backupLog.map((b) => (
             <div className="user-row" key={b.id}>
               <div className="user-row-main">
-                <strong>{relativeTime(b.created_at)}</strong>
+                <strong>{formatDate(b.created_at)} · {relativeTime(b.created_at)}</strong>
                 <span className="user-row-meta">
                   {Object.entries(b.row_counts || {}).map(([k, v]) => `${v} ${k}`).join(' · ')}
                 </span>
+              </div>
+              <div className="user-row-actions">
+                <button className="btn-ghost danger" disabled={busyId === b.id} onClick={() => deleteBackupEntry(b.id)}>Delete</button>
               </div>
             </div>
           ))}

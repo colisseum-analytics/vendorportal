@@ -738,8 +738,12 @@ create policy "backup_log_platform_admin_read"
   on backup_log for select
   using (is_platform_admin());
 
+create policy "backup_log_platform_admin_delete"
+  on backup_log for delete
+  using (is_platform_admin());
+
 grant select, insert, delete on app_changelog to authenticated;
-grant select on backup_log to authenticated;
+grant select, delete on backup_log to authenticated;
 grant select, insert, delete on app_changelog to service_role;
 grant select on backup_log to service_role;
 

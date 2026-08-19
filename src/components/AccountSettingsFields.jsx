@@ -8,20 +8,13 @@ export default function AccountSettingsFields() {
   const { user } = useAuth()
 
   const [name, setName] = useState(user?.user_metadata?.full_name || '')
-  const [nameSaving, setNameSaving] = useState(false)
-  const [nameMsg, setNameMsg] = useState('')
-  const [nameError, setNameError] = useState('')
-
   const [email, setEmail] = useState(user?.email || '')
-  const [emailSaving, setEmailSaving] = useState(false)
-  const [emailMsg, setEmailMsg] = useState('')
-  const [emailError, setEmailError] = useState('')
-
   const [memberships, setMemberships] = useState([])
   const [unitDrafts, setUnitDrafts] = useState({})
-  const [unitSavingId, setUnitSavingId] = useState(null)
-  const [unitMsg, setUnitMsg] = useState('')
-  const [unitError, setUnitError] = useState('')
+
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -39,101 +32,80 @@ export default function AccountSettingsFields() {
     return () => { active = false }
   }, [user.id])
 
-  const saveName = async (e) => {
-    e.preventDefault()
-    setNameSaving(true)
-    setNameError('')
-    setNameMsg('')
-    const { error } = await supabase.auth.updateUser({ data: { full_name: name.trim() } })
-    setNameSaving(false)
-    if (error) {
-      setNameError(error.message)
-      return
-    }
-    setNameMsg(t('accountSettings.nameSaved'))
-  }
+  const nameDirty = name.trim() !== (user.user_metadata?.full_name || '')
+  const emailDirty = email.trim() !== user.email
+  const dirtyMemberships = memberships.filter((m) => (unitDrafts[m.id] || '').trim() !== (m.unit || ''))
+  const isDirty = nameDirty || emailDirty || dirtyMemberships.length > 0
 
-  const saveEmail = async (e) => {
+  const save = async (e) => {
     e.preventDefault()
-    if (email.trim() === user.email) return
-    setEmailSaving(true)
-    setEmailError('')
-    setEmailMsg('')
-    const { error } = await supabase.auth.updateUser({ email: email.trim() })
-    setEmailSaving(false)
-    if (error) {
-      setEmailError(error.message)
-      return
-    }
-    setEmailMsg(t('accountSettings.emailPendingConfirm', { email: email.trim() }))
-  }
+    if (!isDirty) return
+    setSaving(true)
+    setError('')
+    setMessage('')
+    const messages = []
+    const errors = []
 
-  const saveUnit = async (membership) => {
-    const nextUnit = (unitDrafts[membership.id] || '').trim()
-    if (!nextUnit) {
-      setUnitError(t('accountSettings.unitRequired'))
-      return
+    if (nameDirty) {
+      const { error: nameError } = await supabase.auth.updateUser({ data: { full_name: name.trim() } })
+      if (nameError) errors.push(nameError.message)
+      else messages.push(t('accountSettings.nameSaved'))
     }
-    setUnitSavingId(membership.id)
-    setUnitError('')
-    setUnitMsg('')
-    const { error } = await supabase.from('neighborhood_members').update({ unit: nextUnit }).eq('id', membership.id)
-    setUnitSavingId(null)
-    if (error) {
-      setUnitError(error.message)
-      return
+
+    if (emailDirty) {
+      const { error: emailError } = await supabase.auth.updateUser({ email: email.trim() })
+      if (emailError) errors.push(emailError.message)
+      else messages.push(t('accountSettings.emailPendingConfirm', { email: email.trim() }))
     }
-    setMemberships((list) => list.map((m) => (m.id === membership.id ? { ...m, unit: nextUnit } : m)))
-    setUnitMsg(t('accountSettings.unitSaved'))
+
+    if (dirtyMemberships.length > 0) {
+      const results = await Promise.all(
+        dirtyMemberships.map((m) =>
+          supabase.from('neighborhood_members').update({ unit: unitDrafts[m.id].trim() }).eq('id', m.id)
+        )
+      )
+      const failed = results.filter((r) => r.error)
+      if (failed.length > 0) errors.push(...failed.map((r) => r.error.message))
+      else messages.push(t('accountSettings.unitSaved'))
+      setMemberships((list) =>
+        list.map((m) => (dirtyMemberships.some((d) => d.id === m.id) ? { ...m, unit: unitDrafts[m.id].trim() } : m))
+      )
+    }
+
+    setSaving(false)
+    if (errors.length > 0) setError(errors.join(' '))
+    if (messages.length > 0) setMessage(messages.join(' '))
   }
 
   return (
-    <>
-      <form onSubmit={saveName} style={{ marginBottom: 20 }}>
-        <div className="field">
-          <label>{t('accountSettings.nameLabel')}</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('accountSettings.namePlaceholder')} />
-        </div>
-        {nameError ? <div className="error-msg">{nameError}</div> : null}
-        {nameMsg ? <div className="success-msg">{nameMsg}</div> : null}
-        <button type="submit" className="btn-secondary" disabled={nameSaving}>{nameSaving ? t('common.sending') : t('common.save')}</button>
-      </form>
+    <form onSubmit={save}>
+      <div className="field">
+        <label>{t('accountSettings.nameLabel')}</label>
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('accountSettings.namePlaceholder')} />
+      </div>
 
-      <form onSubmit={saveEmail} style={{ marginBottom: 20 }}>
-        <div className="field">
-          <label>{t('accountSettings.emailLabel')}</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        {emailError ? <div className="error-msg">{emailError}</div> : null}
-        {emailMsg ? <div className="success-msg">{emailMsg}</div> : null}
-        <button type="submit" className="btn-secondary" disabled={emailSaving || email.trim() === user.email}>{emailSaving ? t('common.sending') : t('common.save')}</button>
-      </form>
+      <div className="field">
+        <label>{t('accountSettings.emailLabel')}</label>
+        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
 
       {memberships.length > 0 ? (
-        <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--ink-soft)', marginBottom: 5 }}>
-            {t('accountSettings.unitLabel')}
-          </label>
+        <div className="field">
+          <label>{t('accountSettings.unitLabel')}</label>
           {memberships.map((m) => (
             <div className="field-row" key={m.id} style={{ marginBottom: 8 }}>
               <div className="field" style={{ flex: 'none', width: 140, marginBottom: 0 }}>
                 <input type="text" value={unitDrafts[m.id] ?? ''} onChange={(e) => setUnitDrafts((d) => ({ ...d, [m.id]: e.target.value }))} />
               </div>
               <span className="hint" style={{ flex: 1, alignSelf: 'center' }}>{m.neighborhoods?.name}</span>
-              <button
-                type="button"
-                className="btn-ghost"
-                disabled={unitSavingId === m.id || (unitDrafts[m.id] || '').trim() === m.unit}
-                onClick={() => saveUnit(m)}
-              >
-                {unitSavingId === m.id ? t('common.sending') : t('common.save')}
-              </button>
             </div>
           ))}
-          {unitError ? <div className="error-msg">{unitError}</div> : null}
-          {unitMsg ? <div className="success-msg">{unitMsg}</div> : null}
         </div>
       ) : null}
-    </>
+
+      {error ? <div className="error-msg">{error}</div> : null}
+      {message ? <div className="success-msg">{message}</div> : null}
+      <button type="submit" className="btn-primary" disabled={saving || !isDirty}>{saving ? t('common.sending') : t('common.save')}</button>
+    </form>
   )
 }
