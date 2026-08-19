@@ -223,11 +223,14 @@ create policy "platform_admins_read"
   on platform_admins for select
   using (is_platform_admin());
 
--- contact_messages: anyone (including signed-out visitors) can send one;
--- only that neighborhood's admins can read, resolve, or delete them.
-create policy "contact_messages_public_insert"
+-- contact_messages: any logged-in user can send one (the UI already
+-- required a session before this was enforced at the RLS level — see
+-- migration 20260819150000); only that neighborhood's admins can read,
+-- resolve, or delete them.
+create policy "contact_messages_authenticated_insert"
   on contact_messages for insert
-  with check (true);
+  to authenticated
+  with check (auth.uid() is not null);
 
 create policy "contact_messages_admin_read"
   on contact_messages for select
@@ -272,8 +275,7 @@ grant insert, update, delete on vendors to authenticated;
 grant select on neighborhood_admins to authenticated;
 grant select, insert, delete on admin_invites to authenticated;
 grant select on platform_admins to authenticated;
-grant insert on contact_messages to anon, authenticated;
-grant select, update, delete on contact_messages to authenticated;
+grant insert, select, update, delete on contact_messages to authenticated;
 grant insert on neighborhood_requests to anon, authenticated;
 grant select, update, delete on neighborhood_requests to authenticated;
 
