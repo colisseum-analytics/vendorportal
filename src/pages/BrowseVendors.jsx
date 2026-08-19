@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { colorForCategory } from '../utils/categoryColor'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
@@ -62,18 +63,27 @@ export default function BrowseVendors() {
     [neighborhoods]
   )
 
-  const cityOptions = useMemo(
-    () => [...new Set(neighborhoods.map((n) => n.city).filter(Boolean))].sort(),
-    [neighborhoods]
-  )
+  const cityOptions = useMemo(() => {
+    const relevant = neighborhoodFilter
+      ? neighborhoods.filter((n) => n.id === neighborhoodFilter)
+      : neighborhoods
+    return [...new Set(relevant.map((n) => n.city).filter(Boolean))].sort()
+  }, [neighborhoods, neighborhoodFilter])
   const categoryOptions = useMemo(
     () => [...new Set(vendors.map((v) => v.category).filter(Boolean))].sort(),
     [vendors]
   )
   const statusOptions = ['Verified', 'Unknown']
-  const neighborhoodOptions = useMemo(
-    () => neighborhoods.map((n) => ({ value: n.id, label: n.name })),
-    [neighborhoods]
+  const neighborhoodOptions = useMemo(() => {
+    const relevant = city ? neighborhoods.filter((n) => n.city === city) : neighborhoods
+    return relevant.map((n) => ({ value: n.id, label: n.name }))
+  }, [neighborhoods, city])
+
+  const renderCategoryOption = (cat) => (
+    <>
+      <span className="filter-pill-dot" style={{ background: colorForCategory(categoryOptions, cat) }} />
+      {tCategory(cat)}
+    </>
   )
 
   const filtered = useMemo(() => {
@@ -128,10 +138,10 @@ export default function BrowseVendors() {
           />
         </div>
         <div className="filter-pill-row">
-          <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
-          <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
-          <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} renderOption={tCategory} />
+          <FilterPill label={t('browse.filterCategory')} options={categoryOptions} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
           <FilterPill label={t('browse.filterNeighborhood')} options={neighborhoodOptions} value={neighborhoodFilter} onChange={setNeighborhoodFilter} />
+          <FilterPill label={t('browse.filterCity')} options={cityOptions} value={city} onChange={setCity} />
+          <FilterPill label={t('browse.filterStatus')} options={statusOptions} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
           {status || city || category || neighborhoodFilter ? (
             <button
               type="button"

@@ -90,8 +90,8 @@ export default function NeighborhoodDirectory() {
           <input type="text" placeholder={t('directory.searchPlaceholder')} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="filter-pill-row">
-          <FilterPill label={t('browse.filterStatus')} options={STATUS_OPTIONS} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
           <FilterPill label={t('browse.filterCategory')} options={categories} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
+          <FilterPill label={t('browse.filterStatus')} options={STATUS_OPTIONS} value={status} onChange={setStatus} renderOption={(o) => t(`directory.status${o}`)} />
           {status || category ? (
             <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
               {t('browse.reset')} ×
