@@ -8,7 +8,7 @@ import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function Home() {
   const { t } = useLanguage()
-  usePageMeta({ title: t('home.title'), description: t('home.subtitle') })
+  usePageMeta({ description: t('home.subtitle') })
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendorCounts, setVendorCounts] = useState({})
   const [loading, setLoading] = useState(true)
