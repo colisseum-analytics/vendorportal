@@ -16,7 +16,13 @@ import AdminSettings from './pages/AdminSettings.jsx'
 import AdminServicePanel from './pages/AdminServicePanel.jsx'
 import AdminResidents from './pages/AdminResidents.jsx'
 import AccountSettings from './pages/AccountSettings.jsx'
-import PlatformAdmin from './pages/PlatformAdmin.jsx'
+import PlatformAdminLayout from './pages/PlatformAdminLayout.jsx'
+import PlatformMessages from './pages/PlatformMessages.jsx'
+import PlatformRequests from './pages/PlatformRequests.jsx'
+import PlatformNeighborhoods from './pages/PlatformNeighborhoods.jsx'
+import PlatformUsers from './pages/PlatformUsers.jsx'
+import PlatformBackups from './pages/PlatformBackups.jsx'
+import PlatformHistory from './pages/PlatformHistory.jsx'
 import SiteHeader from './components/SiteHeader.jsx'
 
 export default function App() {
@@ -46,7 +52,14 @@ export default function App() {
           <Route path="admin/board" element={<AdminServicePanel />} />
           <Route path="admin/residents" element={<AdminResidents />} />
         </Route>
-        <Route path="/platform-admin" element={<PlatformAdmin />} />
+        <Route path="/platform-admin" element={<PlatformAdminLayout />}>
+          <Route index element={<PlatformMessages />} />
+          <Route path="requests" element={<PlatformRequests />} />
+          <Route path="neighborhoods" element={<PlatformNeighborhoods />} />
+          <Route path="users" element={<PlatformUsers />} />
+          <Route path="backups" element={<PlatformBackups />} />
+          <Route path="history" element={<PlatformHistory />} />
+        </Route>
         <Route path="*" element={<Home />} />
       </Routes>
     </>
