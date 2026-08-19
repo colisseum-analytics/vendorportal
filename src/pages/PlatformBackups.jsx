@@ -3,6 +3,13 @@ import { supabase } from '../supabaseClient'
 import { relativeTime } from '../utils/relativeTime'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
+const FREQUENCIES = [
+  { value: 'manual', label: 'Manual only' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+]
+
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
@@ -15,9 +22,22 @@ export default function PlatformBackups() {
   const [exportError, setExportError] = useState('')
   const [busyId, setBusyId] = useState(null)
 
+  const [frequency, setFrequency] = useState('manual')
+  const [savedFrequency, setSavedFrequency] = useState('manual')
+  const [frequencySaving, setFrequencySaving] = useState(false)
+  const [frequencyError, setFrequencyError] = useState('')
+  const [frequencyMsg, setFrequencyMsg] = useState('')
+
   const load = async () => {
-    const { data } = await supabase.from('backup_log').select('*').order('created_at', { ascending: false }).limit(20)
-    setBackupLog(data || [])
+    const [{ data: logs }, { data: schedule }] = await Promise.all([
+      supabase.from('backup_log').select('*').order('created_at', { ascending: false }).limit(20),
+      supabase.from('backup_schedule').select('*').eq('id', true).maybeSingle(),
+    ])
+    setBackupLog(logs || [])
+    if (schedule) {
+      setFrequency(schedule.frequency)
+      setSavedFrequency(schedule.frequency)
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -43,6 +63,20 @@ export default function PlatformBackups() {
     await load()
   }
 
+  const saveFrequency = async () => {
+    setFrequencySaving(true)
+    setFrequencyError('')
+    setFrequencyMsg('')
+    const { error } = await supabase.rpc('set_backup_frequency', { p_frequency: frequency })
+    setFrequencySaving(false)
+    if (error) {
+      setFrequencyError(error.message)
+      return
+    }
+    setSavedFrequency(frequency)
+    setFrequencyMsg('Schedule updated.')
+  }
+
   const deleteBackupEntry = async (id) => {
     setBusyId(id)
     await supabase.from('backup_log').delete().eq('id', id)
@@ -58,6 +92,22 @@ export default function PlatformBackups() {
       <button type="button" className="btn-primary" disabled={exporting} onClick={exportBackup}>
         {exporting ? 'Exporting…' : 'Export full backup (JSON)'}
       </button>
+
+      <div className="field-row" style={{ marginTop: 20, alignItems: 'flex-end' }}>
+        <div className="field" style={{ flex: 'none', marginBottom: 0 }}>
+          <label>Automatic backup frequency</label>
+          <select value={frequency} onChange={(e) => setFrequency(e.target.value)}>
+            {FREQUENCIES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+          </select>
+        </div>
+        <button type="button" className="btn-secondary" disabled={frequencySaving || frequency === savedFrequency} onClick={saveFrequency}>
+          {frequencySaving ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+      {frequencyError ? <div className="error-msg">{frequencyError}</div> : null}
+      {frequencyMsg ? <div className="success-msg">{frequencyMsg}</div> : null}
+      <p className="hint">Runs alongside the manual export button and the automatic backup on every code push.</p>
+
       {backupLog.length > 0 ? (
         <div className="user-list" style={{ marginTop: 16 }}>
           {backupLog.map((b) => (
