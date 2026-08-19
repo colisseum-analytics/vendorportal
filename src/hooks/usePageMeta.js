@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 const SITE_NAME = 'LoopListing'
-const DEFAULT_TITLE = 'LoopListing · Your Community Knowledge Hub'
+const DEFAULT_TITLE = 'LoopListing • One place for local services, trusted by neighbors'
 const DEFAULT_IMAGE = 'https://looplisting.com/email-logo.png'
 
 function upsertMeta(attr, key, content) {
