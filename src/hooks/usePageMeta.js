@@ -45,6 +45,7 @@ export function usePageMeta({ title, description, image, noindex = false, skip =
       upsertMeta('property', 'og:description', description)
       upsertMeta('name', 'twitter:description', description)
     }
+    upsertMeta('property', 'og:site_name', SITE_NAME)
     upsertMeta('property', 'og:title', fullTitle)
     upsertMeta('property', 'og:type', 'website')
     upsertMeta('property', 'og:url', window.location.href)
