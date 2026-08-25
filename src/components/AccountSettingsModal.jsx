@@ -1,8 +1,7 @@
-import { Link } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import AccountSettingsFields from './AccountSettingsFields.jsx'
 
-export default function AccountSettingsModal({ isPlatformAdmin, onCancel }) {
+export default function AccountSettingsModal({ onCancel }) {
   const { t } = useLanguage()
 
   return (
@@ -17,8 +16,6 @@ export default function AccountSettingsModal({ isPlatformAdmin, onCancel }) {
         <div className="modal-actions">
           <button type="button" className="btn-primary" onClick={onCancel} style={{ width: '100%' }}>{t('common.done')}</button>
         </div>
-
-        {isPlatformAdmin ? <p className="auth-switch"><Link to="/platform-admin">{t('nav.platformAdmin')}</Link></p> : null}
       </div>
     </div>
   )
