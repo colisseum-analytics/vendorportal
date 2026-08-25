@@ -10,6 +10,7 @@ const ADMIN_ITEMS = [
   { path: 'admin/info', label: 'Community Info', icon: '📋' },
   { path: 'admin/board', label: 'Service Board', icon: '🛎' },
   { path: 'admin/settings', label: 'Configuration', icon: '⚙' },
+  { path: 'admin/help', label: 'Admin Help', icon: '📖' },
 ]
 
 export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) {
@@ -24,6 +25,7 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
     { to: `/n/${slug}/faq`, label: t('nav.faq'), icon: '❓' },
     { to: `/n/${slug}/board`, label: t('nav.serviceBoard'), icon: '🛎' },
     ...(user ? [{ to: `/n/${slug}/settings`, label: t('nav.settings'), icon: '👤' }] : []),
+    { to: `/n/${slug}/help`, label: t('nav.help'), icon: '📖' },
   ]
 
   return (

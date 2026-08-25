@@ -16,6 +16,8 @@ import AdminSettings from './pages/AdminSettings.jsx'
 import AdminServicePanel from './pages/AdminServicePanel.jsx'
 import AdminResidents from './pages/AdminResidents.jsx'
 import AccountSettings from './pages/AccountSettings.jsx'
+import HelpPage from './pages/HelpPage.jsx'
+import AdminHelpPage from './pages/AdminHelpPage.jsx'
 import PlatformAdminLayout from './pages/PlatformAdminLayout.jsx'
 import PlatformMessages from './pages/PlatformMessages.jsx'
 import PlatformRequests from './pages/PlatformRequests.jsx'
@@ -45,12 +47,14 @@ export default function App() {
           <Route path="board" element={<ServiceBoard />} />
           <Route path="board/:needId" element={<NeedDetail />} />
           <Route path="settings" element={<AccountSettings />} />
+          <Route path="help" element={<HelpPage />} />
           <Route path="admin" element={<AdminDashboard />} />
           <Route path="admin/messages" element={<AdminMessages />} />
           <Route path="admin/info" element={<AdminCommunityInfo />} />
           <Route path="admin/settings" element={<AdminSettings />} />
           <Route path="admin/board" element={<AdminServicePanel />} />
           <Route path="admin/residents" element={<AdminResidents />} />
+          <Route path="admin/help" element={<AdminHelpPage />} />
         </Route>
         <Route path="/platform-admin" element={<PlatformAdminLayout />}>
           <Route index element={<PlatformMessages />} />
