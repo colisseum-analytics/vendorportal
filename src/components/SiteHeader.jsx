@@ -37,7 +37,6 @@ export default function SiteHeader() {
         <ThemeToggle />
         {user ? (
           <>
-            {isPlatformAdmin ? <Link className="btn-ghost" to="/platform-admin">{t('nav.platformAdmin')}</Link> : null}
             <button type="button" className="account-badge" title={t('accountSettings.title')} onClick={() => setSettingsOpen(true)}>{initial}</button>
             <button className="btn-ghost" onClick={signOut}>{t('nav.logOut')}</button>
           </>
@@ -45,7 +44,7 @@ export default function SiteHeader() {
           <Link className="btn-ghost" to="/login">{t('nav.logIn')}</Link>
         )}
       </div>
-      {settingsOpen ? <AccountSettingsModal onCancel={() => setSettingsOpen(false)} /> : null}
+      {settingsOpen ? <AccountSettingsModal isPlatformAdmin={isPlatformAdmin} onCancel={() => setSettingsOpen(false)} /> : null}
     </header>
   )
 }
