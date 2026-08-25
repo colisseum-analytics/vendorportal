@@ -16,6 +16,7 @@ export const translations = {
       faq: 'Community FAQ',
       serviceBoard: 'Service Board',
       settings: 'Settings',
+      help: 'Help',
     },
     common: {
       backToAllNeighborhoods: 'All neighborhoods',
@@ -165,6 +166,11 @@ export const translations = {
       errorPickVendor: 'Pick a vendor before saving.',
       noVendorsToRefer: 'This neighborhood doesn’t have any vendors listed yet to refer.',
       officialUpdate: 'Official update',
+    },
+    help: {
+      eyebrow: 'Help',
+      title: 'How to use LoopListing',
+      subtitle: 'A quick guide to everything you can do in {name}, as a resident.',
     },
     browse: {
       eyebrow: 'Browse Vendors',
@@ -338,6 +344,7 @@ export const translations = {
       faq: 'Preguntas Frecuentes',
       serviceBoard: 'Tablón de Servicios',
       settings: 'Configuración',
+      help: 'Ayuda',
     },
     common: {
       backToAllNeighborhoods: 'Todos los vecindarios',
@@ -487,6 +494,11 @@ export const translations = {
       errorPickVendor: 'Elige un proveedor antes de guardar.',
       noVendorsToRefer: 'Este vecindario todavía no tiene proveedores listados para recomendar.',
       officialUpdate: 'Actualización oficial',
+    },
+    help: {
+      eyebrow: 'Ayuda',
+      title: 'Cómo usar LoopListing',
+      subtitle: 'Una guía rápida de todo lo que puedes hacer en {name}, como residente.',
     },
     browse: {
       eyebrow: 'Ver Proveedores',
