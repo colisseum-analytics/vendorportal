@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import ActionMenu from './ActionMenu.jsx'
 
 // Add/rename/delete a neighborhood's vendor categories. Every change saves
 // immediately (not tied to the rest of the settings form) since renaming
@@ -115,8 +116,12 @@ export default function CategoryManager({ neighborhood, onChanged }) {
               ) : (
                 <>
                   <span>{c}</span>
-                  <button type="button" className="btn-ghost" disabled={busy} onClick={() => startEdit(i)}>Rename</button>
-                  <button type="button" className="btn-ghost danger" disabled={busy} onClick={() => removeCategory(i)}>Delete</button>
+                  <ActionMenu
+                    items={[
+                      { label: 'Rename', onClick: () => startEdit(i), disabled: busy },
+                      { label: 'Delete', onClick: () => removeCategory(i), disabled: busy, danger: true },
+                    ]}
+                  />
                 </>
               )}
             </li>
