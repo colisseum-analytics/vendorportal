@@ -579,25 +579,24 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
 
 .neighborhood-content{ min-width:0; }
 
-.info-item-list{ display:flex; flex-direction:column; gap:8px; }
-.info-item-card{
-  background: var(--paper-raised); border:1px solid var(--line); border-radius: var(--radius);
-  padding: 12px 16px; box-shadow: var(--shadow);
-}
-.info-item-notes{ font-size:13px; color: var(--ink-soft); margin:4px 0 6px; white-space:pre-wrap; }
+.info-subgroup{ margin-bottom:24px; }
+.info-subgroup:last-child{ margin-bottom:0; }
+.info-item-list{ display:flex; flex-direction:column; gap:18px; }
+.info-item-card{ padding-bottom:16px; border-bottom:1px solid var(--line); }
+.info-item-card:last-child{ padding-bottom:0; border-bottom:none; }
+.info-item-card > strong{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; }
+.info-item-notes{ font-size:14px; line-height:1.55; color: var(--ink-soft); margin:4px 0 6px; white-space:pre-wrap; }
 .info-item-meta{ display:flex; flex-direction:column; gap:4px; font-size:13px; color: var(--ink-soft); margin-top:6px; }
 .info-item-meta .row{ display:flex; gap:7px; }
 .info-item-meta .icon{ color: var(--ink-faint); flex-shrink:0; width:14px; }
 .info-item-meta a{ color: var(--ink-soft); text-decoration:none; }
 .info-item-meta a:hover{ text-decoration:underline; }
 
-.faq-list{ display:flex; flex-direction:column; gap:14px; }
-.faq-item{
-  background: var(--paper-raised); border:1px solid var(--line); border-radius: var(--radius);
-  padding: 16px 20px; box-shadow: var(--shadow);
-}
-.faq-question{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; margin:0 0 6px; }
-.faq-answer{ font-size:13.5px; color: var(--ink-soft); margin:0; white-space:pre-wrap; }
+.faq-list{ display:flex; flex-direction:column; gap:22px; }
+.faq-item{ padding-bottom:20px; border-bottom:1px solid var(--line); }
+.faq-item:last-child{ padding-bottom:0; border-bottom:none; }
+.faq-question{ font-family:'Fraunces', serif; font-weight:600; font-size:16.5px; margin:0 0 6px; }
+.faq-answer{ font-size:14px; line-height:1.55; color: var(--ink-soft); margin:0; white-space:pre-wrap; }
 .faq-vendor-card{
   display:flex; flex-direction:column; gap:2px; margin-top:10px; padding:10px 14px;
   background: var(--paper); border:1px solid var(--line); border-radius:10px; text-decoration:none;
