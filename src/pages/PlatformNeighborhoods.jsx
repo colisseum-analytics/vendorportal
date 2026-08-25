@@ -14,6 +14,7 @@ export default function PlatformNeighborhoods() {
   const [renameValue, setRenameValue] = useState('')
   const [renameCityValue, setRenameCityValue] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleteStep2, setDeleteStep2] = useState(false)
   const [busyId, setBusyId] = useState(null)
   const [collapsedCities, setCollapsedCities] = useState(() => new Set())
 
@@ -45,10 +46,12 @@ export default function PlatformNeighborhoods() {
     setBusyId(null)
   }
 
+  const closeDelete = () => { setDeleteTarget(null); setDeleteStep2(false) }
+
   const confirmDelete = async () => {
     setBusyId(deleteTarget.id)
     await supabase.from('neighborhoods').delete().eq('id', deleteTarget.id)
-    setDeleteTarget(null)
+    closeDelete()
     await reloadCore()
     setBusyId(null)
   }
@@ -142,15 +145,40 @@ export default function PlatformNeighborhoods() {
         </div>
       ) : null}
 
-      {deleteTarget ? (
-        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null) }}>
-          <div className="modal" style={{ maxWidth: 420 }}>
-            <button className="close-x" onClick={() => setDeleteTarget(null)}>×</button>
+      {deleteTarget && !deleteStep2 ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) closeDelete() }}>
+          <div className="modal" style={{ maxWidth: 440 }}>
+            <button className="close-x" onClick={closeDelete}>×</button>
             <h2>Delete {deleteTarget.name}?</h2>
-            <p className="sub">This permanently removes the neighborhood, its vendors, admins, and pending invites. This can't be undone.</p>
+            <p className="sub">This permanently deletes everything tied to this neighborhood:</p>
+            <ul className="sub" style={{ margin: '0 0 14px', paddingLeft: 20 }}>
+              <li>Every vendor listing</li>
+              <li>Association Contacts, Community Services, Emergency, and FAQ entries</li>
+              <li>Service Board needs, their supporters/referrals, and broadcasts</li>
+              <li>Contact messages tied to this neighborhood</li>
+              <li>All admin and resident memberships, and any pending invites</li>
+            </ul>
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setDeleteTarget(null)}>Cancel</button>
-              <button className="btn-primary" style={{ background: 'var(--red)' }} onClick={confirmDelete}>Delete</button>
+              <button className="btn-secondary" onClick={closeDelete}>Cancel</button>
+              <button className="btn-primary" style={{ background: 'var(--red)' }} onClick={() => setDeleteStep2(true)}>Continue</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {deleteTarget && deleteStep2 ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) closeDelete() }}>
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <button className="close-x" onClick={closeDelete}>×</button>
+            <h2>Are you sure?</h2>
+            <p className="sub">
+              This is <strong>permanent and cannot be undone</strong>. "{deleteTarget.name}" and everything listed on the previous step will be gone for good the moment you confirm.
+            </p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={closeDelete}>Cancel</button>
+              <button className="btn-primary" style={{ background: 'var(--red)' }} disabled={busyId === deleteTarget.id} onClick={confirmDelete}>
+                {busyId === deleteTarget.id ? 'Deleting…' : `Yes, delete ${deleteTarget.name}`}
+              </button>
             </div>
           </div>
         </div>
