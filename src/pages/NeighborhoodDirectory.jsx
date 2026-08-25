@@ -5,15 +5,12 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 import { colorForCategory } from '../utils/categoryColor'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
-import Pagination from '../components/Pagination.jsx'
 import FilterPill from '../components/FilterPill.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { relativeTime } from '../utils/relativeTime'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const STATUS_OPTIONS = ['Verified', 'Unknown']
-
-const PAGE_SIZE = 25
 
 export default function NeighborhoodDirectory() {
   const { neighborhood } = useOutletContext()
@@ -29,7 +26,6 @@ export default function NeighborhoodDirectory() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(() => searchParams.get('category') || null)
   const [status, setStatus] = useState(null)
-  const [page, setPage] = useState(1)
   const [view, setView] = useVendorView()
 
   useEffect(() => {
@@ -59,16 +55,6 @@ export default function NeighborhoodDirectory() {
         return hay.includes(search.toLowerCase())
       })
   }, [vendors, category, status, search])
-
-  useEffect(() => {
-    setPage(1)
-  }, [category, status, search])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageItems = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
-  )
 
   const categories = neighborhood.categories || []
   const residentCount = vendors.filter((v) => v.is_resident).length
@@ -119,11 +105,9 @@ export default function NeighborhoodDirectory() {
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
-          {pageItems.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} />)}
+          {filtered.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} />)}
         </div>
       )}
-
-      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   )
 }

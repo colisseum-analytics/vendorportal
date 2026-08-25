@@ -5,13 +5,10 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 import FilterPill from '../components/FilterPill.jsx'
-import Pagination from '../components/Pagination.jsx'
 import NeedCard from '../components/NeedCard.jsx'
 import PostNeedModal from '../components/PostNeedModal.jsx'
 import BroadcastBanner from '../components/BroadcastBanner.jsx'
 import { NEED_CATEGORIES, SEVERITIES, STATUSES, SEVERITY_LABEL_KEY, STATUS_LABEL_KEY } from '../utils/needConstants'
-
-const PAGE_SIZE = 25
 
 // Phase 4 added support (the "upvote / I have this issue too" signal —
 // same underlying table, see need_supporters in the migration) and the
@@ -39,7 +36,6 @@ export default function ServiceBoard() {
   const [severity, setSeverity] = useState(null)
   const [status, setStatus] = useState(null)
   const [sort, setSort] = useState('recent')
-  const [page, setPage] = useState(1)
   const [postOpen, setPostOpen] = useState(false)
 
   const loadAll = async () => {
@@ -158,16 +154,6 @@ export default function ServiceBoard() {
     return [...filtered].sort((a, b) => (supporterCounts[b.id] || 0) - (supporterCounts[a.id] || 0))
   }, [filtered, sort, supporterCounts])
 
-  useEffect(() => {
-    setPage(1)
-  }, [category, severity, status, search, sort])
-
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
-  const pageItems = useMemo(
-    () => sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [sorted, page]
-  )
-
   if (!user) {
     return (
       <div className="wrap-narrow">
@@ -253,7 +239,7 @@ export default function ServiceBoard() {
         </div>
       ) : (
         <div className="grid">
-          {pageItems.map((n) => (
+          {sorted.map((n) => (
             <NeedCard
               key={n.id}
               need={n}
@@ -264,8 +250,6 @@ export default function ServiceBoard() {
           ))}
         </div>
       )}
-
-      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
 
       {postOpen ? (
         <PostNeedModal onCancel={() => setPostOpen(false)} onSave={postNeed} />
