@@ -226,7 +226,7 @@ export default function PlatformUsers() {
           Joined {formatDate(u.created_at)} · {relativeTime(u.created_at)} · Last sign-in {u.last_sign_in_at ? relativeTime(u.last_sign_in_at) : 'never'}
         </span>
       </div>
-      <div className="user-row-roles">
+      <div className="user-row-roles user-row-roles-stacked">
         {u.is_banned ? <span className="badge badge-inactive">Disabled</span> : null}
         {u.is_platform_admin ? <span className="badge badge-active">Platform admin</span> : null}
         {(u.admin_of || []).map((n) => (
@@ -251,6 +251,12 @@ export default function PlatformUsers() {
           items={[
             { label: 'Edit email', onClick: () => startEditEmail(u), disabled: busyUserId === u.user_id },
             { label: 'Assign to neighborhood', onClick: () => startAssign(u), disabled: busyUserId === u.user_id },
+            ...(u.admin_of || []).map((n) => ({
+              label: `Remove from ${n.name}`,
+              onClick: () => removeFromNeighborhood(n.id, u.user_id),
+              disabled: busyUserId === u.user_id,
+              danger: true,
+            })),
             { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id },
             { label: u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin', onClick: () => togglePlatformAdmin(u), disabled: busyUserId === u.user_id },
             { label: u.is_banned ? 'Enable account' : 'Disable account', onClick: () => toggleBanned(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
