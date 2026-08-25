@@ -88,6 +88,14 @@ a { color: var(--blue); }
   border:none; cursor:pointer; transition: filter .15s ease;
 }
 .account-badge:hover{ filter: brightness(0.9); }
+.account-badge-wrap{ position:relative; display:inline-flex; flex-shrink:0; }
+.account-badge-admin-dot{
+  position:absolute; bottom:-3px; right:-3px; width:16px; height:16px; border-radius:50%;
+  background: var(--paper-raised); border:1px solid var(--line); color: var(--blue);
+  display:inline-flex; align-items:center; justify-content:center; font-size:9px; line-height:1;
+  text-decoration:none; transition: all .15s ease;
+}
+.account-badge-admin-dot:hover{ border-color: var(--blue); background: var(--blue-soft); transform: scale(1.1); }
 @media (max-width: 560px){
   .site-header{ padding: 10px 16px; }
   .site-header-logo img{ height: 38px; }

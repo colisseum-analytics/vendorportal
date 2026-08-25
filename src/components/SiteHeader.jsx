@@ -37,14 +37,19 @@ export default function SiteHeader() {
         <ThemeToggle />
         {user ? (
           <>
-            <button type="button" className="account-badge" title={t('accountSettings.title')} onClick={() => setSettingsOpen(true)}>{initial}</button>
+            <div className="account-badge-wrap">
+              <button type="button" className="account-badge" title={t('accountSettings.title')} onClick={() => setSettingsOpen(true)}>{initial}</button>
+              {isPlatformAdmin ? (
+                <Link to="/platform-admin" className="account-badge-admin-dot" title={t('nav.platformAdmin')} aria-label={t('nav.platformAdmin')}>🛡</Link>
+              ) : null}
+            </div>
             <button className="btn-ghost" onClick={signOut}>{t('nav.logOut')}</button>
           </>
         ) : (
           <Link className="btn-ghost" to="/login">{t('nav.logIn')}</Link>
         )}
       </div>
-      {settingsOpen ? <AccountSettingsModal isPlatformAdmin={isPlatformAdmin} onCancel={() => setSettingsOpen(false)} /> : null}
+      {settingsOpen ? <AccountSettingsModal onCancel={() => setSettingsOpen(false)} /> : null}
     </header>
   )
 }
