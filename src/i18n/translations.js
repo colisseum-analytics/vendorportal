@@ -61,7 +61,7 @@ export const translations = {
       adCta: 'Get started →',
     },
     directory: {
-      eyebrow: 'Vendor Directory',
+      eyebrow: 'Directory',
       adminDashboard: 'Admin dashboard',
       requestAdminAccess: 'Request admin access',
       adminLogin: 'Admin login',
@@ -383,7 +383,7 @@ export const translations = {
       adCta: 'Comenzar →',
     },
     directory: {
-      eyebrow: 'Directorio de Proveedores',
+      eyebrow: 'Directorio',
       adminDashboard: 'Panel de administración',
       requestAdminAccess: 'Solicitar acceso de administrador',
       adminLogin: 'Acceso de administrador',
