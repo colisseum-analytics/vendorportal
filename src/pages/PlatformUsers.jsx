@@ -27,6 +27,10 @@ export default function PlatformUsers() {
   const [deleteUserTarget, setDeleteUserTarget] = useState(null)
   const [editEmailTarget, setEditEmailTarget] = useState(null)
   const [editEmailValue, setEditEmailValue] = useState('')
+  const [assignTarget, setAssignTarget] = useState(null)
+  const [assignNeighborhoodId, setAssignNeighborhoodId] = useState('')
+  const [assigning, setAssigning] = useState(false)
+  const [assignError, setAssignError] = useState('')
 
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
@@ -105,6 +109,30 @@ export default function PlatformUsers() {
       setUserError(error.message)
       return
     }
+    await reloadCore()
+  }
+
+  const startAssign = (u) => {
+    setAssignTarget(u)
+    setAssignNeighborhoodId('')
+    setAssignError('')
+  }
+
+  const assignToNeighborhood = async (e) => {
+    e.preventDefault()
+    if (!assignNeighborhoodId) return
+    setAssigning(true)
+    setAssignError('')
+    const { error } = await supabase.rpc('add_neighborhood_admin', {
+      p_neighborhood_id: assignNeighborhoodId,
+      p_user_id: assignTarget.user_id,
+    })
+    setAssigning(false)
+    if (error) {
+      setAssignError(error.message)
+      return
+    }
+    setAssignTarget(null)
     await reloadCore()
   }
 
@@ -222,6 +250,7 @@ export default function PlatformUsers() {
         <ActionMenu
           items={[
             { label: 'Edit email', onClick: () => startEditEmail(u), disabled: busyUserId === u.user_id },
+            { label: 'Assign to neighborhood', onClick: () => startAssign(u), disabled: busyUserId === u.user_id },
             { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id },
             { label: u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin', onClick: () => togglePlatformAdmin(u), disabled: busyUserId === u.user_id },
             { label: u.is_banned ? 'Enable account' : 'Disable account', onClick: () => toggleBanned(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
@@ -332,6 +361,41 @@ export default function PlatformUsers() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      ) : null}
+
+      {assignTarget ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setAssignTarget(null) }}>
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <button className="close-x" onClick={() => setAssignTarget(null)}>×</button>
+            <h2>Assign {assignTarget.email} to a neighborhood</h2>
+            <p className="sub">Grants admin access directly — works for accounts that already exist, and a user can be an admin of more than one neighborhood.</p>
+            {assignError ? <div className="error-msg">{assignError}</div> : null}
+            {(() => {
+              const alreadyAssigned = new Set((assignTarget.admin_of || []).map((n) => n.id))
+              const available = neighborhoods.filter((n) => !alreadyAssigned.has(n.id))
+              if (available.length === 0) {
+                return <p className="sub">Already an admin of every neighborhood.</p>
+              }
+              return (
+                <form onSubmit={assignToNeighborhood}>
+                  <div className="field">
+                    <label>Neighborhood</label>
+                    <select value={assignNeighborhoodId} onChange={(e) => setAssignNeighborhoodId(e.target.value)} autoFocus>
+                      <option value="" disabled>Choose one…</option>
+                      {available.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="modal-actions">
+                    <button type="button" className="btn-secondary" onClick={() => setAssignTarget(null)}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={!assignNeighborhoodId || assigning}>
+                      {assigning ? 'Assigning…' : 'Assign'}
+                    </button>
+                  </div>
+                </form>
+              )
+            })()}
           </div>
         </div>
       ) : null}

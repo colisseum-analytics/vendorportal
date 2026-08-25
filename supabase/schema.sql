@@ -667,6 +667,29 @@ as $$
   order by na.created_at;
 $$;
 
+-- Grants an EXISTING account admin access to a neighborhood directly.
+-- admin_invites only resolves via a trigger on brand-new auth.users
+-- signup, so it can't promote someone who already has an account -- this
+-- fills that gap. A user can already be admin of more than one
+-- neighborhood (neighborhood_admins' primary key is the pair, not
+-- user_id alone), so this works fine for a second, third, etc. grant.
+create or replace function public.add_neighborhood_admin(p_neighborhood_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not (is_neighborhood_admin(p_neighborhood_id) or is_platform_admin()) then
+    raise exception 'Only an admin of this neighborhood (or a platform admin) can do that.';
+  end if;
+
+  insert into neighborhood_admins (neighborhood_id, user_id)
+  values (p_neighborhood_id, p_user_id)
+  on conflict do nothing;
+end;
+$$;
+
 -- Revokes one admin's access to a neighborhood. Refuses to remove the
 -- last remaining admin, so a neighborhood is never left with none.
 create or replace function public.remove_neighborhood_admin(p_neighborhood_id uuid, p_user_id uuid)
