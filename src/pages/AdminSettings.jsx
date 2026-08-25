@@ -124,60 +124,62 @@ export default function AdminSettings() {
         <p className="tagline">These changes are visible to everyone browsing the public directory.</p>
       </div>
 
-      <div className="auth-card" style={{ maxWidth: 520 }}>
-        <div className="field logo-field">
-          <label>Neighborhood logo</label>
-          <div className="logo-row">
-            {neighborhood.logo_url ? (
-              <img src={neighborhood.logo_url} alt="" className="logo-preview" />
-            ) : (
-              <div className="logo-preview logo-placeholder">{neighborhood.name?.[0]?.toUpperCase() || '?'}</div>
-            )}
-            <div className="logo-actions">
-              <label className="btn-secondary logo-upload-btn">
-                {logoUploading ? 'Uploading…' : neighborhood.logo_url ? 'Replace' : 'Upload image'}
-                <input type="file" accept="image/*" onChange={uploadLogo} disabled={logoUploading} hidden />
-              </label>
+      <div className="config-columns">
+        <div className="auth-card">
+          <div className="field logo-field">
+            <label>Neighborhood logo</label>
+            <div className="logo-row">
               {neighborhood.logo_url ? (
-                <button type="button" className="btn-ghost" onClick={removeLogo} disabled={logoUploading}>Remove</button>
-              ) : null}
+                <img src={neighborhood.logo_url} alt="" className="logo-preview" />
+              ) : (
+                <div className="logo-preview logo-placeholder">{neighborhood.name?.[0]?.toUpperCase() || '?'}</div>
+              )}
+              <div className="logo-actions">
+                <label className="btn-secondary logo-upload-btn">
+                  {logoUploading ? 'Uploading…' : neighborhood.logo_url ? 'Replace' : 'Upload image'}
+                  <input type="file" accept="image/*" onChange={uploadLogo} disabled={logoUploading} hidden />
+                </label>
+                {neighborhood.logo_url ? (
+                  <button type="button" className="btn-ghost" onClick={removeLogo} disabled={logoUploading}>Remove</button>
+                ) : null}
+              </div>
             </div>
+            {logoError ? <div className="error-msg">{logoError}</div> : null}
+            <div className="hint">Square images work best. Shown next to the neighborhood name across the site.</div>
           </div>
-          {logoError ? <div className="error-msg">{logoError}</div> : null}
-          <div className="hint">Square images work best. Shown next to the neighborhood name across the site.</div>
+
+          {error ? <div className="error-msg">{error}</div> : null}
+          {saved ? <div className="success-msg">Saved.</div> : null}
+          <form onSubmit={submit}>
+            <div className="field">
+              <label>Neighborhood name</label>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>One-line description</label>
+              <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>City</label>
+              <CityPicker value={city} onChange={setCity} />
+              <div className="hint">The broader city/metro area — used for cross-neighborhood city search.</div>
+            </div>
+            <div className="field">
+              <label>Web address</label>
+              <input type="text" value={slug} disabled style={{ opacity: 0.6 }} />
+              <div className="hint">yoursite.com/n/{slug} — not editable here, since changing it would break any links people already have. Ask a developer to change it directly in Supabase if you really need to.</div>
+            </div>
+            <button type="submit" className="btn-primary" disabled={saving} style={{ width: '100%' }}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+          </form>
         </div>
 
-        {error ? <div className="error-msg">{error}</div> : null}
-        {saved ? <div className="success-msg">Saved.</div> : null}
-        <form onSubmit={submit}>
-          <div className="field">
-            <label>Neighborhood name</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-          <div className="field">
-            <label>One-line description</label>
-            <input type="text" value={tagline} onChange={(e) => setTagline(e.target.value)} />
-          </div>
-          <div className="field">
-            <label>City</label>
-            <CityPicker value={city} onChange={setCity} />
-            <div className="hint">The broader city/metro area — used for cross-neighborhood city search.</div>
-          </div>
-          <div className="field">
-            <label>Web address</label>
-            <input type="text" value={slug} disabled style={{ opacity: 0.6 }} />
-            <div className="hint">yoursite.com/n/{slug} — not editable here, since changing it would break any links people already have. Ask a developer to change it directly in Supabase if you really need to.</div>
-          </div>
-          <button type="submit" className="btn-primary" disabled={saving} style={{ width: '100%' }}>
-            {saving ? 'Saving…' : 'Save changes'}
-          </button>
-        </form>
-      </div>
-
-      <div className="auth-card" style={{ maxWidth: 520, marginTop: 16 }}>
-        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, margin: '0 0 6px' }}>Vendor categories</h2>
-        <p className="sub" style={{ marginBottom: 14 }}>Changes here save immediately.</p>
-        <CategoryManager neighborhood={neighborhood} onChanged={reload} />
+        <div className="auth-card">
+          <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 17, margin: '0 0 6px' }}>Vendor categories</h2>
+          <p className="sub" style={{ marginBottom: 14 }}>Changes here save immediately.</p>
+          <CategoryManager neighborhood={neighborhood} onChanged={reload} />
+        </div>
       </div>
     </div>
   )
