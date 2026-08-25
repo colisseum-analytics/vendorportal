@@ -191,6 +191,7 @@ export const translations = {
       emptyNoVendors: 'No neighborhoods have added vendors yet.',
       emptyNoMatch: 'Try a different search or filter.',
       loading: 'Loading vendors…',
+      loadMore: 'Load {count} more',
     },
     vendorCard: {
       copyToShare: 'Copy details to share',
@@ -253,11 +254,6 @@ export const translations = {
       city: 'City…',
       chooseStateFirst: 'Choose a state first',
       noCities: 'No cities over 100k in this state',
-    },
-    pagination: {
-      prev: '‹ Prev',
-      next: 'Next ›',
-      pageOf: 'Page {page} of {total}',
     },
     createNeighborhood: {
       title: 'Start a directory',
@@ -519,6 +515,7 @@ export const translations = {
       emptyNoVendors: 'Ningún vecindario ha añadido proveedores todavía.',
       emptyNoMatch: 'Prueba con otra búsqueda o filtro.',
       loading: 'Cargando proveedores…',
+      loadMore: 'Cargar {count} más',
     },
     vendorCard: {
       copyToShare: 'Copiar detalles para compartir',
@@ -581,11 +578,6 @@ export const translations = {
       city: 'Ciudad…',
       chooseStateFirst: 'Elige un estado primero',
       noCities: 'Ninguna ciudad con más de 100k en este estado',
-    },
-    pagination: {
-      prev: '‹ Anterior',
-      next: 'Siguiente ›',
-      pageOf: 'Página {page} de {total}',
     },
     createNeighborhood: {
       title: 'Crear un directorio',

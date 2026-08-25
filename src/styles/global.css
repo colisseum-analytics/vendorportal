@@ -259,8 +259,7 @@ a { color: var(--blue); }
   padding: 7px 6px; white-space:nowrap; transition: color .15s ease;
 }
 .filter-reset-btn:hover{ color: var(--red); }
-.pagination-row{ display:flex; align-items:center; justify-content:center; gap:16px; margin: 28px 0 8px; }
-.pagination-status{ font-family:'IBM Plex Mono', monospace; font-size:12px; color: var(--ink-soft); white-space:nowrap; }
+.load-more-row{ display:flex; justify-content:center; margin: 28px 0 8px; }
 .filter-pill-btn-active{ border-style:solid; border-color: var(--ink); background: var(--ink); color: var(--paper-raised); }
 .filter-pill-btn-active:hover{ border-color: var(--blue); color: var(--paper-raised); background: var(--ink); }
 .filter-pill-label{ opacity:0.75; }

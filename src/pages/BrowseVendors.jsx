@@ -6,12 +6,11 @@ import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
-import Pagination from '../components/Pagination.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
-const PAGE_SIZE = 25
+const BATCH_SIZE = 50
 
 export default function BrowseVendors() {
   const { t, tCategory } = useLanguage()
@@ -24,7 +23,7 @@ export default function BrowseVendors() {
   const [category, setCategory] = useState(null)
   const [status, setStatus] = useState(null)
   const [neighborhoodFilter, setNeighborhoodFilter] = useState(null)
-  const [page, setPage] = useState(1)
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
   const [view, setView] = useVendorView()
 
   useEffect(() => {
@@ -101,14 +100,11 @@ export default function BrowseVendors() {
   }, [vendors, status, category, city, neighborhoodFilter, search, neighborhoodById])
 
   useEffect(() => {
-    setPage(1)
+    setVisibleCount(BATCH_SIZE)
   }, [status, category, city, neighborhoodFilter, search])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageItems = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
-  )
+  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount])
+  const remaining = filtered.length - visibleItems.length
 
   const cityCount = new Set(neighborhoods.map((n) => n.city).filter(Boolean)).size
 
@@ -170,7 +166,7 @@ export default function BrowseVendors() {
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
-          {pageItems.map((v) => (
+          {visibleItems.map((v) => (
             <VendorCard
               key={v.id}
               vendor={v}
@@ -182,7 +178,13 @@ export default function BrowseVendors() {
         </div>
       )}
 
-      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+      {remaining > 0 ? (
+        <div className="load-more-row">
+          <button type="button" className="btn-secondary" onClick={() => setVisibleCount((c) => c + BATCH_SIZE)}>
+            {t('browse.loadMore', { count: Math.min(remaining, BATCH_SIZE) })}
+          </button>
+        </div>
+      ) : null}
 
       <footer className="site-footer">
         {t('footer.tagline')}
