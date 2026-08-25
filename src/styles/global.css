@@ -576,7 +576,7 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
   background: var(--paper-raised); border:1px solid var(--line); border-radius: var(--radius);
   padding: 12px 16px; box-shadow: var(--shadow);
 }
-.info-item-notes{ font-size:13px; color: var(--ink-soft); margin:4px 0 6px; }
+.info-item-notes{ font-size:13px; color: var(--ink-soft); margin:4px 0 6px; white-space:pre-wrap; }
 .info-item-meta{ display:flex; flex-direction:column; gap:4px; font-size:13px; color: var(--ink-soft); margin-top:6px; }
 .info-item-meta .row{ display:flex; gap:7px; }
 .info-item-meta .icon{ color: var(--ink-faint); flex-shrink:0; width:14px; }
@@ -589,7 +589,7 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
   padding: 16px 20px; box-shadow: var(--shadow);
 }
 .faq-question{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; margin:0 0 6px; }
-.faq-answer{ font-size:13.5px; color: var(--ink-soft); margin:0; }
+.faq-answer{ font-size:13.5px; color: var(--ink-soft); margin:0; white-space:pre-wrap; }
 .faq-vendor-card{
   display:flex; flex-direction:column; gap:2px; margin-top:10px; padding:10px 14px;
   background: var(--paper); border:1px solid var(--line); border-radius:10px; text-decoration:none;
