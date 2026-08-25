@@ -255,11 +255,6 @@ export const translations = {
       chooseStateFirst: 'Choose a state first',
       noCities: 'No cities over 100k in this state',
     },
-    pagination: {
-      prev: '‹ Prev',
-      next: 'Next ›',
-      pageOf: 'Page {page} of {total}',
-    },
     createNeighborhood: {
       title: 'Start a directory',
       subtitle: "Submit the basics below, then verify your email to activate your account. A platform admin will review it, and once approved you'll be its first admin.",
@@ -583,11 +578,6 @@ export const translations = {
       city: 'Ciudad…',
       chooseStateFirst: 'Elige un estado primero',
       noCities: 'Ninguna ciudad con más de 100k en este estado',
-    },
-    pagination: {
-      prev: '‹ Anterior',
-      next: 'Siguiente ›',
-      pageOf: 'Página {page} de {total}',
     },
     createNeighborhood: {
       title: 'Crear un directorio',
