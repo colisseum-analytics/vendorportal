@@ -191,6 +191,7 @@ export const translations = {
       emptyNoVendors: 'No neighborhoods have added vendors yet.',
       emptyNoMatch: 'Try a different search or filter.',
       loading: 'Loading vendors…',
+      loadMore: 'Load {count} more',
     },
     vendorCard: {
       copyToShare: 'Copy details to share',
@@ -519,6 +520,7 @@ export const translations = {
       emptyNoVendors: 'Ningún vecindario ha añadido proveedores todavía.',
       emptyNoMatch: 'Prueba con otra búsqueda o filtro.',
       loading: 'Cargando proveedores…',
+      loadMore: 'Cargar {count} más',
     },
     vendorCard: {
       copyToShare: 'Copiar detalles para compartir',
