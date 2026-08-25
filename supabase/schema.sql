@@ -933,7 +933,10 @@ create table neighborhood_info_items (
   vendor_id uuid references vendors(id) on delete set null,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  -- Links a faq-section item to a vendor category, shown as a "browse this
+  -- category" card under the answer (see migration 20260807090000).
+  category text
 );
 
 create index neighborhood_info_items_neighborhood_idx on neighborhood_info_items(neighborhood_id, section);
