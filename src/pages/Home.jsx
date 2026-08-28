@@ -13,7 +13,6 @@ export default function Home() {
   const [vendorCounts, setVendorCounts] = useState({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [adMessage] = useState(() => (Math.random() < 0.5 ? 'adMessage1' : 'adMessage2'))
 
   useEffect(() => {
     let active = true
@@ -49,29 +48,6 @@ export default function Home() {
             <li>{t('home.subtitleBullet2')}</li>
             <li>{t('home.subtitleBullet3')}</li>
           </ul>
-        </div>
-      </div>
-
-      <div className="cta-grid">
-        <div className="cta-banner">
-          <div>
-            <h2>{t('home.ctaTitle')}</h2>
-            <p>{t('home.ctaBody')}</p>
-          </div>
-          <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
-        </div>
-        <div className="cta-banner ad-banner">
-          <div>
-            {adMessage === 'adMessage2' ? (
-              <>
-                <h2>{t('home.adMessage2Title')}</h2>
-                <p>{t('home.adMessage2Body')}</p>
-              </>
-            ) : (
-              <p className="ad-banner-solo">{t('home.adMessage1')}</p>
-            )}
-          </div>
-          <Link className="btn-invert" to="/new">{t('home.adCta')}</Link>
         </div>
       </div>
 
@@ -116,6 +92,14 @@ export default function Home() {
           ))}
         </div>
       )}
+
+      <div className="cta-banner cta-banner-compact">
+        <div>
+          <h2>{t('home.ctaTitle')}</h2>
+          <p>{t('home.ctaBody')}</p>
+        </div>
+        <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
+      </div>
 
       <footer className="site-footer">
         {t('footer.tagline')}
