@@ -33,6 +33,7 @@ export default function BrowseVendors() {
       const { data: n } = await supabase
         .from('neighborhoods')
         .select('id, name, slug, city')
+        .eq('active', true)
         .order('name')
       if (!active) return
       const neighborhoodList = n || []
