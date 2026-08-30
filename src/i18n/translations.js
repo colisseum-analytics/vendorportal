@@ -36,7 +36,7 @@ export const translations = {
     },
     footer: {
       tagline: 'A directory platform run by neighbors, for neighbors.',
-      builtWith: 'Built with 💙 in Miami',
+      builtWith: 'Built in Miami ☀️',
       disclaimer:
         'Vendors listed here are recommendations submitted by individual residents and do not constitute an official legal endorsement, vetting, or warranty of any kind by this platform.',
     },
@@ -61,7 +61,6 @@ export const translations = {
       eyebrow: 'Directory',
       adminDashboard: 'Admin dashboard',
       requestAdminAccess: 'Request admin access',
-      adminLogin: 'Admin login',
       contactAdmins: 'Feedback',
       statVendors: 'Vendor',
       statVendorsPlural: 'Vendors',
@@ -356,7 +355,7 @@ export const translations = {
     },
     footer: {
       tagline: 'Una plataforma de directorios creada por vecinos, para vecinos.',
-      builtWith: 'Hecho con 💙 en Miami',
+      builtWith: 'Hecho en Miami ☀️',
       disclaimer:
         'Los proveedores aquí listados son recomendaciones enviadas por residentes individuales y no constituyen un aval legal oficial, verificación ni garantía de ningún tipo por parte de esta plataforma.',
     },
@@ -381,7 +380,6 @@ export const translations = {
       eyebrow: 'Directorio',
       adminDashboard: 'Panel de administración',
       requestAdminAccess: 'Solicitar acceso de administrador',
-      adminLogin: 'Acceso de administrador',
       contactAdmins: 'Comentarios',
       statVendors: 'Proveedor',
       statVendorsPlural: 'Proveedores',
