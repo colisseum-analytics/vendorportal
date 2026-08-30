@@ -23,7 +23,6 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
     { to: `/n/${slug}/community-services`, label: t('nav.communityServices'), icon: '🧰' },
     { to: `/n/${slug}/emergency`, label: t('nav.emergency'), icon: '⚠' },
     { to: `/n/${slug}/faq`, label: t('nav.faq'), icon: '❓' },
-    { to: `/n/${slug}/help`, label: t('nav.help'), icon: '📖' },
   ]
   // Below the divider: the two things that actually require being
   // logged in (posting/joining the board, and account settings), kept
@@ -50,6 +49,12 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
         <button type="button" className="sidebar-link" onClick={onContactAdmins}>
           <span className="sidebar-link-icon">💬</span>{t('directory.contactAdmins')}
         </button>
+        <NavLink
+          to={`/n/${slug}/help`}
+          className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
+        >
+          <span className="sidebar-link-icon">📖</span>{t('nav.help')}
+        </NavLink>
         <hr className="sidebar-divider" />
         {authItems.map((item) => (
           <NavLink
