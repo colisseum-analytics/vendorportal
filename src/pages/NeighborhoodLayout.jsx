@@ -119,8 +119,10 @@ export default function NeighborhoodLayout() {
           </div>
 
           <footer className="site-footer">
-            {t('directory.footerAskAdmin')}{' '}
-            <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>{t('directory.footerAskAdminLink')}</button> {t('directory.footerAskAdminSuffix')}
+            <p className="footer-feedback">
+              {t('directory.footerAskAdmin')}{' '}
+              <button type="button" className="footer-link" onClick={() => setContactOpen(true)}>{t('directory.footerAskAdminLink')}</button> {t('directory.footerAskAdminSuffix')}
+            </p>
             <FooterExtras />
           </footer>
 
