@@ -56,7 +56,7 @@ export default function ContactAdminModal({ neighborhood, membershipUnit, onCanc
             <h2>{t('contactModal.loginRequiredTitle')}</h2>
             <p className="sub">{t('contactModal.loginRequiredBody')}</p>
             <div className="modal-actions">
-              <button type="button" className="btn-secondary" onClick={onCancel}>{t('common.cancel')}</button>
+              <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={onCancel}>{t('common.cancel')}</button>
               <Link className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }} to={`/login?redirect=${encodeURIComponent(location.pathname)}`}>
                 {t('contactModal.loginCta')}
               </Link>
