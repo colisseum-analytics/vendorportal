@@ -17,22 +17,27 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
   const { slug } = useParams()
   const { t } = useLanguage()
 
-  const directoryItems = [
+  const publicItems = [
     { to: `/n/${slug}`, label: t('nav.vendors'), icon: '🛠', end: true },
     { to: `/n/${slug}/hoa-contacts`, label: t('nav.hoaContacts'), icon: '☎' },
     { to: `/n/${slug}/community-services`, label: t('nav.communityServices'), icon: '🧰' },
     { to: `/n/${slug}/emergency`, label: t('nav.emergency'), icon: '⚠' },
     { to: `/n/${slug}/faq`, label: t('nav.faq'), icon: '❓' },
+    { to: `/n/${slug}/help`, label: t('nav.help'), icon: '📖' },
+  ]
+  // Below the divider: the two things that actually require being
+  // logged in (posting/joining the board, and account settings), kept
+  // visually apart from the always-public directory pages above.
+  const authItems = [
     { to: `/n/${slug}/board`, label: t('nav.serviceBoard'), icon: '🛎' },
     ...(user ? [{ to: `/n/${slug}/settings`, label: t('nav.settings'), icon: '👤' }] : []),
-    { to: `/n/${slug}/help`, label: t('nav.help'), icon: '📖' },
   ]
 
   return (
     <nav className="neighborhood-sidebar">
       <div className="sidebar-group">
         <p className="sidebar-group-label">Directory</p>
-        {directoryItems.map((item) => (
+        {publicItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -45,6 +50,17 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
         <button type="button" className="sidebar-link" onClick={onContactAdmins}>
           <span className="sidebar-link-icon">💬</span>{t('directory.contactAdmins')}
         </button>
+        <hr className="sidebar-divider" />
+        {authItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
+          >
+            <span className="sidebar-link-icon">{item.icon}</span>{item.label}
+          </NavLink>
+        ))}
       </div>
 
       {isAdmin ? (

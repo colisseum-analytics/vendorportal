@@ -562,6 +562,7 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
 .sidebar-link:hover{ background: var(--paper); color: var(--ink); }
 .sidebar-link-active{ background: var(--ink); color: var(--paper-raised); font-weight:600; }
 .sidebar-link-active:hover{ background: var(--ink); color: var(--paper-raised); }
+.sidebar-divider{ border:none; border-top:1px solid var(--line); margin:8px 6px; }
 .sidebar-link-icon{ width:18px; text-align:center; flex-shrink:0; }
 
 @media (max-width: 720px){
@@ -574,6 +575,7 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
   .sidebar-group-label{ display:none; }
   .sidebar-link{ white-space:nowrap; padding: 7px 12px; border-radius:20px; border:1px solid var(--line); }
   .sidebar-link-active{ border-color: var(--ink); }
+  .sidebar-divider{ width:1px; height:24px; flex-shrink:0; border-top:none; border-left:1px solid var(--line); margin:0 4px; }
 }
 
 .neighborhood-content{ min-width:0; }
