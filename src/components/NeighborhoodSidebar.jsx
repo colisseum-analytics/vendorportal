@@ -24,13 +24,9 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
     { to: `/n/${slug}/emergency`, label: t('nav.emergency'), icon: '⚠' },
     { to: `/n/${slug}/faq`, label: t('nav.faq'), icon: '❓' },
   ]
-  // Below the divider: the two things that actually require being
-  // logged in (posting/joining the board, and account settings), kept
-  // visually apart from the always-public directory pages above.
-  const authItems = [
-    { to: `/n/${slug}/board`, label: t('nav.serviceBoard'), icon: '🛎' },
-    ...(user ? [{ to: `/n/${slug}/settings`, label: t('nav.settings'), icon: '👤' }] : []),
-  ]
+  // Below the divider: things that actually require being logged in
+  // (posting/joining the board, sending feedback, account settings),
+  // kept visually apart from the always-public directory pages above.
 
   return (
     <nav className="neighborhood-sidebar">
@@ -46,9 +42,6 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
             <span className="sidebar-link-icon">{item.icon}</span>{item.label}
           </NavLink>
         ))}
-        <button type="button" className="sidebar-link" onClick={onContactAdmins}>
-          <span className="sidebar-link-icon">💬</span>{t('directory.contactAdmins')}
-        </button>
         <NavLink
           to={`/n/${slug}/help`}
           className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
@@ -56,16 +49,23 @@ export default function NeighborhoodSidebar({ isAdmin, user, onContactAdmins }) 
           <span className="sidebar-link-icon">📖</span>{t('nav.help')}
         </NavLink>
         <hr className="sidebar-divider" />
-        {authItems.map((item) => (
+        <NavLink
+          to={`/n/${slug}/board`}
+          className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
+        >
+          <span className="sidebar-link-icon">🛎</span>{t('nav.serviceBoard')}
+        </NavLink>
+        <button type="button" className="sidebar-link" onClick={onContactAdmins}>
+          <span className="sidebar-link-icon">💬</span>{t('directory.contactAdmins')}
+        </button>
+        {user ? (
           <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
+            to={`/n/${slug}/settings`}
             className={({ isActive }) => `sidebar-link ${isActive ? 'sidebar-link-active' : ''}`}
           >
-            <span className="sidebar-link-icon">{item.icon}</span>{item.label}
+            <span className="sidebar-link-icon">👤</span>{t('nav.settings')}
           </NavLink>
-        ))}
+        ) : null}
       </div>
 
       {isAdmin ? (
