@@ -107,13 +107,9 @@ export default function NeighborhoodLayout() {
                 {neighborhood.tagline ? <p className="tagline">{neighborhood.tagline}</p> : null}
               </div>
             </div>
-            {!isAdmin ? (
+            {!isAdmin && user ? (
               <div className="admin-corner">
-                {user ? (
-                  <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.requestAdminAccess')}</Link>
-                ) : (
-                  <Link className="btn-ghost" to={`/login?redirect=/n/${slug}/admin`}>{t('directory.adminLogin')}</Link>
-                )}
+                <Link className="btn-ghost" to={`/n/${slug}/admin`}>{t('directory.requestAdminAccess')}</Link>
               </div>
             ) : null}
           </div>
