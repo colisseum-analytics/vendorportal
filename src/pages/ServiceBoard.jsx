@@ -160,9 +160,12 @@ export default function ServiceBoard() {
         <div className="auth-card">
           <h1>{t('serviceBoard.loginRequiredTitle')}</h1>
           <p className="sub">{t('serviceBoard.loginRequiredBody')}</p>
-          <Link className="btn-primary" to={`/login?redirect=/n/${slug}/board`} style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
-            {t('serviceBoard.loginButton')}
-          </Link>
+          <div className="modal-actions">
+            <Link className="btn-secondary" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }} to={`/n/${slug}`}>{t('common.cancel')}</Link>
+            <Link className="btn-primary" style={{ textAlign: 'center', textDecoration: 'none' }} to={`/login?redirect=/n/${slug}/board`}>
+              {t('serviceBoard.loginButton')}
+            </Link>
+          </div>
         </div>
       </div>
     )
