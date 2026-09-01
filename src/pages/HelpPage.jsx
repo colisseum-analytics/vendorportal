@@ -23,11 +23,11 @@ const SECTIONS = {
     },
     {
       title: 'Signing in',
-      body: 'There\'s no password to remember. Enter your email wherever you see "Sign in to manage or join," and we\'ll send a one-time code — enter it and you\'re in. Browsing vendors and community info doesn\'t require an account at all; you only need to sign in to join the Service Board, save your unit info, or send feedback.',
+      body: 'There\'s no password to remember. Enter your email wherever you see "Sign in to manage or join," and we\'ll send a one-time code — enter it and you\'re in. Sign in to send feedback, save your unit/address info, or partake on the Service Board.',
     },
     {
       title: 'The Service Board',
-      body: 'This is where residents post and track community issues and ideas — a pothole, a broken gate, a suggestion for the HOA. The first time you visit, you\'ll be asked for your name and unit to join. Once you\'re in, you can post a need, browse what others have posted, and click "I have this too" on anything you\'re also experiencing to help admins see what matters most. Sort by Recent or Most upvoted, and filter by category, severity, or status.',
+      body: 'This is where residents post and track community issues and ideas — a pothole, a broken gate, a suggestion for the HOA. The first time you visit, you\'ll be asked for your name and unit/address to join. Once you\'re in, you can post a need, browse what others have posted, and click "I have this too" on anything you\'re also experiencing to help admins see what matters most. Sort by Recent or Most upvoted, and filter by category, severity, or status.',
     },
     {
       title: 'Sending feedback',
@@ -35,7 +35,7 @@ const SECTIONS = {
     },
     {
       title: 'Your account settings',
-      body: 'Click your initials in the top right to update your name, email, or unit number. Changing your email sends a confirmation link before it takes effect.',
+      body: 'Click your initials in the top right to update your name, email, or unit/address. Changing your email sends a confirmation link before it takes effect.',
     },
   ],
   es: [
@@ -53,11 +53,11 @@ const SECTIONS = {
     },
     {
       title: 'Iniciar sesión',
-      body: 'No hay ninguna contraseña que recordar. Escribe tu correo donde veas "Inicia sesión para administrar o unirte" y te enviaremos un código de un solo uso — ingrésalo y listo. Explorar proveedores e información comunitaria no requiere cuenta; solo necesitas iniciar sesión para unirte al Tablón de Servicios, guardar los datos de tu unidad, o enviar comentarios.',
+      body: 'No hay ninguna contraseña que recordar. Escribe tu correo donde veas "Inicia sesión para administrar o unirte" y te enviaremos un código de un solo uso — ingrésalo y listo. Inicia sesión para enviar comentarios, guardar tu unidad/dirección, o participar en el Tablón de Servicios.',
     },
     {
       title: 'El Tablón de Servicios',
-      body: 'Aquí es donde los residentes publican y dan seguimiento a problemas e ideas de la comunidad — un bache, un portón roto, una sugerencia para la HOA. La primera vez que entres, te pediremos tu nombre y unidad para unirte. Una vez dentro, puedes publicar una necesidad, ver lo que otros han publicado, y hacer clic en "Yo también tengo esto" en cualquier publicación que también te afecte, para ayudar a los administradores a ver qué es más importante. Ordena por Reciente o Más votados, y filtra por categoría, gravedad o estado.',
+      body: 'Aquí es donde los residentes publican y dan seguimiento a problemas e ideas de la comunidad — un bache, un portón roto, una sugerencia para la HOA. La primera vez que entres, te pediremos tu nombre y unidad/dirección para unirte. Una vez dentro, puedes publicar una necesidad, ver lo que otros han publicado, y hacer clic en "Yo también tengo esto" en cualquier publicación que también te afecte, para ayudar a los administradores a ver qué es más importante. Ordena por Reciente o Más votados, y filtra por categoría, gravedad o estado.',
     },
     {
       title: 'Enviar comentarios',
@@ -65,7 +65,7 @@ const SECTIONS = {
     },
     {
       title: 'La configuración de tu cuenta',
-      body: 'Haz clic en tus iniciales en la esquina superior derecha para actualizar tu nombre, correo o número de unidad. Cambiar tu correo envía un enlace de confirmación antes de que el cambio tome efecto.',
+      body: 'Haz clic en tus iniciales en la esquina superior derecha para actualizar tu nombre, correo o unidad/dirección. Cambiar tu correo envía un enlace de confirmación antes de que el cambio tome efecto.',
     },
   ],
 }

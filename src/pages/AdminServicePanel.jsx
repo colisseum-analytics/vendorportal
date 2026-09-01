@@ -137,7 +137,7 @@ export default function AdminServicePanel() {
               <div className="user-row" key={n.id}>
                 <div className="user-row-main">
                   <strong>{n.title}</strong>
-                  <span className="user-row-meta">{n.category} · Unit {n.unit || '—'} · {relativeTime(n.created_at)}</span>
+                  <span className="user-row-meta">{n.category} · Unit/Address {n.unit || '—'} · {relativeTime(n.created_at)}</span>
                 </div>
                 <div className="user-row-actions">
                   <select value={n.severity} disabled={busyId === n.id} onChange={(e) => updateNeedField(n.id, 'severity', e.target.value)}>

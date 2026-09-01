@@ -37,7 +37,7 @@ export default function PlatformMessages() {
       <div className="message-item-head">
         <span className="message-from">
           {m.category ? <span className={`badge ${m.category === 'issue' ? 'badge-inactive' : 'badge-active'}`}>{m.category === 'issue' ? 'Issue' : 'Idea'}</span> : null}
-          {' '}{m.neighborhood_id ? (neighborhoodNameById[m.neighborhood_id] || 'Unknown neighborhood') : 'General inquiry'} · {m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}{m.unit ? ` · Unit ${m.unit}` : ''}
+          {' '}{m.neighborhood_id ? (neighborhoodNameById[m.neighborhood_id] || 'Unknown neighborhood') : 'General inquiry'} · {m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}{m.unit ? ` · Unit/Address ${m.unit}` : ''}
         </span>
         <span className="message-time">{relativeTime(m.created_at)}</span>
       </div>

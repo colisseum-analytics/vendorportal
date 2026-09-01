@@ -67,7 +67,7 @@ export default function AdminResidents() {
     setAddError('')
     setAddMsg('')
     if (!addEmail.trim() || !addUnit.trim()) {
-      setAddError('Give this resident an email and unit.')
+      setAddError('Give this resident an email and unit/address.')
       return
     }
     setAddSaving(true)
@@ -117,7 +117,7 @@ export default function AdminResidents() {
     <div className="wrap">
       <div style={{ margin: '20px 0 10px' }}>
         <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 28, margin: '0 0 4px' }}>Residents</h1>
-        <p className="tagline">The Service Board roster — who's a resident, their unit, and role.</p>
+        <p className="tagline">The Service Board roster — who's a resident, their unit/address, and role.</p>
       </div>
 
       <div className="auth-card" style={{ marginBottom: 20 }}>
@@ -157,7 +157,7 @@ export default function AdminResidents() {
                   disabled={busyId === m.user_id || (unitDrafts[m.user_id] || '').trim() === m.unit}
                   onClick={() => updateMemberUnit(m.user_id)}
                 >
-                  Save unit
+                  Save unit/address
                 </button>
                 {m.is_admin ? (
                   <span className="badge badge-active">Admin</span>

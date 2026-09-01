@@ -82,7 +82,7 @@ export default function AdminMessages() {
               <div className="message-item-head">
                 <span className="message-from">
                   {m.category ? <span className={`badge ${m.category === 'issue' ? 'badge-inactive' : 'badge-active'}`}>{m.category === 'issue' ? 'Issue' : 'Idea'}</span> : null}
-                  {' '}{m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}{m.unit ? ` · Unit ${m.unit}` : ''}
+                  {' '}{m.name || 'Anonymous'}{m.email ? ` · ${m.email}` : ''}{m.unit ? ` · Unit/Address ${m.unit}` : ''}
                 </span>
                 <span className="message-time">{relativeTime(m.created_at)}</span>
               </div>
