@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
@@ -74,9 +74,12 @@ export default function Login() {
                 <label>{t('login.emailLabel')}</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
               </div>
-              <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-                {loading ? t('login.emailSubmitting') : t('login.emailSubmit')}
-              </button>
+              <div className="modal-actions">
+                <Link className="btn-secondary" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }} to={redirectTo}>{t('common.cancel')}</Link>
+                <button type="submit" className="btn-primary" disabled={loading}>
+                  {loading ? t('login.emailSubmitting') : t('login.emailSubmit')}
+                </button>
+              </div>
             </form>
           </>
         ) : (
@@ -94,9 +97,12 @@ export default function Login() {
                 autoFocus
               />
             </div>
-            <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-              {loading ? t('login.codeSubmitting') : t('login.codeSubmit')}
-            </button>
+            <div className="modal-actions">
+              <Link className="btn-secondary" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }} to={redirectTo}>{t('common.cancel')}</Link>
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? t('login.codeSubmitting') : t('login.codeSubmit')}
+              </button>
+            </div>
             <p className="auth-switch">
               <button type="button" className="link-btn" onClick={sendCode} disabled={loading}>{t('login.resendCode')}</button>
               {' · '}
