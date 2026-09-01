@@ -298,7 +298,7 @@ export const translations = {
     },
     login: {
       title: 'Log in',
-      subtitle: 'Log in to manage vendors for your neighborhood.',
+      subtitle: 'Log in to join the Service Board, leave feedback, or manage vendors for your neighborhood.',
       emailLabel: 'Email',
       emailSubmit: 'Send code',
       emailSubmitting: 'Sending…',
@@ -617,7 +617,7 @@ export const translations = {
     },
     login: {
       title: 'Iniciar sesión',
-      subtitle: 'Inicia sesión para administrar los proveedores de tu vecindario.',
+      subtitle: 'Inicia sesión para unirte al Tablón de Servicios, dejar comentarios o administrar los proveedores de tu vecindario.',
       emailLabel: 'Correo electrónico',
       emailSubmit: 'Enviar código',
       emailSubmitting: 'Enviando…',
