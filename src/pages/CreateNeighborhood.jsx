@@ -18,6 +18,7 @@ const DEFAULT_CATEGORIES = [
   'Professional Services',
 ]
 const DEFAULT_TAGLINE = 'A resident-run guide to trusted local vendors.'
+const COMMUNITY_TYPES = ['hoa', 'condo', 'community']
 
 function slugify(str) {
   return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -31,6 +32,7 @@ export default function CreateNeighborhood() {
   const [slugEdited, setSlugEdited] = useState(false)
   const [tagline, setTagline] = useState(DEFAULT_TAGLINE)
   const [city, setCity] = useState('')
+  const [communityType, setCommunityType] = useState('')
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
   const [contactName, setContactName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
@@ -85,6 +87,7 @@ export default function CreateNeighborhood() {
       slug: cleanSlug,
       tagline: tagline.trim() || null,
       city: city.trim(),
+      community_type: communityType || null,
       categories,
       contact_name: contactName.trim() || null,
       contact_email: cleanEmail,
@@ -151,6 +154,15 @@ export default function CreateNeighborhood() {
             <label>{t('createNeighborhood.cityLabel')}</label>
             <CityPicker value={city} onChange={setCity} />
             <div className="hint">{t('createNeighborhood.cityHint')}</div>
+          </div>
+          <div className="field">
+            <label>{t('createNeighborhood.communityTypeLabel')}</label>
+            <select value={communityType} onChange={(e) => setCommunityType(e.target.value)}>
+              <option value="">{t('createNeighborhood.communityTypeUnset')}</option>
+              {COMMUNITY_TYPES.map((c) => (
+                <option key={c} value={c}>{t(`createNeighborhood.communityTypeLabels.${c}`)}</option>
+              ))}
+            </select>
           </div>
           <div className="field">
             <label>{t('createNeighborhood.categoriesLabel')}</label>

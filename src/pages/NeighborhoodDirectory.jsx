@@ -15,9 +15,14 @@ const STATUS_OPTIONS = ['Verified', 'Unknown']
 export default function NeighborhoodDirectory() {
   const { neighborhood } = useOutletContext()
   const { t, tCategory } = useLanguage()
+  const metaDescriptionKey = neighborhood.community_type === 'hoa'
+    ? 'directory.metaDescriptionFallbackHoa'
+    : neighborhood.community_type === 'condo'
+    ? 'directory.metaDescriptionFallbackCondo'
+    : 'directory.metaDescriptionFallback'
   usePageMeta({
     title: neighborhood.name,
-    description: neighborhood.tagline || t('directory.metaDescriptionFallback', { name: neighborhood.name }),
+    description: neighborhood.tagline || t(metaDescriptionKey, { name: neighborhood.name }),
     image: neighborhood.logo_url,
   })
   const [searchParams, setSearchParams] = useSearchParams()

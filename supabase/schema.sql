@@ -18,6 +18,7 @@ create table neighborhoods (
   categories jsonb not null default '["Food & Drink","Home & Repair","Health & Wellness","Shops & Services","Kids & Pets","Professional"]'::jsonb,
   logo_url text,
   city text,
+  community_type text,
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -92,6 +93,7 @@ create table neighborhood_requests (
   slug text not null,
   tagline text,
   city text,
+  community_type text,
   categories jsonb not null default '[]'::jsonb,
   contact_name text,
   contact_email text not null,
@@ -476,8 +478,8 @@ begin
     raise exception 'This request cannot be approved until the requester verifies their email.';
   end if;
 
-  insert into neighborhoods (name, slug, tagline, city, categories)
-  values (req.name, req.slug, req.tagline, req.city, coalesce(req.categories, '[]'::jsonb))
+  insert into neighborhoods (name, slug, tagline, city, community_type, categories)
+  values (req.name, req.slug, req.tagline, req.city, req.community_type, coalesce(req.categories, '[]'::jsonb))
   returning id into new_id;
 
   select id into existing_user_id from auth.users where lower(email) = lower(req.contact_email);
