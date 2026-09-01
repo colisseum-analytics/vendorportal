@@ -18,12 +18,12 @@ const SECTIONS = {
       body: 'These four sections are reference info kept up to date by your neighborhood\'s admins — board and management contacts, utility providers, emergency numbers, and answers to common questions. If something looks out of date, use Feedback (below) to flag it.',
     },
     {
-      title: 'Signing in',
-      body: 'There\'s no password to remember. Enter your email wherever you see "Sign in to manage or join," and we\'ll send a one-time code — enter it and you\'re in. Browsing vendors and community info doesn\'t require an account at all; you only need to sign in to join the Service Board, save your unit info, or send feedback.',
-    },
-    {
       title: 'Finding your neighborhood',
       body: 'Search for it by name on the LoopListing homepage, or use "Browse all vendors" to search across every neighborhood on the platform at once. If your community isn\'t listed yet, use "Start a directory" from the homepage to request one.',
+    },
+    {
+      title: 'Signing in',
+      body: 'There\'s no password to remember. Enter your email wherever you see "Sign in to manage or join," and we\'ll send a one-time code — enter it and you\'re in. Browsing vendors and community info doesn\'t require an account at all; you only need to sign in to join the Service Board, save your unit info, or send feedback.',
     },
     {
       title: 'The Service Board',
@@ -48,12 +48,12 @@ const SECTIONS = {
       body: 'Estas cuatro secciones son información de referencia que los administradores de tu vecindario mantienen actualizada — contactos de la junta y administración, proveedores de servicios públicos, números de emergencia y respuestas a preguntas comunes. Si algo parece desactualizado, usa Comentarios (más abajo) para avisar.',
     },
     {
-      title: 'Iniciar sesión',
-      body: 'No hay ninguna contraseña que recordar. Escribe tu correo donde veas "Inicia sesión para administrar o unirte" y te enviaremos un código de un solo uso — ingrésalo y listo. Explorar proveedores e información comunitaria no requiere cuenta; solo necesitas iniciar sesión para unirte al Tablón de Servicios, guardar los datos de tu unidad, o enviar comentarios.',
-    },
-    {
       title: 'Encontrar tu vecindario',
       body: 'Búscalo por nombre en la página principal de LoopListing, o usa "Ver todos los proveedores" para buscar en todos los vecindarios de la plataforma a la vez. Si tu comunidad todavía no está en la lista, usa "Crear un directorio" desde la página principal para solicitar uno.',
+    },
+    {
+      title: 'Iniciar sesión',
+      body: 'No hay ninguna contraseña que recordar. Escribe tu correo donde veas "Inicia sesión para administrar o unirte" y te enviaremos un código de un solo uso — ingrésalo y listo. Explorar proveedores e información comunitaria no requiere cuenta; solo necesitas iniciar sesión para unirte al Tablón de Servicios, guardar los datos de tu unidad, o enviar comentarios.',
     },
     {
       title: 'El Tablón de Servicios',
