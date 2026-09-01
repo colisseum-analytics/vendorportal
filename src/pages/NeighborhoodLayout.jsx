@@ -103,7 +103,14 @@ export default function NeighborhoodLayout() {
               ) : null}
               <div>
                 <p className="eyebrow"><Link to="/">{t('common.backToAllNeighborhoods')}</Link> · {t('directory.eyebrow')}</p>
-                <h1>{neighborhood.name}</h1>
+                <h1>
+                  {neighborhood.name}
+                  {neighborhood.community_type ? (
+                    <span className="badge badge-neutral" style={{ marginLeft: 10, verticalAlign: 'middle' }}>
+                      {t(`createNeighborhood.communityTypeLabels.${neighborhood.community_type}`)}
+                    </span>
+                  ) : null}
+                </h1>
                 {neighborhood.tagline ? <p className="tagline">{neighborhood.tagline}</p> : null}
               </div>
             </div>

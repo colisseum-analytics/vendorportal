@@ -18,7 +18,7 @@ export default function Home() {
     let active = true
     async function load() {
       const [{ data: n, error }, { data: v }] = await Promise.all([
-        supabase.from('neighborhoods').select('id, slug, name, tagline, logo_url, city, active').order('name'),
+        supabase.from('neighborhoods').select('id, slug, name, tagline, logo_url, city, community_type, active').order('name'),
         supabase.from('vendors').select('neighborhood_id'),
       ])
       if (!active) return
@@ -76,7 +76,14 @@ export default function Home() {
                   <div className="n-logo n-logo-placeholder">{n.name?.[0]?.toUpperCase() || '?'}</div>
                 )}
                 <div>
-                  <h3>{n.name}</h3>
+                  <h3>
+                    {n.name}
+                    {n.community_type ? (
+                      <span className="badge badge-neutral" style={{ marginLeft: 8, verticalAlign: 'middle' }}>
+                        {t(`createNeighborhood.communityTypeLabels.${n.community_type}`)}
+                      </span>
+                    ) : null}
+                  </h3>
                   {n.tagline ? <p>{n.tagline}</p> : null}
                   <p className="n-row-meta">
                     {n.city ? `${n.city}${stateForCity(n.city) ? `, ${stateForCity(n.city)}` : ''} · ` : ''}
