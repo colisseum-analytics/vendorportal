@@ -6,6 +6,12 @@ import CityPicker from '../components/CityPicker.jsx'
 import CategoryManager from '../components/CategoryManager.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
+const COMMUNITY_TYPES = [
+  { value: 'hoa', label: 'HOA' },
+  { value: 'condo', label: 'Condo' },
+  { value: 'community', label: 'Community' },
+]
+
 export default function AdminSettings() {
   const { slug } = useParams()
   const { user } = useAuth()
@@ -15,6 +21,7 @@ export default function AdminSettings() {
   const [name, setName] = useState('')
   const [tagline, setTagline] = useState('')
   const [city, setCity] = useState('')
+  const [communityType, setCommunityType] = useState('')
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -27,6 +34,7 @@ export default function AdminSettings() {
     setName(neighborhood.name || '')
     setTagline(neighborhood.tagline || '')
     setCity(neighborhood.city || '')
+    setCommunityType(neighborhood.community_type || '')
   }, [neighborhood])
 
   const uploadLogo = async (e) => {
@@ -106,7 +114,7 @@ export default function AdminSettings() {
     setSaved(false)
     const { error } = await supabase
       .from('neighborhoods')
-      .update({ name: name.trim(), tagline: tagline.trim(), city: city.trim() || null })
+      .update({ name: name.trim(), tagline: tagline.trim(), city: city.trim() || null, community_type: communityType || null })
       .eq('id', neighborhood.id)
     setSaving(false)
     if (error) {
@@ -163,6 +171,14 @@ export default function AdminSettings() {
               <label>City</label>
               <CityPicker value={city} onChange={setCity} />
               <div className="hint">The broader city/metro area — used for cross-neighborhood city search.</div>
+            </div>
+            <div className="field">
+              <label>Community type</label>
+              <select value={communityType} onChange={(e) => setCommunityType(e.target.value)}>
+                <option value="">Not set</option>
+                {COMMUNITY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+              <div className="hint">Used to tailor search-engine descriptions for this page.</div>
             </div>
             <div className="field">
               <label>Web address</label>
