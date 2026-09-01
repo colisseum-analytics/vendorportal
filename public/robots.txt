@@ -5,3 +5,5 @@ Disallow: /signup
 Disallow: /verify-request
 Disallow: /platform-admin
 Disallow: /n/*/admin
+
+Sitemap: https://looplisting.com/sitemap.xml
