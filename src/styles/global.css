@@ -514,6 +514,7 @@ a { color: var(--blue); }
 
 .error-msg{ background: var(--red-soft); color: var(--red); font-size:13px; padding: 9px 12px; border-radius:8px; margin-bottom:14px; }
 .success-msg{ background: var(--green-soft); color: var(--green); font-size:13px; padding: 9px 12px; border-radius:8px; margin-bottom:14px; }
+.warning-msg{ background: var(--marigold-soft); color: #94660f; font-size:13px; padding: 9px 12px; border-radius:8px; margin-bottom:14px; }
 .close-x{ position:absolute; top:16px; right:16px; background:none; border:none; color: var(--ink-faint); font-size:20px; cursor:pointer; line-height:1; }
 
 .config-columns{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; align-items:start; }
