@@ -78,7 +78,11 @@ export default function NeighborhoodLayout() {
 
   usePageMeta({ title: t('directory.notFoundTitle'), noindex: true, skip: !notFound })
 
-  if (loading) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>{t('directory.loadingDirectory')}</div></div>
+  // Only the very first load has nothing to show yet — a reloadNeighborhood()
+  // refresh (after saving settings, uploading a logo, etc.) already has data
+  // on screen, so it should update in place rather than unmounting the whole
+  // Outlet and wiping every admin page's local state (form warnings, etc.).
+  if (loading && !neighborhood) return <div className="wrap"><div className="empty" style={{ marginTop: 60 }}>{t('directory.loadingDirectory')}</div></div>
 
   if (notFound) {
     return (

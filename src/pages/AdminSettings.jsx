@@ -12,6 +12,27 @@ const COMMUNITY_TYPES = [
   { value: 'community', label: 'Community' },
 ]
 
+// Matches MIN_SIZE in api/og-logo.js — logos smaller than this get padded
+// up automatically when shared, but a real image at this size looks
+// noticeably crisper than an upscaled small one.
+const MIN_LOGO_SIZE = 400
+
+function getImageDimensions(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve({ width: img.naturalWidth, height: img.naturalHeight })
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Could not read image dimensions.'))
+    }
+    img.src = url
+  })
+}
+
 export default function AdminSettings() {
   const { slug } = useParams()
   const { user } = useAuth()
@@ -28,6 +49,7 @@ export default function AdminSettings() {
 
   const [logoUploading, setLogoUploading] = useState(false)
   const [logoError, setLogoError] = useState('')
+  const [logoWarning, setLogoWarning] = useState('')
 
   useEffect(() => {
     if (!neighborhood) return
@@ -50,6 +72,12 @@ export default function AdminSettings() {
       return
     }
     setLogoError('')
+    const dims = await getImageDimensions(file).catch(() => null)
+    setLogoWarning(
+      dims && (dims.width < MIN_LOGO_SIZE || dims.height < MIN_LOGO_SIZE)
+        ? `This image is ${dims.width}×${dims.height}px — at least ${MIN_LOGO_SIZE}×${MIN_LOGO_SIZE}px is recommended so it stays sharp when shown around the site or shared as a link preview.`
+        : ''
+    )
     setLogoUploading(true)
     const ext = file.name.split('.').pop()
     const path = `${neighborhood.id}/logo.${ext}`
@@ -153,7 +181,8 @@ export default function AdminSettings() {
               </div>
             </div>
             {logoError ? <div className="error-msg">{logoError}</div> : null}
-            <div className="hint">Square images work best. Shown next to the neighborhood name across the site.</div>
+            {logoWarning ? <div className="warning-msg">{logoWarning}</div> : null}
+            <div className="hint">Square images work best, at least {MIN_LOGO_SIZE}×{MIN_LOGO_SIZE}px, under 3MB. Shown next to the neighborhood name across the site.</div>
           </div>
 
           {error ? <div className="error-msg">{error}</div> : null}
