@@ -43,7 +43,6 @@ export default function Home() {
           <p className="eyebrow">{t('home.eyebrow')}</p>
           <h1>{t('home.title')}</h1>
           <p className="tagline tagline-strong">{t('home.subtitle')}</p>
-          <p className="tagline">{t('home.subtitleSupport')}</p>
           <ul className="tagline-list">
             <li>{t('home.subtitleBullet1')}</li>
             <li>{t('home.subtitleBullet2')}</li>

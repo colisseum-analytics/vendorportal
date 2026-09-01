@@ -44,7 +44,6 @@ export const translations = {
       eyebrow: 'LoopListing',
       title: 'One place for every contact, vendor, and answer in your community',
       subtitle: 'Community-maintained vendor directory for HOAs and Condos.',
-      subtitleSupport: 'Everything around your community, in one place — trusted vendors, association info, and a way to reach your board, all in one spot.',
       subtitleBullet1: 'Run and updated by residents.',
       subtitleBullet2: "Freeing up Property Management and Boards of Directors' time.",
       subtitleBullet3: 'Management receives fewer repetitive messages, calls, and emails.',
