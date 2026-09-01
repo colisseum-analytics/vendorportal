@@ -15,7 +15,7 @@ const BOT_UA_PATTERN = /facebookexternalhit|Twitterbot|Slackbot|LinkedInBot|What
 
 const SITE_URL = 'https://looplisting.com'
 const SITE_NAME = 'LoopListing'
-const DEFAULT_IMAGE = 'https://looplisting.com/email-logo.png'
+const DEFAULT_IMAGE = 'https://looplisting.com/og-image.jpg'
 
 export const config = {
   matcher: '/n/:slug',
@@ -78,7 +78,10 @@ export default async function middleware(request) {
     const html = renderHtml({
       title: n.name,
       description,
-      image: n.logo_url || DEFAULT_IMAGE,
+      // Proxied through our own domain instead of linking Supabase Storage
+      // directly — its CDN sends X-Robots-Tag: none, which link-preview
+      // bots respect and silently ignore as an image source.
+      image: n.logo_url ? `${SITE_URL}/api/og-logo?slug=${encodeURIComponent(slug)}` : DEFAULT_IMAGE,
       url: `${SITE_URL}${url.pathname}`,
     })
 

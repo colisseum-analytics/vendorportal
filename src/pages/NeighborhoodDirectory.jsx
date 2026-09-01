@@ -23,7 +23,10 @@ export default function NeighborhoodDirectory() {
   usePageMeta({
     title: neighborhood.name,
     description: neighborhood.tagline || t(metaDescriptionKey, { name: neighborhood.name }),
-    image: neighborhood.logo_url,
+    // Proxied through our own domain — Supabase Storage's CDN sends
+    // X-Robots-Tag: none, which link-preview bots treat as "don't use this
+    // as an image" and silently ignore.
+    image: neighborhood.logo_url ? `https://looplisting.com/api/og-logo?slug=${neighborhood.slug}` : undefined,
   })
   const [searchParams, setSearchParams] = useSearchParams()
   const [vendors, setVendors] = useState([])
