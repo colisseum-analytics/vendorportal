@@ -93,12 +93,22 @@ export default function Home() {
         </div>
       )}
 
-      <div className="cta-banner cta-banner-compact">
-        <div>
-          <h2>{t('home.ctaTitle')}</h2>
-          <p>{t('home.ctaBody')}</p>
+      <div className="cta-banner-row">
+        <div className="cta-banner cta-banner-compact">
+          <div>
+            <h2>{t('home.ctaTitle')}</h2>
+            <p>{t('home.ctaBody')}</p>
+          </div>
+          <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
         </div>
-        <Link className="btn-invert" to="/new">{t('home.ctaButton')}</Link>
+
+        <div className="cta-banner cta-banner-compact cta-banner-terra">
+          <div>
+            <h2>{t('home.managerCtaTitle')}</h2>
+            <p>{t('home.managerCtaBody')}</p>
+          </div>
+          <Link className="btn-invert" to="/new">{t('home.managerCtaButton')}</Link>
+        </div>
       </div>
 
       <footer className="site-footer">
