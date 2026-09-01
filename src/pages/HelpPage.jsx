@@ -23,7 +23,7 @@ const SECTIONS = {
     },
     {
       title: 'Signing in',
-      body: 'There\'s no password to remember. Enter your email wherever you see "Sign in to manage or join," and we\'ll send a one-time code — enter it and you\'re in. Sign in to send feedback, save your unit/address info, or join the Service Board.',
+      body: 'Sign in to send feedback, save your unit/address info, or join the Service Board. There\'s no password to remember — enter your email wherever you see "Sign in to manage or join," and we\'ll send a one-time code. Enter it and you\'re in.',
     },
     {
       title: 'The Service Board',
@@ -53,7 +53,7 @@ const SECTIONS = {
     },
     {
       title: 'Iniciar sesión',
-      body: 'No hay ninguna contraseña que recordar. Escribe tu correo donde veas "Inicia sesión para administrar o unirte" y te enviaremos un código de un solo uso — ingrésalo y listo. Inicia sesión para enviar comentarios, guardar tu unidad/dirección, o unirte al Tablón de Servicios.',
+      body: 'Inicia sesión para enviar comentarios, guardar tu unidad/dirección, o unirte al Tablón de Servicios. No hay ninguna contraseña que recordar — escribe tu correo donde veas "Inicia sesión para administrar o unirte" y te enviaremos un código de un solo uso. Ingrésalo y listo.',
     },
     {
       title: 'El Tablón de Servicios',
