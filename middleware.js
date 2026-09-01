@@ -15,7 +15,7 @@ const BOT_UA_PATTERN = /facebookexternalhit|Twitterbot|Slackbot|LinkedInBot|What
 
 const SITE_URL = 'https://looplisting.com'
 const SITE_NAME = 'LoopListing'
-const DEFAULT_IMAGE = 'https://looplisting.com/email-logo.png'
+const DEFAULT_IMAGE = 'https://looplisting.com/og-image.jpg'
 
 export const config = {
   matcher: '/n/:slug',
