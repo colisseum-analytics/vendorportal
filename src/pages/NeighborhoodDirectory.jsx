@@ -12,6 +12,17 @@ import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const STATUS_OPTIONS = ['Verified', 'Unknown']
 
+// The og-logo proxy URL is otherwise stable per neighborhood, so nothing
+// signals to our own CDN or a social platform's own preview cache that the
+// logo changed after a re-upload — both would keep serving stale bytes
+// indefinitely. Baking a token derived from the current logo_url into the
+// URL forces a fresh fetch whenever it actually changes.
+function versionToken(str) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0
+  return hash.toString(36)
+}
+
 export default function NeighborhoodDirectory() {
   const { neighborhood } = useOutletContext()
   const { t, tCategory } = useLanguage()
@@ -26,7 +37,7 @@ export default function NeighborhoodDirectory() {
     // Proxied through our own domain — Supabase Storage's CDN sends
     // X-Robots-Tag: none, which link-preview bots treat as "don't use this
     // as an image" and silently ignore.
-    image: neighborhood.logo_url ? `https://looplisting.com/api/og-logo?slug=${neighborhood.slug}` : undefined,
+    image: neighborhood.logo_url ? `https://looplisting.com/api/og-logo?slug=${neighborhood.slug}&v=${versionToken(neighborhood.logo_url)}` : undefined,
   })
   const [searchParams, setSearchParams] = useSearchParams()
   const [vendors, setVendors] = useState([])
