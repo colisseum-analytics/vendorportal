@@ -25,6 +25,18 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 }
 
+// The proxy URL below is otherwise stable per neighborhood, so nothing
+// signals to our own CDN or (more importantly) a social platform's own
+// preview cache that the underlying logo changed after a re-upload —
+// both would keep serving the old bytes indefinitely. Baking a token
+// derived from the current logo_url into the URL forces a fresh fetch
+// whenever it actually changes.
+function versionToken(str) {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0
+  return hash.toString(36)
+}
+
 function renderHtml({ title, description, image, url }) {
   const fullTitle = `${escapeHtml(title)} · ${SITE_NAME}`
   const desc = escapeHtml(description)
@@ -81,7 +93,7 @@ export default async function middleware(request) {
       // Proxied through our own domain instead of linking Supabase Storage
       // directly — its CDN sends X-Robots-Tag: none, which link-preview
       // bots respect and silently ignore as an image source.
-      image: n.logo_url ? `${SITE_URL}/api/og-logo?slug=${encodeURIComponent(slug)}` : DEFAULT_IMAGE,
+      image: n.logo_url ? `${SITE_URL}/api/og-logo?slug=${encodeURIComponent(slug)}&v=${versionToken(n.logo_url)}` : DEFAULT_IMAGE,
       url: `${SITE_URL}${url.pathname}`,
     })
 
