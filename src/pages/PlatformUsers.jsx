@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
 import ActionMenu from '../components/ActionMenu.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
+
+const BATCH_SIZE = 50
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -16,6 +18,7 @@ export default function PlatformUsers() {
   const { neighborhoods, users, reloadCore } = useOutletContext()
 
   const [userSearch, setUserSearch] = useState('')
+  const [tab, setTab] = useState('all')
   const [adminEmail, setAdminEmail] = useState('')
   const [adminMsg, setAdminMsg] = useState('')
   const [adminError, setAdminError] = useState('')
@@ -32,9 +35,38 @@ export default function PlatformUsers() {
   const [assigning, setAssigning] = useState(false)
   const [assignError, setAssignError] = useState('')
 
+  const [moveTarget, setMoveTarget] = useState(null) // { user, fromNeighborhood }
+  const [moveNeighborhoodId, setMoveNeighborhoodId] = useState('')
+  const [moveUnit, setMoveUnit] = useState('')
+  const [moveRole, setMoveRole] = useState('owner')
+  const [moving, setMoving] = useState(false)
+  const [moveError, setMoveError] = useState('')
+
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
   const [bulkDeleting, setBulkDeleting] = useState(false)
+
+  const [expandedNeighborhoods, setExpandedNeighborhoods] = useState(() => new Set())
+  const [visibleAll, setVisibleAll] = useState(BATCH_SIZE)
+  const [visibleResidents, setVisibleResidents] = useState(BATCH_SIZE)
+  const [visibleNeverSignedIn, setVisibleNeverSignedIn] = useState(BATCH_SIZE)
+  const [visibleNoActivity, setVisibleNoActivity] = useState(BATCH_SIZE)
+
+  useEffect(() => {
+    setVisibleAll(BATCH_SIZE)
+    setVisibleResidents(BATCH_SIZE)
+    setVisibleNeverSignedIn(BATCH_SIZE)
+    setVisibleNoActivity(BATCH_SIZE)
+  }, [userSearch, tab])
+
+  const toggleNeighborhoodExpanded = (id) => {
+    setExpandedNeighborhoods((set) => {
+      const next = new Set(set)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const toggleSelected = (id) => {
     setSelectedIds((set) => {
@@ -136,6 +168,41 @@ export default function PlatformUsers() {
     await reloadCore()
   }
 
+  const startMove = (u, fromNeighborhood) => {
+    setMoveTarget({ user: u, fromNeighborhood })
+    setMoveNeighborhoodId('')
+    setMoveUnit('')
+    setMoveRole('owner')
+    setMoveError('')
+  }
+
+  // A move only ever touches this one neighborhood_members row — it never
+  // touches neighborhood_admins (a separate role) or anything the resident
+  // already posted (needs, contact messages, referrals stay attached to
+  // whichever neighborhood they actually happened under).
+  const submitMove = async (e) => {
+    e.preventDefault()
+    if (!moveNeighborhoodId || !moveUnit.trim()) return
+    setMoving(true)
+    setMoveError('')
+    const { error } = await supabase
+      .from('neighborhood_members')
+      .update({ neighborhood_id: moveNeighborhoodId, unit: moveUnit.trim(), role: moveRole })
+      .eq('neighborhood_id', moveTarget.fromNeighborhood.id)
+      .eq('user_id', moveTarget.user.user_id)
+    setMoving(false)
+    if (error) {
+      setMoveError(
+        error.code === '23505'
+          ? `${moveTarget.user.email} is already a resident of that neighborhood.`
+          : error.message
+      )
+      return
+    }
+    setMoveTarget(null)
+    await reloadCore()
+  }
+
   const sendSignInCode = async (u) => {
     setBusyUserId(u.user_id)
     setUserError('')
@@ -200,6 +267,7 @@ export default function PlatformUsers() {
 
   const filteredUsers = users.filter((u) => (u.email || '').toLowerCase().includes(userSearch.toLowerCase()))
   const platformAdminUsers = filteredUsers.filter((u) => u.is_platform_admin)
+  const neighborhoodAdminUsers = filteredUsers.filter((u) => (u.admin_of || []).length > 0)
   const usersByNeighborhood = neighborhoods
     .map((n) => ({ neighborhood: n, users: filteredUsers.filter((u) => (u.admin_of || []).some((a) => a.id === n.id)) }))
     .filter((g) => g.users.length > 0)
@@ -208,6 +276,14 @@ export default function PlatformUsers() {
   const neverSignedInUsers = noRoleUsers.filter((u) => (u.member_of || []).length === 0 && !u.last_sign_in_at)
   const noActivityUsers = noRoleUsers.filter((u) => (u.member_of || []).length === 0 && u.last_sign_in_at)
   const lingeringCount = neverSignedInUsers.length + noActivityUsers.length
+
+  const TABS = [
+    { key: 'all', label: `All (${filteredUsers.length})` },
+    { key: 'admins', label: `Platform admins (${platformAdminUsers.length})` },
+    { key: 'neighborhoods', label: `By neighborhood (${neighborhoodAdminUsers.length})` },
+    { key: 'residents', label: `Residents (${residentUsers.length})` },
+    { key: 'norole', label: `No role (${lingeringCount})` },
+  ]
 
   const renderUserRow = (u, { selectable = false } = {}) => (
     <div className={`user-row ${u.is_banned ? 'user-row-banned' : ''}`} key={u.user_id}>
@@ -257,6 +333,11 @@ export default function PlatformUsers() {
               disabled: busyUserId === u.user_id,
               danger: true,
             })),
+            ...(u.member_of || []).map((n) => ({
+              label: `Move from ${n.name}…`,
+              onClick: () => startMove(u, n),
+              disabled: busyUserId === u.user_id,
+            })),
             { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id },
             { label: u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin', onClick: () => togglePlatformAdmin(u), disabled: busyUserId === u.user_id },
             { label: u.is_banned ? 'Enable account' : 'Disable account', onClick: () => toggleBanned(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
@@ -267,9 +348,26 @@ export default function PlatformUsers() {
     </div>
   )
 
+  const loadMoreRow = (remaining, onClick) =>
+    remaining > 0 ? (
+      <div className="load-more-row">
+        <button type="button" className="btn-secondary" onClick={onClick}>
+          Show {Math.min(remaining, BATCH_SIZE)} more
+        </button>
+      </div>
+    ) : null
+
   return (
     <div className="overview-card">
-      <h2 className="section-title">Users by neighborhood</h2>
+      <h2 className="section-title">Users</h2>
+
+      <div className="stats-row" style={{ marginBottom: 18 }}>
+        <div className="stat-item"><strong>{platformAdminUsers.length}</strong><span>Platform admins</span></div>
+        <div className="stat-item"><strong>{neighborhoodAdminUsers.length}</strong><span>Neighborhood admins</span></div>
+        <div className="stat-item"><strong>{residentUsers.length}</strong><span>Residents</span></div>
+        <div className="stat-item"><strong>{lingeringCount}</strong><span>No role</span></div>
+      </div>
+
       <form className="invite-row" onSubmit={addAdmin}>
         <input type="email" placeholder="Grant platform admin by email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
         <button type="submit" className="btn-secondary" disabled={adminSending}>{adminSending ? 'Adding…' : 'Grant'}</button>
@@ -277,76 +375,97 @@ export default function PlatformUsers() {
       {adminError ? <div className="error-msg">{adminError}</div> : null}
       {adminMsg ? <div className="success-msg">{adminMsg}</div> : null}
 
-      <div className="field" style={{ maxWidth: 340 }}>
+      <div className="field" style={{ maxWidth: 340, marginBottom: 12 }}>
         <input type="text" placeholder="Search users by email…" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} />
+      </div>
+      <div className="status-toggle" style={{ flexWrap: 'wrap', width: 'fit-content', marginBottom: 18 }}>
+        {TABS.map((tb) => (
+          <button key={tb.key} type="button" className={tab === tb.key ? 'active' : ''} onClick={() => setTab(tb.key)}>{tb.label}</button>
+        ))}
       </div>
       {userError ? <div className="error-msg">{userError}</div> : null}
       {userMsg ? <div className="success-msg">{userMsg}</div> : null}
 
       {filteredUsers.length === 0 ? (
         <p className="sub">No users match.</p>
-      ) : (
+      ) : tab === 'all' ? (
         <>
-          {platformAdminUsers.length > 0 ? (
-            <div className="overview-subgroup">
-              <h3 className="overview-subgroup-title">Platform admins <span className="badge badge-neutral">{platformAdminUsers.length}</span></h3>
-              <div className="user-list">{platformAdminUsers.map((u) => renderUserRow(u))}</div>
-            </div>
-          ) : null}
-          {usersByNeighborhood.map(({ neighborhood: n, users: group }) => (
-            <div key={n.id} className="overview-subgroup">
-              <h3 className="overview-subgroup-title">{n.name} <span className="badge badge-neutral">{group.length}</span></h3>
-              <div className="user-list">{group.map((u) => renderUserRow(u))}</div>
-            </div>
-          ))}
-          {residentUsers.length > 0 ? (
-            <div className="overview-subgroup">
-              <h3 className="overview-subgroup-title">Residents (no admin role) <span className="badge badge-neutral">{residentUsers.length}</span></h3>
-              <div className="user-list">{residentUsers.map((u) => renderUserRow(u))}</div>
-            </div>
-          ) : null}
-          {lingeringCount > 0 ? (
-            <div className="overview-subgroup">
-              <h3 className="overview-subgroup-title" style={{ justifyContent: 'space-between' }}>
-                <span>No neighborhood <span className="badge badge-neutral">{lingeringCount}</span></span>
-                {selectedIds.size > 0 ? (
-                  <button type="button" className="btn-ghost danger" onClick={() => setConfirmBulkDelete(true)}>
-                    Delete selected ({selectedIds.size})
-                  </button>
-                ) : null}
-              </h3>
-              <p className="sub" style={{ marginTop: -4, marginBottom: 12 }}>
-                Verified accounts with no membership or admin role anywhere — usually someone who logged in (e.g. to leave feedback) but never followed through. Harmless, but safe to bulk-delete once they've been sitting for a while.
-              </p>
-              {neverSignedInUsers.length > 0 ? (
-                <div style={{ marginBottom: 14 }}>
-                  <label className="select-all-row">
-                    <input
-                      type="checkbox"
-                      checked={neverSignedInUsers.every((u) => selectedIds.has(u.user_id))}
-                      onChange={() => toggleSelectAll(neverSignedInUsers.map((u) => u.user_id))}
-                    />
-                    Never completed sign-in <span className="badge badge-neutral">{neverSignedInUsers.length}</span>
-                  </label>
-                  <div className="user-list">{neverSignedInUsers.map((u) => renderUserRow(u, { selectable: true }))}</div>
-                </div>
-              ) : null}
-              {noActivityUsers.length > 0 ? (
-                <div>
-                  <label className="select-all-row">
-                    <input
-                      type="checkbox"
-                      checked={noActivityUsers.every((u) => selectedIds.has(u.user_id))}
-                      onChange={() => toggleSelectAll(noActivityUsers.map((u) => u.user_id))}
-                    />
-                    Signed in, no activity <span className="badge badge-neutral">{noActivityUsers.length}</span>
-                  </label>
-                  <div className="user-list">{noActivityUsers.map((u) => renderUserRow(u, { selectable: true }))}</div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          <div className="user-list">{filteredUsers.slice(0, visibleAll).map((u) => renderUserRow(u))}</div>
+          {loadMoreRow(filteredUsers.length - visibleAll, () => setVisibleAll((v) => v + BATCH_SIZE))}
         </>
+      ) : tab === 'admins' ? (
+        platformAdminUsers.length === 0 ? (
+          <p className="sub">No platform admins match.</p>
+        ) : (
+          <div className="user-list">{platformAdminUsers.map((u) => renderUserRow(u))}</div>
+        )
+      ) : tab === 'neighborhoods' ? (
+        usersByNeighborhood.length === 0 ? (
+          <p className="sub">No neighborhood admins match.</p>
+        ) : (
+          usersByNeighborhood.map(({ neighborhood: n, users: group }) => {
+            const expanded = expandedNeighborhoods.has(n.id)
+            return (
+              <div key={n.id} className="overview-subgroup">
+                <button type="button" className="changelog-group-toggle" onClick={() => toggleNeighborhoodExpanded(n.id)}>
+                  <span className={`changelog-group-chevron ${expanded ? 'changelog-group-chevron-open' : ''}`}>▸</span>
+                  <h3 className="overview-subgroup-title" style={{ margin: 0 }}>{n.name} <span className="badge badge-neutral">{group.length}</span></h3>
+                </button>
+                {expanded ? <div className="user-list" style={{ marginTop: 8 }}>{group.map((u) => renderUserRow(u))}</div> : null}
+              </div>
+            )
+          })
+        )
+      ) : tab === 'residents' ? (
+        residentUsers.length === 0 ? (
+          <p className="sub">No residents match.</p>
+        ) : (
+          <>
+            <div className="user-list">{residentUsers.slice(0, visibleResidents).map((u) => renderUserRow(u))}</div>
+            {loadMoreRow(residentUsers.length - visibleResidents, () => setVisibleResidents((v) => v + BATCH_SIZE))}
+          </>
+        )
+      ) : (
+        <div className="overview-subgroup">
+          <p className="sub" style={{ marginTop: -4, marginBottom: 12 }}>
+            Verified accounts with no membership or admin role anywhere — usually someone who logged in (e.g. to leave feedback) but never followed through. Harmless, but safe to bulk-delete once they've been sitting for a while.
+          </p>
+          {selectedIds.size > 0 ? (
+            <div style={{ marginBottom: 12 }}>
+              <button type="button" className="btn-ghost danger" onClick={() => setConfirmBulkDelete(true)}>
+                Delete selected ({selectedIds.size})
+              </button>
+            </div>
+          ) : null}
+          {neverSignedInUsers.length > 0 ? (
+            <div style={{ marginBottom: 14 }}>
+              <label className="select-all-row">
+                <input
+                  type="checkbox"
+                  checked={neverSignedInUsers.every((u) => selectedIds.has(u.user_id))}
+                  onChange={() => toggleSelectAll(neverSignedInUsers.map((u) => u.user_id))}
+                />
+                Never completed sign-in <span className="badge badge-neutral">{neverSignedInUsers.length}</span>
+              </label>
+              <div className="user-list">{neverSignedInUsers.slice(0, visibleNeverSignedIn).map((u) => renderUserRow(u, { selectable: true }))}</div>
+              {loadMoreRow(neverSignedInUsers.length - visibleNeverSignedIn, () => setVisibleNeverSignedIn((v) => v + BATCH_SIZE))}
+            </div>
+          ) : null}
+          {noActivityUsers.length > 0 ? (
+            <div>
+              <label className="select-all-row">
+                <input
+                  type="checkbox"
+                  checked={noActivityUsers.every((u) => selectedIds.has(u.user_id))}
+                  onChange={() => toggleSelectAll(noActivityUsers.map((u) => u.user_id))}
+                />
+                Signed in, no activity <span className="badge badge-neutral">{noActivityUsers.length}</span>
+              </label>
+              <div className="user-list">{noActivityUsers.slice(0, visibleNoActivity).map((u) => renderUserRow(u, { selectable: true }))}</div>
+              {loadMoreRow(noActivityUsers.length - visibleNoActivity, () => setVisibleNoActivity((v) => v + BATCH_SIZE))}
+            </div>
+          ) : null}
+        </div>
       )}
 
       {editEmailTarget ? (
@@ -397,6 +516,54 @@ export default function PlatformUsers() {
                     <button type="button" className="btn-secondary" onClick={() => setAssignTarget(null)}>Cancel</button>
                     <button type="submit" className="btn-primary" disabled={!assignNeighborhoodId || assigning}>
                       {assigning ? 'Assigning…' : 'Assign'}
+                    </button>
+                  </div>
+                </form>
+              )
+            })()}
+          </div>
+        </div>
+      ) : null}
+
+      {moveTarget ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setMoveTarget(null) }}>
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <button className="close-x" onClick={() => setMoveTarget(null)}>×</button>
+            <h2>Move {moveTarget.user.email}</h2>
+            <p className="sub">
+              Moves their residency from {moveTarget.fromNeighborhood.name} to another neighborhood. Doesn't affect
+              admin access, or anything they've already posted there.
+            </p>
+            {moveError ? <div className="error-msg">{moveError}</div> : null}
+            {(() => {
+              const available = neighborhoods.filter((n) => n.id !== moveTarget.fromNeighborhood.id)
+              if (available.length === 0) {
+                return <p className="sub">No other neighborhood to move them to.</p>
+              }
+              return (
+                <form onSubmit={submitMove}>
+                  <div className="field">
+                    <label>Move to</label>
+                    <select value={moveNeighborhoodId} onChange={(e) => setMoveNeighborhoodId(e.target.value)} autoFocus>
+                      <option value="" disabled>Choose one…</option>
+                      {available.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>New unit/address</label>
+                    <input type="text" value={moveUnit} onChange={(e) => setMoveUnit(e.target.value)} placeholder="e.g. 4B" />
+                  </div>
+                  <div className="field">
+                    <label>Role there</label>
+                    <select value={moveRole} onChange={(e) => setMoveRole(e.target.value)}>
+                      <option value="owner">Owner</option>
+                      <option value="renter">Renter</option>
+                    </select>
+                  </div>
+                  <div className="modal-actions">
+                    <button type="button" className="btn-secondary" onClick={() => setMoveTarget(null)}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={!moveNeighborhoodId || !moveUnit.trim() || moving}>
+                      {moving ? 'Moving…' : 'Move'}
                     </button>
                   </div>
                 </form>
