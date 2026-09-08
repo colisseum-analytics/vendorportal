@@ -138,7 +138,14 @@ export default function NeighborhoodLayout() {
           </footer>
 
           {contactOpen ? (
-            <ContactAdminModal neighborhood={neighborhood} membershipUnit={membershipUnit} onCancel={() => setContactOpen(false)} />
+            <ContactAdminModal
+              neighborhood={neighborhood}
+              membershipUnit={membershipUnit}
+              isMember={isMember}
+              isAdmin={isAdmin}
+              reloadNeighborhood={reloadNeighborhood}
+              onCancel={() => setContactOpen(false)}
+            />
           ) : null}
         </div>
       </div>

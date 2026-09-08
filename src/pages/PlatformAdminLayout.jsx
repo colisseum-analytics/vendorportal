@@ -15,6 +15,7 @@ export default function PlatformAdminLayout() {
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendorCounts, setVendorCounts] = useState({})
   const [lastVendorAdded, setLastVendorAdded] = useState({})
+  const [memberCounts, setMemberCounts] = useState({})
   const [users, setUsers] = useState([])
   const [pendingRequestCount, setPendingRequestCount] = useState(0)
   const [unresolvedMessageCount, setUnresolvedMessageCount] = useState(0)
@@ -33,12 +34,13 @@ export default function PlatformAdminLayout() {
   }, [user, authLoading])
 
   const reloadCore = async () => {
-    const [{ data: n }, { data: v }, { data: u }, { count: pending }, { count: unresolved }] = await Promise.all([
+    const [{ data: n }, { data: v }, { data: u }, { count: pending }, { count: unresolved }, { data: m }] = await Promise.all([
       supabase.from('neighborhoods').select('*').order('name'),
       supabase.from('vendors').select('neighborhood_id, created_at'),
       supabase.rpc('list_all_users'),
       supabase.from('neighborhood_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
       supabase.from('contact_messages').select('*', { count: 'exact', head: true }).eq('resolved', false),
+      supabase.from('neighborhood_members').select('neighborhood_id'),
     ])
     setNeighborhoods(n || [])
     const counts = {}
@@ -54,6 +56,9 @@ export default function PlatformAdminLayout() {
     setUsers(u || [])
     setPendingRequestCount(pending || 0)
     setUnresolvedMessageCount(unresolved || 0)
+    const memberTally = {}
+    ;(m || []).forEach((row) => { memberTally[row.neighborhood_id] = (memberTally[row.neighborhood_id] || 0) + 1 })
+    setMemberCounts(memberTally)
   }
 
   useEffect(() => {
@@ -132,7 +137,7 @@ export default function PlatformAdminLayout() {
           {loading ? (
             <div className="empty" style={{ marginTop: 20 }}>Loading…</div>
           ) : (
-            <Outlet context={{ neighborhoods, vendorCounts, lastVendorAdded, users, adminCounts, neighborhoodNameById, reloadCore }} />
+            <Outlet context={{ neighborhoods, vendorCounts, lastVendorAdded, memberCounts, users, adminCounts, neighborhoodNameById, reloadCore }} />
           )}
         </div>
       </div>

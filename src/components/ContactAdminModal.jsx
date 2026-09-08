@@ -9,7 +9,7 @@ const CATEGORIES = [
   { key: 'idea', icon: '💡' },
 ]
 
-export default function ContactAdminModal({ neighborhood, membershipUnit, onCancel }) {
+export default function ContactAdminModal({ neighborhood, membershipUnit, isMember, isAdmin, reloadNeighborhood, onCancel }) {
   const { t } = useLanguage()
   const { user } = useAuth()
   const location = useLocation()
@@ -21,6 +21,35 @@ export default function ContactAdminModal({ neighborhood, membershipUnit, onCanc
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+
+  const [joinName, setJoinName] = useState(user?.user_metadata?.full_name || '')
+  const [joinUnit, setJoinUnit] = useState('')
+  const [joinRole, setJoinRole] = useState('owner')
+  const [joinError, setJoinError] = useState('')
+  const [joining, setJoining] = useState(false)
+
+  const join = async (e) => {
+    e.preventDefault()
+    if (!joinName.trim()) {
+      setJoinError(t('serviceBoard.errorName'))
+      return
+    }
+    if (!joinUnit.trim()) return
+    setJoining(true)
+    setJoinError('')
+    if (joinName.trim() !== (user.user_metadata?.full_name || '')) {
+      await supabase.auth.updateUser({ data: { full_name: joinName.trim() } })
+    }
+    const { error: joinInsertError } = await supabase
+      .from('neighborhood_members')
+      .insert({ neighborhood_id: neighborhood.id, user_id: user.id, unit: joinUnit.trim(), role: joinRole })
+    setJoining(false)
+    if (joinInsertError) {
+      setJoinError(joinInsertError.message)
+      return
+    }
+    reloadNeighborhood()
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -61,6 +90,35 @@ export default function ContactAdminModal({ neighborhood, membershipUnit, onCanc
                 {t('contactModal.loginCta')}
               </Link>
             </div>
+          </>
+        ) : neighborhood && !isMember && !isAdmin ? (
+          <>
+            <h2>{t('serviceBoard.joinTitle')}</h2>
+            <p className="sub">{t('serviceBoard.joinBody')}</p>
+            {joinError ? <div className="error-msg">{joinError}</div> : null}
+            <form onSubmit={join}>
+              <div className="field">
+                <label>{t('serviceBoard.nameLabel')}</label>
+                <input type="text" value={joinName} onChange={(e) => setJoinName(e.target.value)} placeholder={t('serviceBoard.namePlaceholder')} autoFocus />
+              </div>
+              <div className="field">
+                <label>{t('serviceBoard.unitLabel')}</label>
+                <input type="text" value={joinUnit} onChange={(e) => setJoinUnit(e.target.value)} placeholder={t('serviceBoard.unitPlaceholder')} />
+              </div>
+              <div className="field">
+                <label>{t('serviceBoard.roleLabel')}</label>
+                <select value={joinRole} onChange={(e) => setJoinRole(e.target.value)}>
+                  <option value="owner">{t('serviceBoard.roleOwner')}</option>
+                  <option value="renter">{t('serviceBoard.roleRenter')}</option>
+                </select>
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" style={{ flex: 1 }} onClick={onCancel}>{t('common.cancel')}</button>
+                <button type="submit" className="btn-primary" disabled={joining}>
+                  {joining ? t('serviceBoard.joinSubmitting') : t('serviceBoard.joinSubmit')}
+                </button>
+              </div>
+            </form>
           </>
         ) : sent ? (
           <>
