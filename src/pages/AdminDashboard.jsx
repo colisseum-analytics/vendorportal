@@ -176,11 +176,18 @@ export default function AdminDashboard() {
     )
   }
 
-  const categories = neighborhood.categories || []
+  const categories = useMemo(() => [...(neighborhood.categories || [])].sort(), [neighborhood.categories])
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const v of vendors) {
+      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
+    }
+    return counts
+  }, [vendors])
   const renderCategoryOption = (cat) => (
     <>
       <span className="filter-pill-dot" style={{ background: colorForCategory(categories, cat) }} />
-      {cat}
+      {cat} <span className="filter-pill-count">({categoryCounts[cat] || 0})</span>
     </>
   )
   const residentCount = vendors.filter((v) => v.is_resident).length

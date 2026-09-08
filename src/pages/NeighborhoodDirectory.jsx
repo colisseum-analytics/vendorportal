@@ -75,14 +75,21 @@ export default function NeighborhoodDirectory() {
       })
   }, [vendors, category, status, search])
 
-  const categories = neighborhood.categories || []
+  const categories = useMemo(() => [...(neighborhood.categories || [])].sort(), [neighborhood.categories])
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const v of vendors) {
+      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
+    }
+    return counts
+  }, [vendors])
   const residentCount = vendors.filter((v) => v.is_resident).length
   const lastAdded = vendors.reduce((max, v) => (!max || v.created_at > max ? v.created_at : max), null)
 
   const renderCategoryOption = (cat) => (
     <>
       <span className="filter-pill-dot" style={{ background: colorForCategory(categories, cat) }} />
-      {tCategory(cat)}
+      {tCategory(cat)} <span className="filter-pill-count">({categoryCounts[cat] || 0})</span>
     </>
   )
 

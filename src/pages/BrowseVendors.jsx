@@ -73,6 +73,13 @@ export default function BrowseVendors() {
     () => [...new Set(vendors.flatMap((v) => v.categories || []))].sort(),
     [vendors]
   )
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const v of vendors) {
+      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
+    }
+    return counts
+  }, [vendors])
   const statusOptions = ['Verified', 'Unknown']
   const neighborhoodOptions = useMemo(() => {
     const relevant = city ? neighborhoods.filter((n) => n.city === city) : neighborhoods
@@ -82,7 +89,7 @@ export default function BrowseVendors() {
   const renderCategoryOption = (cat) => (
     <>
       <span className="filter-pill-dot" style={{ background: colorForCategory(categoryOptions, cat) }} />
-      {tCategory(cat)}
+      {tCategory(cat)} <span className="filter-pill-count">({categoryCounts[cat] || 0})</span>
     </>
   )
 
