@@ -66,11 +66,11 @@ export default function NeighborhoodDirectory() {
 
   const filtered = useMemo(() => {
     return vendors
-      .filter((v) => !category || v.category === category)
+      .filter((v) => !category || (v.categories || []).includes(category))
       .filter((v) => !status || v.status === status)
       .filter((v) => {
         if (!search) return true
-        const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
+        const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
         return hay.includes(search.toLowerCase())
       })
   }, [vendors, category, status, search])

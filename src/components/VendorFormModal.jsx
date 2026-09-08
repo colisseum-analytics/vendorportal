@@ -5,7 +5,7 @@ const STATUSES = ['Verified', 'Unknown']
 export default function VendorFormModal({ categories, existing, onCancel, onSave }) {
   const [form, setForm] = useState({
     name: existing?.name || '',
-    category: existing?.category || categories[0] || '',
+    categories: existing?.categories?.length ? existing.categories : (existing?.category ? [existing.category] : []),
     specialty: existing?.specialty || '',
     is_resident: existing?.is_resident || false,
     status: existing?.status || 'Unknown',
@@ -19,11 +19,21 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
   const updateCheckbox = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.checked }))
+  const toggleCategory = (c) => {
+    setForm((f) => ({
+      ...f,
+      categories: f.categories.includes(c) ? f.categories.filter((x) => x !== c) : [...f.categories, c],
+    }))
+  }
 
   const submit = async (e) => {
     e.preventDefault()
     if (!form.name.trim()) {
       setError("Give this vendor a name before saving.")
+      return
+    }
+    if (form.categories.length === 0) {
+      setError("Pick at least one category before saving.")
       return
     }
     setSaving(true)
@@ -48,24 +58,23 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
             <label>Business name *</label>
             <input type="text" value={form.name} onChange={update('name')} autoFocus />
           </div>
-          <div className="field-row">
-            <div className="field">
-              <label>Category *</label>
-              <select value={form.category} onChange={update('category')}>
-                {categories.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
+          <div className="field">
+            <label>Categories * <span className="hint" style={{ display: 'inline' }}>— a vendor can do more than one</span></label>
+            <div className="category-checkbox-grid">
+              {categories.map((c) => (
+                <label key={c} className="category-checkbox">
+                  <input type="checkbox" checked={form.categories.includes(c)} onChange={() => toggleCategory(c)} />
+                  {c}
+                </label>
+              ))}
             </div>
+          </div>
+          <div className="field-row">
             <div className="field">
               <label>Verified by neighbors?</label>
               <select value={form.status} onChange={update('status')}>
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
-            </div>
-          </div>
-          <div className="field-row">
-            <div className="field">
-              <label>Specialty</label>
-              <input type="text" value={form.specialty} onChange={update('specialty')} placeholder="e.g. Plomero, A/C Tecnico" />
             </div>
             <div className="field" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'flex-end', paddingBottom: 9 }}>
               <label className="checkbox-label">
@@ -73,6 +82,10 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
                 Lives in this neighborhood
               </label>
             </div>
+          </div>
+          <div className="field">
+            <label>Specialty</label>
+            <input type="text" value={form.specialty} onChange={update('specialty')} placeholder="e.g. Plomero, A/C Tecnico" />
           </div>
           <div className="field">
             <label>Short description</label>

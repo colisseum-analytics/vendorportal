@@ -49,7 +49,7 @@ export default function ReferVendorModal({ vendors, onCancel, onSave }) {
             <div className="field">
               <label>{t('serviceBoard.referVendorLabel')}</label>
               <select value={form.vendor_id} onChange={update('vendor_id')}>
-                {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}{v.category ? ` · ${v.category}` : ''}</option>)}
+                {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}{v.categories?.length ? ` · ${v.categories.join(', ')}` : ''}</option>)}
               </select>
             </div>
             <div className="field-row">

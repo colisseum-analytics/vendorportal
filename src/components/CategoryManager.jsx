@@ -63,12 +63,27 @@ export default function CategoryManager({ neighborhood, onChanged }) {
     if (newName !== oldName) {
       setBusy(true)
       setError('')
-      const { error: vendorError } = await supabase
+      // Array column — rewrite each affected vendor's categories client-side
+      // (swap oldName for newName, keep every other entry) rather than a
+      // single .update(), since PostgREST can't rename one jsonb-array
+      // element across rows in place.
+      const { data: affected, error: fetchError } = await supabase
         .from('vendors')
-        .update({ category: newName })
+        .select('id, categories')
         .eq('neighborhood_id', neighborhood.id)
-        .eq('category', oldName)
+        .contains('categories', [oldName])
+      if (fetchError) {
+        setBusy(false)
+        setError(fetchError.message)
+        return
+      }
+      const results = await Promise.all(
+        (affected || []).map((v) =>
+          supabase.from('vendors').update({ categories: v.categories.map((c) => (c === oldName ? newName : c)) }).eq('id', v.id)
+        )
+      )
       setBusy(false)
+      const vendorError = results.find((r) => r.error)?.error
       if (vendorError) {
         setError(vendorError.message)
         return
@@ -84,7 +99,7 @@ export default function CategoryManager({ neighborhood, onChanged }) {
       .from('vendors')
       .select('id', { count: 'exact', head: true })
       .eq('neighborhood_id', neighborhood.id)
-      .eq('category', name)
+      .contains('categories', [name])
     if (count > 0) {
       const ok = window.confirm(
         `${count} vendor${count === 1 ? '' : 's'} currently use "${name}". They'll keep that category until you edit them individually — remove it from the list anyway?`

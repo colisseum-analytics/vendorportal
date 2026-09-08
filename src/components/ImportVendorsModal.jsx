@@ -7,7 +7,7 @@ const STATUSES = ['Verified', 'Unknown']
 
 const HEADER_ALIASES = {
   name: 'name', 'business name': 'name', 'provider name': 'name',
-  category: 'category',
+  category: 'categories', categories: 'categories',
   specialty: 'specialty',
   status: 'status',
   description: 'description', services: 'description',
@@ -36,10 +36,16 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
     const name = (raw.name || '').trim()
     if (!name) errors.push('missing name')
 
-    const rawCategory = (raw.category || '').trim()
-    const category = categoryLookup.get(rawCategory.toLowerCase())
-    if (!rawCategory) errors.push('missing category')
-    else if (!category) errors.push(`category "${rawCategory}" isn't in this neighborhood's list — add it in Settings first`)
+    const rawCategories = (raw.categories || '').split(',').map((c) => c.trim()).filter(Boolean)
+    const matchedCategories = []
+    const unknownCategories = []
+    for (const rc of rawCategories) {
+      const match = categoryLookup.get(rc.toLowerCase())
+      if (match) matchedCategories.push(match)
+      else unknownCategories.push(rc)
+    }
+    if (rawCategories.length === 0) errors.push('missing categories')
+    if (unknownCategories.length) errors.push(`categor${unknownCategories.length === 1 ? 'y' : 'ies'} "${unknownCategories.join(', ')}" isn't in this neighborhood's list — add it in Settings first`)
 
     let status = (raw.status || 'Unknown').trim()
     // legacy values from earlier relabelings all collapse to Unknown
@@ -54,7 +60,7 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
 
     return {
       name,
-      category: category || rawCategory,
+      categories: matchedCategories.length ? matchedCategories : rawCategories,
       specialty: (raw.specialty || '').trim(),
       status,
       description: (raw.description || '').trim(),
@@ -81,8 +87,8 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
       return
     }
     const headerRow = table[0].map((h) => HEADER_ALIASES[h.trim().toLowerCase()] || h.trim().toLowerCase())
-    if (!headerRow.includes('name') || !headerRow.includes('category')) {
-      setParseError('The file needs at least "name" and "category" columns — download the template below to see the expected format.')
+    if (!headerRow.includes('name') || !headerRow.includes('categories')) {
+      setParseError('The file needs at least "name" and "categories" columns — download the template below to see the expected format.')
       setRows(null)
       return
     }
@@ -124,7 +130,7 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
               <label>CSV file</label>
               <input type="file" accept=".csv,text/csv" onChange={handleFile} />
               <div className="hint">
-                Needs <code>name</code> and <code>category</code> columns at minimum — also recognizes <code>specialty</code>, <code>status</code>, <code>description</code>, <code>address</code>, <code>phone</code>, <code>website</code>, and <code>lives_here</code> (Yes/No).
+                Needs <code>name</code> and <code>categories</code> columns at minimum — a vendor doing more than one trade can list several, comma-separated, in that cell. Also recognizes <code>specialty</code>, <code>status</code>, <code>description</code>, <code>address</code>, <code>phone</code>, <code>website</code>, and <code>lives_here</code> (Yes/No).
               </div>
             </div>
             <button type="button" className="btn-ghost" onClick={() => downloadVendorCsvTemplate(categories)}>Download template CSV</button>
@@ -141,7 +147,7 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
                 <div key={i} className={`import-row ${r.errors.length ? 'import-row-error' : ''}`}>
                   <div className="import-row-main">
                     <strong>{r.name || '(no name)'}</strong>
-                    <span className="import-row-cat">{r.category}{r.specialty ? ` · ${r.specialty}` : ''}</span>
+                    <span className="import-row-cat">{(r.categories || []).join(', ')}{r.specialty ? ` · ${r.specialty}` : ''}</span>
                   </div>
                   {r.errors.length ? <div className="import-row-errors">{r.errors.join('; ')}</div> : null}
                 </div>

@@ -50,7 +50,7 @@ export default function NeedDetail() {
     setNeed(n)
     const [{ data: supporters }, { data: v }, { data: refs }, { data: bc }] = await Promise.all([
       supabase.from('need_supporters').select('user_id').eq('need_id', needId),
-      supabase.from('vendors').select('id, name, category, phone, website').eq('neighborhood_id', neighborhood.id).order('name'),
+      supabase.from('vendors').select('id, name, categories, phone, website').eq('neighborhood_id', neighborhood.id).order('name'),
       supabase.from('need_vendor_referrals').select('*').eq('need_id', needId).order('created_at', { ascending: false }),
       supabase.from('broadcasts').select('*').eq('need_id', needId).order('created_at', { ascending: false }),
     ])
