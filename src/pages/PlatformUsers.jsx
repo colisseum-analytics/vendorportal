@@ -12,6 +12,10 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
+function neighborhoodLabel(n) {
+  return n.city ? `${n.name} · ${n.city}` : n.name
+}
+
 export default function PlatformUsers() {
   usePageMeta({ title: 'Platform admin · Users', noindex: true })
   const { user } = useAuth()
@@ -307,7 +311,7 @@ export default function PlatformUsers() {
         {u.is_platform_admin ? <span className="badge badge-active">Platform admin</span> : null}
         {(u.admin_of || []).map((n) => (
           <span className="badge badge-neutral" key={n.id}>
-            {n.name}
+            {neighborhoodLabel(n)}
             <button
               type="button"
               className="badge-remove"
@@ -319,7 +323,7 @@ export default function PlatformUsers() {
           </span>
         ))}
         {(u.member_of || []).map((n) => (
-          <span className="badge badge-neutral" key={n.id} title={`Resident of ${n.name}`}>{n.name}</span>
+          <span className="badge badge-neutral" key={n.id} title={`Resident of ${n.name}`}>{neighborhoodLabel(n)}</span>
         ))}
       </div>
       <div className="user-row-actions">
@@ -360,13 +364,6 @@ export default function PlatformUsers() {
   return (
     <div className="overview-card">
       <h2 className="section-title">Users</h2>
-
-      <div className="stats-row" style={{ marginBottom: 18 }}>
-        <div className="stat-item"><strong>{platformAdminUsers.length}</strong><span>Platform admins</span></div>
-        <div className="stat-item"><strong>{neighborhoodAdminUsers.length}</strong><span>Neighborhood admins</span></div>
-        <div className="stat-item"><strong>{residentUsers.length}</strong><span>Residents</span></div>
-        <div className="stat-item"><strong>{lingeringCount}</strong><span>No role</span></div>
-      </div>
 
       <form className="invite-row" onSubmit={addAdmin}>
         <input type="email" placeholder="Grant platform admin by email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
@@ -409,7 +406,7 @@ export default function PlatformUsers() {
               <div key={n.id} className="overview-subgroup">
                 <button type="button" className="changelog-group-toggle" onClick={() => toggleNeighborhoodExpanded(n.id)}>
                   <span className={`changelog-group-chevron ${expanded ? 'changelog-group-chevron-open' : ''}`}>▸</span>
-                  <h3 className="overview-subgroup-title" style={{ margin: 0 }}>{n.name} <span className="badge badge-neutral">{group.length}</span></h3>
+                  <h3 className="overview-subgroup-title" style={{ margin: 0 }}>{neighborhoodLabel(n)} <span className="badge badge-neutral">{group.length}</span></h3>
                 </button>
                 {expanded ? <div className="user-list" style={{ marginTop: 8 }}>{group.map((u) => renderUserRow(u))}</div> : null}
               </div>
@@ -509,7 +506,7 @@ export default function PlatformUsers() {
                     <label>Neighborhood</label>
                     <select value={assignNeighborhoodId} onChange={(e) => setAssignNeighborhoodId(e.target.value)} autoFocus>
                       <option value="" disabled>Choose one…</option>
-                      {available.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                      {available.map((n) => <option key={n.id} value={n.id}>{neighborhoodLabel(n)}</option>)}
                     </select>
                   </div>
                   <div className="modal-actions">
@@ -546,7 +543,7 @@ export default function PlatformUsers() {
                     <label>Move to</label>
                     <select value={moveNeighborhoodId} onChange={(e) => setMoveNeighborhoodId(e.target.value)} autoFocus>
                       <option value="" disabled>Choose one…</option>
-                      {available.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                      {available.map((n) => <option key={n.id} value={n.id}>{neighborhoodLabel(n)}</option>)}
                     </select>
                   </div>
                   <div className="field">

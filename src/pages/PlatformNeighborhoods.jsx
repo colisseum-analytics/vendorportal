@@ -10,16 +10,18 @@ export default function PlatformNeighborhoods() {
   usePageMeta({ title: 'Platform admin · Neighborhoods', noindex: true })
   const { neighborhoods, vendorCounts, lastVendorAdded, memberCounts, adminCounts, reloadCore } = useOutletContext()
 
+  const [search, setSearch] = useState('')
+  const [statusTab, setStatusTab] = useState('all')
   const [renaming, setRenaming] = useState(null)
   const [renameValue, setRenameValue] = useState('')
   const [renameCityValue, setRenameCityValue] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleteStep2, setDeleteStep2] = useState(false)
   const [busyId, setBusyId] = useState(null)
-  const [collapsedCities, setCollapsedCities] = useState(() => new Set())
+  const [expandedCities, setExpandedCities] = useState(() => new Set())
 
   const toggleCity = (city) => {
-    setCollapsedCities((set) => {
+    setExpandedCities((set) => {
       const next = new Set(set)
       if (next.has(city)) next.delete(city)
       else next.add(city)
@@ -56,9 +58,25 @@ export default function PlatformNeighborhoods() {
     setBusyId(null)
   }
 
+  const activeCount = neighborhoods.filter((n) => n.active).length
+  const inactiveCount = neighborhoods.length - activeCount
+  const totalVendors = Object.values(vendorCounts).reduce((sum, c) => sum + c, 0)
+  const totalMembers = Object.values(memberCounts).reduce((sum, c) => sum + c, 0)
+
+  const TABS = [
+    { key: 'all', label: `All (${neighborhoods.length})` },
+    { key: 'active', label: `Active (${activeCount})` },
+    { key: 'inactive', label: `Inactive (${inactiveCount})` },
+  ]
+
+  const searchLower = search.trim().toLowerCase()
+  const filtered = neighborhoods
+    .filter((n) => statusTab === 'all' || (statusTab === 'active' ? n.active : !n.active))
+    .filter((n) => !searchLower || `${n.name} ${n.slug} ${n.city || ''}`.toLowerCase().includes(searchLower))
+
   const neighborhoodsByCity = (() => {
     const groups = {}
-    neighborhoods.forEach((n) => {
+    filtered.forEach((n) => {
       const city = n.city || 'No city set'
       if (!groups[city]) groups[city] = []
       groups[city].push(n)
@@ -72,12 +90,29 @@ export default function PlatformNeighborhoods() {
 
   return (
     <div className="overview-card">
-      <h2 className="section-title">Neighborhoods by city</h2>
-      {neighborhoods.length === 0 ? (
-        <div className="empty"><strong>No neighborhoods yet</strong></div>
+      <h2 className="section-title">Neighborhoods</h2>
+
+      <div className="stats-row" style={{ marginBottom: 18 }}>
+        <div className="stat-item"><strong>{totalVendors}</strong><span>Total vendors</span></div>
+        <div className="stat-item"><strong>{totalMembers}</strong><span>Total members</span></div>
+      </div>
+
+      <div className="field" style={{ maxWidth: 340, marginBottom: 12 }}>
+        <input type="text" placeholder="Search by name, city, or web address…" value={search} onChange={(e) => setSearch(e.target.value)} />
+      </div>
+      <div className="status-toggle" style={{ flexWrap: 'wrap', width: 'fit-content', marginBottom: 18 }}>
+        {TABS.map((tb) => (
+          <button key={tb.key} type="button" className={statusTab === tb.key ? 'active' : ''} onClick={() => setStatusTab(tb.key)}>{tb.label}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="empty"><strong>{neighborhoods.length === 0 ? 'No neighborhoods yet' : 'No neighborhoods match'}</strong></div>
       ) : (
         neighborhoodsByCity.map(([city, group]) => {
-          const expanded = !collapsedCities.has(city)
+          // Auto-expand a city that has a search match, so results aren't
+          // hidden behind a collapsed group the admin has to think to open.
+          const expanded = expandedCities.has(city) || (searchLower.length > 0)
           return (
           <div key={city} className="overview-subgroup">
             <button type="button" className="changelog-group-toggle" onClick={() => toggleCity(city)}>

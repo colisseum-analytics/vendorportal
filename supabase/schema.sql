@@ -553,14 +553,14 @@ as $$
     u.last_sign_in_at,
     exists(select 1 from platform_admins pa where pa.user_id = u.id),
     coalesce(
-      (select jsonb_agg(jsonb_build_object('id', n.id, 'name', n.name, 'slug', n.slug) order by n.name)
+      (select jsonb_agg(jsonb_build_object('id', n.id, 'name', n.name, 'slug', n.slug, 'city', n.city) order by n.name)
        from neighborhood_admins na
        join neighborhoods n on n.id = na.neighborhood_id
        where na.user_id = u.id),
       '[]'::jsonb
     ),
     coalesce(
-      (select jsonb_agg(jsonb_build_object('id', n.id, 'name', n.name, 'slug', n.slug) order by n.name)
+      (select jsonb_agg(jsonb_build_object('id', n.id, 'name', n.name, 'slug', n.slug, 'city', n.city) order by n.name)
        from neighborhood_members nm
        join neighborhoods n on n.id = nm.neighborhood_id
        where nm.user_id = u.id),
