@@ -8,7 +8,7 @@ import { usePageMeta } from '../hooks/usePageMeta.js'
 
 export default function PlatformNeighborhoods() {
   usePageMeta({ title: 'Platform admin · Neighborhoods', noindex: true })
-  const { neighborhoods, vendorCounts, lastVendorAdded, adminCounts, reloadCore } = useOutletContext()
+  const { neighborhoods, vendorCounts, lastVendorAdded, memberCounts, adminCounts, reloadCore } = useOutletContext()
 
   const [renaming, setRenaming] = useState(null)
   const [renameValue, setRenameValue] = useState('')
@@ -102,6 +102,7 @@ export default function PlatformNeighborhoods() {
                     <span className={`badge ${n.active ? 'badge-active' : 'badge-inactive'}`}>{n.active ? 'Active' : 'Inactive'}</span>
                     <span className="badge badge-neutral">{vendorCounts[n.id] || 0} vendor{(vendorCounts[n.id] || 0) === 1 ? '' : 's'}</span>
                     <span className="badge badge-neutral">{(n.categories || []).length} categor{(n.categories || []).length === 1 ? 'y' : 'ies'}</span>
+                    <span className="badge badge-neutral">{memberCounts[n.id] || 0} member{(memberCounts[n.id] || 0) === 1 ? '' : 's'}</span>
                     <span className="badge badge-neutral">{adminCounts[n.id] || 0} admin{(adminCounts[n.id] || 0) === 1 ? '' : 's'}</span>
                   </div>
                   <div className="user-row-actions">
