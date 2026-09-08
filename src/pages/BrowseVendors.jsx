@@ -70,9 +70,16 @@ export default function BrowseVendors() {
     return [...new Set(relevant.map((n) => n.city).filter(Boolean))].sort()
   }, [neighborhoods, neighborhoodFilter])
   const categoryOptions = useMemo(
-    () => [...new Set(vendors.map((v) => v.category).filter(Boolean))].sort(),
+    () => [...new Set(vendors.flatMap((v) => v.categories || []))].sort(),
     [vendors]
   )
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const v of vendors) {
+      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
+    }
+    return counts
+  }, [vendors])
   const statusOptions = ['Verified', 'Unknown']
   const neighborhoodOptions = useMemo(() => {
     const relevant = city ? neighborhoods.filter((n) => n.city === city) : neighborhoods
@@ -82,20 +89,20 @@ export default function BrowseVendors() {
   const renderCategoryOption = (cat) => (
     <>
       <span className="filter-pill-dot" style={{ background: colorForCategory(categoryOptions, cat) }} />
-      {tCategory(cat)}
+      {tCategory(cat)} <span className="filter-pill-count">({categoryCounts[cat] || 0})</span>
     </>
   )
 
   const filtered = useMemo(() => {
     return vendors
       .filter((v) => !status || (v.status || 'Unknown') === status)
-      .filter((v) => !category || v.category === category)
+      .filter((v) => !category || (v.categories || []).includes(category))
       .filter((v) => !city || neighborhoodById[v.neighborhood_id]?.city === city)
       .filter((v) => !neighborhoodFilter || v.neighborhood_id === neighborhoodFilter)
       .filter((v) => {
         if (!search) return true
         const n = neighborhoodById[v.neighborhood_id]
-        const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.description || ''} ${n?.name || ''} ${n?.city || ''}`.toLowerCase()
+        const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.description || ''} ${n?.name || ''} ${n?.city || ''}`.toLowerCase()
         return hay.includes(search.toLowerCase())
       })
   }, [vendors, status, category, city, neighborhoodFilter, search, neighborhoodById])

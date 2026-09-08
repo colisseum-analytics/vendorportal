@@ -65,14 +65,23 @@ export default function AdminDashboard() {
 
   const filtered = useMemo(() => {
     return vendors
-      .filter((v) => !category || v.category === category)
+      .filter((v) => !category || (v.categories || []).includes(category))
       .filter((v) => !status || v.status === status)
       .filter((v) => {
         if (!search) return true
-        const hay = `${v.name} ${v.category} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
+        const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
         return hay.includes(search.toLowerCase())
       })
   }, [vendors, category, status, search])
+
+  const categories = useMemo(() => [...(neighborhood?.categories || [])].sort(), [neighborhood])
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const v of vendors) {
+      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
+    }
+    return counts
+  }, [vendors])
 
   const refreshVendors = async () => {
     const { data } = await supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name')
@@ -176,11 +185,10 @@ export default function AdminDashboard() {
     )
   }
 
-  const categories = neighborhood.categories || []
   const renderCategoryOption = (cat) => (
     <>
       <span className="filter-pill-dot" style={{ background: colorForCategory(categories, cat) }} />
-      {cat}
+      {cat} <span className="filter-pill-count">({categoryCounts[cat] || 0})</span>
     </>
   )
   const residentCount = vendors.filter((v) => v.is_resident).length

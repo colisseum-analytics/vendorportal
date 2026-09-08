@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import ActionMenu from './ActionMenu.jsx'
 
@@ -9,11 +9,32 @@ import ActionMenu from './ActionMenu.jsx'
 // hits the page's main "Save changes" button.
 export default function CategoryManager({ neighborhood, onChanged }) {
   const categories = neighborhood.categories || []
+  // Rename/delete operate by position in the raw (unsorted) `categories`
+  // array — this pairs each name with that original index so the list can
+  // display alphabetically without disturbing that indexing.
+  const sortedEntries = useMemo(
+    () => categories.map((name, index) => ({ name, index })).sort((a, b) => a.name.localeCompare(b.name)),
+    [categories]
+  )
   const [newCat, setNewCat] = useState('')
   const [editingIndex, setEditingIndex] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [counts, setCounts] = useState({})
+
+  useEffect(() => {
+    let active = true
+    supabase.from('vendors').select('categories').eq('neighborhood_id', neighborhood.id).then(({ data }) => {
+      if (!active || !data) return
+      const next = {}
+      for (const v of data) {
+        for (const c of v.categories || []) next[c] = (next[c] || 0) + 1
+      }
+      setCounts(next)
+    })
+    return () => { active = false }
+  }, [neighborhood.id])
 
   const saveCategories = async (next) => {
     setBusy(true)
@@ -63,16 +84,35 @@ export default function CategoryManager({ neighborhood, onChanged }) {
     if (newName !== oldName) {
       setBusy(true)
       setError('')
-      const { error: vendorError } = await supabase
+      // Array column — rewrite each affected vendor's categories client-side
+      // (swap oldName for newName, keep every other entry) rather than a
+      // single .update(), since PostgREST can't rename one jsonb-array
+      // element across rows in place.
+      const { data: affected, error: fetchError } = await supabase
         .from('vendors')
-        .update({ category: newName })
+        .select('id, categories')
         .eq('neighborhood_id', neighborhood.id)
-        .eq('category', oldName)
+        .contains('categories', [oldName])
+      if (fetchError) {
+        setBusy(false)
+        setError(fetchError.message)
+        return
+      }
+      const results = await Promise.all(
+        (affected || []).map((v) =>
+          supabase.from('vendors').update({ categories: v.categories.map((c) => (c === oldName ? newName : c)) }).eq('id', v.id)
+        )
+      )
       setBusy(false)
+      const vendorError = results.find((r) => r.error)?.error
       if (vendorError) {
         setError(vendorError.message)
         return
       }
+      setCounts((c) => {
+        const { [oldName]: moved, ...rest } = c
+        return { ...rest, [newName]: moved || 0 }
+      })
     }
     const next = categories.map((c, i) => (i === editingIndex ? newName : c))
     if (await saveCategories(next)) setEditingIndex(null)
@@ -84,7 +124,7 @@ export default function CategoryManager({ neighborhood, onChanged }) {
       .from('vendors')
       .select('id', { count: 'exact', head: true })
       .eq('neighborhood_id', neighborhood.id)
-      .eq('category', name)
+      .contains('categories', [name])
     if (count > 0) {
       const ok = window.confirm(
         `${count} vendor${count === 1 ? '' : 's'} currently use "${name}". They'll keep that category until you edit them individually — remove it from the list anyway?`
@@ -99,7 +139,7 @@ export default function CategoryManager({ neighborhood, onChanged }) {
       {error ? <div className="error-msg">{error}</div> : null}
       {categories.length > 0 ? (
         <ul className="category-manager-list">
-          {categories.map((c, i) => (
+          {sortedEntries.map(({ name: c, index: i }) => (
             <li key={i}>
               {editingIndex === i ? (
                 <>
@@ -115,7 +155,7 @@ export default function CategoryManager({ neighborhood, onChanged }) {
                 </>
               ) : (
                 <>
-                  <span>{c}</span>
+                  <span>{c} <span className="filter-pill-count">({counts[c] || 0})</span></span>
                   <ActionMenu
                     items={[
                       { label: 'Rename', onClick: () => startEdit(i), disabled: busy },

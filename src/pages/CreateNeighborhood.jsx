@@ -7,15 +7,14 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
 const DEFAULT_CATEGORIES = [
-  'Home Repair & Trades',
-  'Cleaning',
-  'Auto & Transportation',
-  'Personal Care',
-  'Health & Wellness',
-  'Pet Care',
-  'Insurance',
-  'Food',
-  'Professional Services',
+  'Plumbing', 'HVAC', 'Electrical', 'Handyman', 'Landscaping', 'Flooring', 'Windows',
+  'Window Treatments', 'Fencing', 'Painting', 'Railings', 'Appliance Repair', 'Pest Control',
+  'Remodeling', 'Countertops & Stonework', 'Pool', 'Roofing', 'Security', 'Tree Service',
+  'Pressure Washing', 'House Cleaning', 'Air Duct & Dryer Vent Cleaning', 'Office & Commercial Cleaning',
+  'Auto Repair', 'Rideshare & Transportation', 'Boat Rental & Marine', 'Home Insurance',
+  'Health & Life Insurance', 'Hair Stylist', 'Tailoring & Seamstress', 'Nails & Manicure',
+  'Pet Grooming', 'Dog Walking & Sitting', 'Cat Sitting', 'Notary', 'Legal', 'Real Estate Services',
+  'Tutoring & Lessons', 'Food', 'Health & Wellness',
 ]
 const DEFAULT_TAGLINE = 'A resident-run guide to trusted local vendors.'
 const COMMUNITY_TYPES = ['hoa', 'condo', 'community']

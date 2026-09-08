@@ -36,7 +36,11 @@ create table vendors (
   id uuid primary key default gen_random_uuid(),
   neighborhood_id uuid not null references neighborhoods(id) on delete cascade,
   name text not null,
-  category text not null,
+  -- Unused by the app going forward — superseded by `categories` below
+  -- (a vendor can belong to more than one) — left in place, and no
+  -- longer not-null, rather than dropped.
+  category text,
+  categories jsonb not null default '[]'::jsonb,
   specialty text,
   is_resident boolean not null default false,
   status text not null default 'Unknown',

@@ -10,7 +10,7 @@ function normalizeUrl(u) {
 
 function buildShareText(v) {
   const lines = [v.name]
-  const sub = [v.category, v.specialty].filter(Boolean).join(' · ')
+  const sub = [(v.categories || []).join(', '), v.specialty].filter(Boolean).join(' · ')
   if (sub) lines.push(sub)
   if (v.description) lines.push(v.description)
   if (v.address) lines.push(`Address: ${v.address}`)
@@ -35,14 +35,18 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
     }
   }
 
+  const cats = v.categories || []
+  const shownCats = cats.slice(0, 3)
+  const extraCount = cats.length - shownCats.length
+
   return (
     <div className="card">
-      <span className="pin" style={{ background: colorForCategory(categories, v.category) }} />
+      <span className="pin" style={{ background: colorForCategory(categories, cats[0]) }} />
       <div className="card-top">
         <div className="card-top-name">
           <h3 title={v.description || undefined}>{v.name}</h3>
           <div className="category">
-            {v.category}{v.specialty ? ` · ${v.specialty}` : ''}
+            {shownCats.join(', ')}{extraCount > 0 ? ` +${extraCount} more` : ''}{v.specialty ? ` · ${v.specialty}` : ''}
             {neighborhood ? (
               <>
                 {' · '}

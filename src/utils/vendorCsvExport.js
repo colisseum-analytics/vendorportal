@@ -6,7 +6,7 @@ import { VENDOR_CSV_HEADERS } from './vendorCsvTemplate'
 export function downloadVendorsCsv(vendors, filename = 'vendors-export.csv') {
   const rows = vendors.map((v) => ({
     name: v.name,
-    category: v.category,
+    categories: (v.categories || []).join(', '),
     specialty: v.specialty || '',
     status: v.status || 'Unknown',
     description: v.description || '',
