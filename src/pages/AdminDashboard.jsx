@@ -74,6 +74,15 @@ export default function AdminDashboard() {
       })
   }, [vendors, category, status, search])
 
+  const categories = useMemo(() => [...(neighborhood?.categories || [])].sort(), [neighborhood])
+  const categoryCounts = useMemo(() => {
+    const counts = {}
+    for (const v of vendors) {
+      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
+    }
+    return counts
+  }, [vendors])
+
   const refreshVendors = async () => {
     const { data } = await supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name')
     setVendors(data || [])
@@ -176,14 +185,6 @@ export default function AdminDashboard() {
     )
   }
 
-  const categories = useMemo(() => [...(neighborhood.categories || [])].sort(), [neighborhood.categories])
-  const categoryCounts = useMemo(() => {
-    const counts = {}
-    for (const v of vendors) {
-      for (const c of v.categories || []) counts[c] = (counts[c] || 0) + 1
-    }
-    return counts
-  }, [vendors])
   const renderCategoryOption = (cat) => (
     <>
       <span className="filter-pill-dot" style={{ background: colorForCategory(categories, cat) }} />
