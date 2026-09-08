@@ -93,8 +93,6 @@ export default function PlatformNeighborhoods() {
       <h2 className="section-title">Neighborhoods</h2>
 
       <div className="stats-row" style={{ marginBottom: 18 }}>
-        <div className="stat-item"><strong>{activeCount}</strong><span>Active</span></div>
-        <div className="stat-item"><strong>{inactiveCount}</strong><span>Inactive</span></div>
         <div className="stat-item"><strong>{totalVendors}</strong><span>Total vendors</span></div>
         <div className="stat-item"><strong>{totalMembers}</strong><span>Total members</span></div>
       </div>
