@@ -35,6 +35,13 @@ export default function PlatformUsers() {
   const [assigning, setAssigning] = useState(false)
   const [assignError, setAssignError] = useState('')
 
+  const [moveTarget, setMoveTarget] = useState(null) // { user, fromNeighborhood }
+  const [moveNeighborhoodId, setMoveNeighborhoodId] = useState('')
+  const [moveUnit, setMoveUnit] = useState('')
+  const [moveRole, setMoveRole] = useState('owner')
+  const [moving, setMoving] = useState(false)
+  const [moveError, setMoveError] = useState('')
+
   const [selectedIds, setSelectedIds] = useState(() => new Set())
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
   const [bulkDeleting, setBulkDeleting] = useState(false)
@@ -158,6 +165,41 @@ export default function PlatformUsers() {
       return
     }
     setAssignTarget(null)
+    await reloadCore()
+  }
+
+  const startMove = (u, fromNeighborhood) => {
+    setMoveTarget({ user: u, fromNeighborhood })
+    setMoveNeighborhoodId('')
+    setMoveUnit('')
+    setMoveRole('owner')
+    setMoveError('')
+  }
+
+  // A move only ever touches this one neighborhood_members row — it never
+  // touches neighborhood_admins (a separate role) or anything the resident
+  // already posted (needs, contact messages, referrals stay attached to
+  // whichever neighborhood they actually happened under).
+  const submitMove = async (e) => {
+    e.preventDefault()
+    if (!moveNeighborhoodId || !moveUnit.trim()) return
+    setMoving(true)
+    setMoveError('')
+    const { error } = await supabase
+      .from('neighborhood_members')
+      .update({ neighborhood_id: moveNeighborhoodId, unit: moveUnit.trim(), role: moveRole })
+      .eq('neighborhood_id', moveTarget.fromNeighborhood.id)
+      .eq('user_id', moveTarget.user.user_id)
+    setMoving(false)
+    if (error) {
+      setMoveError(
+        error.code === '23505'
+          ? `${moveTarget.user.email} is already a resident of that neighborhood.`
+          : error.message
+      )
+      return
+    }
+    setMoveTarget(null)
     await reloadCore()
   }
 
@@ -290,6 +332,11 @@ export default function PlatformUsers() {
               onClick: () => removeFromNeighborhood(n.id, u.user_id),
               disabled: busyUserId === u.user_id,
               danger: true,
+            })),
+            ...(u.member_of || []).map((n) => ({
+              label: `Move from ${n.name}…`,
+              onClick: () => startMove(u, n),
+              disabled: busyUserId === u.user_id,
             })),
             { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id },
             { label: u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin', onClick: () => togglePlatformAdmin(u), disabled: busyUserId === u.user_id },
@@ -469,6 +516,54 @@ export default function PlatformUsers() {
                     <button type="button" className="btn-secondary" onClick={() => setAssignTarget(null)}>Cancel</button>
                     <button type="submit" className="btn-primary" disabled={!assignNeighborhoodId || assigning}>
                       {assigning ? 'Assigning…' : 'Assign'}
+                    </button>
+                  </div>
+                </form>
+              )
+            })()}
+          </div>
+        </div>
+      ) : null}
+
+      {moveTarget ? (
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setMoveTarget(null) }}>
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <button className="close-x" onClick={() => setMoveTarget(null)}>×</button>
+            <h2>Move {moveTarget.user.email}</h2>
+            <p className="sub">
+              Moves their residency from {moveTarget.fromNeighborhood.name} to another neighborhood. Doesn't affect
+              admin access, or anything they've already posted there.
+            </p>
+            {moveError ? <div className="error-msg">{moveError}</div> : null}
+            {(() => {
+              const available = neighborhoods.filter((n) => n.id !== moveTarget.fromNeighborhood.id)
+              if (available.length === 0) {
+                return <p className="sub">No other neighborhood to move them to.</p>
+              }
+              return (
+                <form onSubmit={submitMove}>
+                  <div className="field">
+                    <label>Move to</label>
+                    <select value={moveNeighborhoodId} onChange={(e) => setMoveNeighborhoodId(e.target.value)} autoFocus>
+                      <option value="" disabled>Choose one…</option>
+                      {available.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>New unit/address</label>
+                    <input type="text" value={moveUnit} onChange={(e) => setMoveUnit(e.target.value)} placeholder="e.g. 4B" />
+                  </div>
+                  <div className="field">
+                    <label>Role there</label>
+                    <select value={moveRole} onChange={(e) => setMoveRole(e.target.value)}>
+                      <option value="owner">Owner</option>
+                      <option value="renter">Renter</option>
+                    </select>
+                  </div>
+                  <div className="modal-actions">
+                    <button type="button" className="btn-secondary" onClick={() => setMoveTarget(null)}>Cancel</button>
+                    <button type="submit" className="btn-primary" disabled={!moveNeighborhoodId || !moveUnit.trim() || moving}>
+                      {moving ? 'Moving…' : 'Move'}
                     </button>
                   </div>
                 </form>
