@@ -25,7 +25,7 @@ function versionToken(str) {
 
 export default function NeighborhoodDirectory() {
   const { neighborhood } = useOutletContext()
-  const { t, tCategory } = useLanguage()
+  const { t, tCategory, lang } = useLanguage()
   const metaDescriptionKey = neighborhood.community_type === 'hoa'
     ? 'directory.metaDescriptionFallbackHoa'
     : neighborhood.community_type === 'condo'
@@ -75,7 +75,10 @@ export default function NeighborhoodDirectory() {
       })
   }, [vendors, category, status, search])
 
-  const categories = useMemo(() => [...(neighborhood.categories || [])].sort(), [neighborhood.categories])
+  const categories = useMemo(
+    () => [...(neighborhood.categories || [])].sort((a, b) => tCategory(a).localeCompare(tCategory(b), lang)),
+    [neighborhood.categories, lang]
+  )
   const categoryCounts = useMemo(() => {
     const counts = {}
     for (const v of vendors) {
