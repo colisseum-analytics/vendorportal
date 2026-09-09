@@ -13,7 +13,7 @@ import { usePageMeta } from '../hooks/usePageMeta.js'
 const BATCH_SIZE = 50
 
 export default function BrowseVendors() {
-  const { t, tCategory } = useLanguage()
+  const { t, tCategory, lang } = useLanguage()
   usePageMeta({ title: t('browse.title'), description: t('browse.subtitle') })
   const [neighborhoods, setNeighborhoods] = useState([])
   const [vendors, setVendors] = useState([])
@@ -70,8 +70,8 @@ export default function BrowseVendors() {
     return [...new Set(relevant.map((n) => n.city).filter(Boolean))].sort()
   }, [neighborhoods, neighborhoodFilter])
   const categoryOptions = useMemo(
-    () => [...new Set(vendors.flatMap((v) => v.categories || []))].sort(),
-    [vendors]
+    () => [...new Set(vendors.flatMap((v) => v.categories || []))].sort((a, b) => tCategory(a).localeCompare(tCategory(b), lang)),
+    [vendors, lang]
   )
   const categoryCounts = useMemo(() => {
     const counts = {}
