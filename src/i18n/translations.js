@@ -195,6 +195,7 @@ export const translations = {
     },
     vendorCard: {
       copyToShare: 'Copy details to share',
+      viewFlyer: 'View flyer',
       neighborRecommended: '★ Neighbor',
       edit: 'Edit',
       delete: 'Delete',
@@ -557,6 +558,7 @@ export const translations = {
     },
     vendorCard: {
       copyToShare: 'Copiar detalles para compartir',
+      viewFlyer: 'Ver volante',
       neighborRecommended: '★ Vecino',
       edit: 'Editar',
       delete: 'Eliminar',

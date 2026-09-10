@@ -48,6 +48,7 @@ create table vendors (
   address text,
   phone text,
   website text,
+  flyer_url text,
   created_at timestamptz not null default now()
 );
 
@@ -751,6 +752,39 @@ create policy "logo_admin_delete"
   on storage.objects for delete
   using (
     bucket_id = 'neighborhood-logos'
+    and (is_neighborhood_admin(((storage.foldername(name))[1])::uuid) or is_platform_admin())
+  );
+
+-- ---------- storage (vendor flyers) ----------
+
+insert into storage.buckets (id, name, public)
+values ('vendor-flyers', 'vendor-flyers', true)
+on conflict (id) do nothing;
+
+create policy "flyer_public_read"
+  on storage.objects for select
+  using (bucket_id = 'vendor-flyers');
+
+-- Flyers are uploaded to "<neighborhood_id>/<filename>" — same
+-- folder-per-neighborhood convention as neighborhood-logos.
+create policy "flyer_admin_insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'vendor-flyers'
+    and (is_neighborhood_admin(((storage.foldername(name))[1])::uuid) or is_platform_admin())
+  );
+
+create policy "flyer_admin_update"
+  on storage.objects for update
+  using (
+    bucket_id = 'vendor-flyers'
+    and (is_neighborhood_admin(((storage.foldername(name))[1])::uuid) or is_platform_admin())
+  );
+
+create policy "flyer_admin_delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'vendor-flyers'
     and (is_neighborhood_admin(((storage.foldername(name))[1])::uuid) or is_platform_admin())
   );
 -- Platform admin overview improvements:

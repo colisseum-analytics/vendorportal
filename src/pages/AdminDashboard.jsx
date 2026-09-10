@@ -310,6 +310,7 @@ export default function AdminDashboard() {
         <VendorFormModal
           categories={categories}
           vendors={vendors}
+          neighborhood={neighborhood}
           existing={editingVendor}
           onCancel={() => { setModalOpen(false); setEditingVendor(null) }}
           onSave={saveVendor}
