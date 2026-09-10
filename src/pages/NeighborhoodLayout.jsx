@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import NeighborhoodSidebar from '../components/NeighborhoodSidebar.jsx'
 import ContactAdminModal from '../components/ContactAdminModal.jsx'
+import ChatWidget from '../components/ChatWidget.jsx'
 import FooterExtras from '../components/FooterExtras.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
 
@@ -147,6 +148,8 @@ export default function NeighborhoodLayout() {
               onCancel={() => setContactOpen(false)}
             />
           ) : null}
+
+          <ChatWidget neighborhood={neighborhood} onContactAdmins={() => setContactOpen(true)} />
         </div>
       </div>
     </div>
