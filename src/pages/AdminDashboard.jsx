@@ -204,17 +204,11 @@ export default function AdminDashboard() {
         <p className="tagline">Changes here appear on the public directory immediately.</p>
       </div>
 
-      <div className="stats-row">
-        <div className="stat-item"><strong>{vendors.length}</strong><span>Vendor{vendors.length === 1 ? '' : 's'}</span></div>
-        <div className="stat-item"><strong>{categories.length}</strong><span>Categor{categories.length === 1 ? 'y' : 'ies'}</span></div>
-        <div className="stat-item"><strong>{residentCount}</strong><span>Neighbor-recommended</span></div>
-        {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>Last added</span></div> : null}
-        {unresolvedCount > 0 ? (
-          <Link to={`/n/${slug}/admin/messages`} className="stat-item stat-alert stat-item-clickable">
-            <strong>{unresolvedCount}</strong><span>New message{unresolvedCount === 1 ? '' : 's'}</span>
-          </Link>
-        ) : null}
-      </div>
+      {unresolvedCount > 0 ? (
+        <Link to={`/n/${slug}/admin/messages`} className="stat-item stat-alert stat-item-clickable" style={{ display: 'inline-flex', marginBottom: 14 }}>
+          <strong>{unresolvedCount}</strong><span>New message{unresolvedCount === 1 ? '' : 's'}</span>
+        </Link>
+      ) : null}
 
       <div className="controls controls-compact">
         <div className="search-box search-box-compact">
@@ -228,6 +222,12 @@ export default function AdminDashboard() {
               Reset ×
             </button>
           ) : null}
+        </div>
+        <div className="stats-compact stats-compact-inline">
+          <span><strong>{vendors.length}</strong> Vendor{vendors.length === 1 ? '' : 's'}</span>
+          <span><strong>{categories.length}</strong> Categor{categories.length === 1 ? 'y' : 'ies'}</span>
+          <span><strong>{residentCount}</strong> Neighbor-recommended</span>
+          {lastAdded ? <span><strong>{relativeTime(lastAdded)}</strong> Last added</span> : null}
         </div>
       </div>
 
