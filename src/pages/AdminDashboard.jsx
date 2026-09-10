@@ -5,6 +5,7 @@ import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
 import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
 import { colorForCategory } from '../utils/categoryColor'
+import { normalizeVendorPhone } from '../utils/vendorDuplicates'
 import { downloadVendorsCsv } from '../utils/vendorCsvExport'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
@@ -70,7 +71,9 @@ export default function AdminDashboard() {
       .filter((v) => {
         if (!search) return true
         const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
-        return hay.includes(search.toLowerCase())
+        if (hay.includes(search.toLowerCase())) return true
+        const searchDigits = normalizeVendorPhone(search)
+        return searchDigits.length >= 3 && normalizeVendorPhone(v.phone).includes(searchDigits)
       })
   }, [vendors, category, status, search])
 
@@ -215,11 +218,11 @@ export default function AdminDashboard() {
 
       <div className="controls controls-compact">
         <div className="search-box search-box-compact">
-          <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search vendors, categories, streets, phone…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="filter-pill-row">
-          <FilterPill label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
           <FilterPill label="Category" options={categories} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
+          <FilterPill label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
           {status || category ? (
             <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
               Reset ×

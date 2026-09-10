@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { colorForCategory } from '../utils/categoryColor'
+import { normalizeVendorPhone } from '../utils/vendorDuplicates'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
@@ -103,7 +104,9 @@ export default function BrowseVendors() {
         if (!search) return true
         const n = neighborhoodById[v.neighborhood_id]
         const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.description || ''} ${n?.name || ''} ${n?.city || ''}`.toLowerCase()
-        return hay.includes(search.toLowerCase())
+        if (hay.includes(search.toLowerCase())) return true
+        const searchDigits = normalizeVendorPhone(search)
+        return searchDigits.length >= 3 && normalizeVendorPhone(v.phone).includes(searchDigits)
       })
   }, [vendors, status, category, city, neighborhoodFilter, search, neighborhoodById])
 
