@@ -363,7 +363,10 @@ a { color: var(--blue); }
    stays pinned to the top of its own cell instead of stretching to match
    (and drifting down beside) a name column that grows taller once the
    category list wraps to more than one line. */
-.grid:not(.list-view) .card-top{ display:grid; grid-template-columns: 1fr auto; align-items:start; }
+/* minmax(0, 1fr), not a bare 1fr — a bare 1fr track won't shrink below
+   its content's unwrapped width, so a long vendor name pushed the
+   actions column (and itself) past the card's edge instead of wrapping. */
+.grid:not(.list-view) .card-top{ display:grid; grid-template-columns: minmax(0, 1fr) auto; align-items:start; }
 .card h3{ font-family:'Fraunces', serif; font-weight:600; font-size: 18px; margin: 0 0 3px; line-height:1.25; }
 .card .category{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:0.05em; text-transform: uppercase; color: var(--ink-soft); }
 .vendor-neighborhood-link{ color: var(--blue); text-decoration:none; }
