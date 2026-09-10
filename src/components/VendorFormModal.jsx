@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { supabase } from '../supabaseClient'
 import { findDuplicateVendor } from '../utils/vendorDuplicates'
 
 const STATUSES = ['Verified', 'Unknown']
 
-export default function VendorFormModal({ categories, vendors, existing, onCancel, onSave }) {
+export default function VendorFormModal({ categories, vendors, neighborhood, existing, onCancel, onSave }) {
   const [form, setForm] = useState({
     name: existing?.name || '',
     categories: existing?.categories?.length ? existing.categories : (existing?.category ? [existing.category] : []),
@@ -14,10 +15,42 @@ export default function VendorFormModal({ categories, vendors, existing, onCance
     address: existing?.address || '',
     phone: existing?.phone || '',
     website: existing?.website || '',
+    flyer_url: existing?.flyer_url || '',
   })
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [pendingDuplicate, setPendingDuplicate] = useState(null)
+  const [flyerUploading, setFlyerUploading] = useState(false)
+  const [flyerError, setFlyerError] = useState('')
+
+  const uploadFlyer = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setFlyerError('Please choose an image file.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setFlyerError('Image is too large — please use one under 5MB.')
+      return
+    }
+    setFlyerError('')
+    setFlyerUploading(true)
+    const ext = file.name.split('.').pop()
+    const path = `${neighborhood.id}/${Date.now()}.${ext}`
+    const { error: uploadError } = await supabase.storage.from('vendor-flyers').upload(path, file, { cacheControl: '3600' })
+    if (uploadError) {
+      setFlyerUploading(false)
+      setFlyerError(uploadError.message)
+      return
+    }
+    const { data: pub } = supabase.storage.from('vendor-flyers').getPublicUrl(path)
+    setForm((f) => ({ ...f, flyer_url: pub.publicUrl }))
+    setFlyerUploading(false)
+  }
+
+  const removeFlyer = () => setForm((f) => ({ ...f, flyer_url: '' }))
 
   const update = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -50,7 +83,7 @@ export default function VendorFormModal({ categories, vendors, existing, onCance
     setSaving(true)
     setError('')
     try {
-      await onSave({ ...form, name: form.name.trim() })
+      await onSave({ ...form, name: form.name.trim(), flyer_url: form.flyer_url || null })
     } catch (err) {
       setError(err.message || "Couldn't save — try again.")
       setSaving(false)
@@ -120,6 +153,25 @@ export default function VendorFormModal({ categories, vendors, existing, onCance
               <label>Website</label>
               <input type="text" value={form.website} onChange={update('website')} placeholder="example.com" />
             </div>
+          </div>
+          <div className="field">
+            <label>Flyer (optional)</label>
+            {flyerError ? <div className="error-msg">{flyerError}</div> : null}
+            <div className="logo-row">
+              {form.flyer_url ? (
+                <img src={form.flyer_url} alt="" className="logo-preview" />
+              ) : null}
+              <div className="logo-actions">
+                <label className="btn-secondary logo-upload-btn">
+                  {flyerUploading ? 'Uploading…' : form.flyer_url ? 'Replace' : 'Upload image'}
+                  <input type="file" accept="image/*" onChange={uploadFlyer} disabled={flyerUploading} hidden />
+                </label>
+                {form.flyer_url ? (
+                  <button type="button" className="btn-ghost" onClick={removeFlyer} disabled={flyerUploading}>Remove</button>
+                ) : null}
+              </div>
+            </div>
+            <div className="hint">Shown to residents as a tappable flyer icon on this vendor's card — handy if they already have a promotional image.</div>
           </div>
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onCancel}>Cancel</button>

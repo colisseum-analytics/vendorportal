@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { colorForCategory } from '../utils/categoryColor'
 import { useLanguage } from '../context/LanguageContext.jsx'
@@ -23,6 +24,7 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
   const v = vendor
   const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
+  const [flyerOpen, setFlyerOpen] = useState(false)
 
   const copy = async (e) => {
     e.preventDefault()
@@ -58,6 +60,11 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
           </div>
         </div>
         <div className="card-top-actions">
+          {v.flyer_url ? (
+            <button className="copy-btn" onClick={() => setFlyerOpen(true)} title={t('vendorCard.viewFlyer')} aria-label={t('vendorCard.viewFlyer')}>
+              🪧
+            </button>
+          ) : null}
           <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title={t('vendorCard.copyToShare')} aria-label={t('vendorCard.copyToShare')}>
             {copied ? '✓' : '⧉'}
           </button>
@@ -89,6 +96,19 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
           <button onClick={() => onEdit(v)}>{t('vendorCard.edit')}</button>
           <button className="danger" onClick={() => onDelete(v)}>{t('vendorCard.delete')}</button>
         </div>
+      ) : null}
+      {flyerOpen ? createPortal(
+        // Rendered into document.body, not here — an ancestor .card has a
+        // hover transform, and a transformed ancestor turns this overlay's
+        // position:fixed into "fixed relative to that ancestor" instead of
+        // the viewport, which otherwise pins the lightbox to the card.
+        <div className="overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setFlyerOpen(false) }}>
+          <div className="flyer-lightbox">
+            <button className="close-x" onClick={() => setFlyerOpen(false)}>×</button>
+            <img src={v.flyer_url} alt={`${v.name} flyer`} />
+          </div>
+        </div>,
+        document.body
       ) : null}
     </div>
   )
