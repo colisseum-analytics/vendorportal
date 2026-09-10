@@ -336,6 +336,7 @@ a { color: var(--blue); }
 .grid.list-view .meta .row{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .grid.list-view .resident-badge{ grid-column:5; grid-row:1; margin-top:0; margin-left:0; justify-self:end; }
 .grid.list-view .card-admin-actions{ grid-column:6; padding-left:0; border-top:none; margin-top:0; padding-top:0; }
+.grid.list-view .added-by-note{ display:none; }
 
 /* ---------- csv import preview ---------- */
 .import-preview{ max-height: 320px; overflow-y:auto; border:1px solid var(--line); border-radius: 10px; margin-bottom: 16px; }
@@ -380,6 +381,7 @@ a { color: var(--blue); }
   color: var(--marigold); background: var(--marigold-soft); padding:2px 8px; border-radius:10px; width:fit-content;
 }
 .card p.desc{ font-size: 13.5px; color: var(--ink-soft); line-height:1.5; margin: 10px 0 12px; padding-left: 18px; }
+.added-by-note{ font-size:10.5px; color: var(--ink-faint); margin-top:8px; padding-left: 18px; }
 .card .meta{ padding-left: 18px; display:flex; flex-direction:column; gap:5px; font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; }
 .card .meta a{ text-decoration:none; }
 .card .meta a:hover{ text-decoration:underline; }

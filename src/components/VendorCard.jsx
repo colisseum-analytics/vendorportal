@@ -20,7 +20,7 @@ function buildShareText(v) {
   return lines.join('\n')
 }
 
-export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDelete, neighborhood }) {
+export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, onEdit, onDelete, neighborhood }) {
   const v = vendor
   const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
@@ -91,6 +91,7 @@ export default function VendorCard({ vendor, categories, isAdmin, onEdit, onDele
         ) : null}
       </div>
       {v.is_resident ? <div className="resident-badge">{t('vendorCard.neighborRecommended')}</div> : null}
+      {isAdmin && addedByEmail ? <div className="added-by-note">Added by {addedByEmail}</div> : null}
       {isAdmin ? (
         <div className="card-admin-actions">
           <button onClick={() => onEdit(v)}>{t('vendorCard.edit')}</button>

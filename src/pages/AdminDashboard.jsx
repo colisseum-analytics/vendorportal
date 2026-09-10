@@ -28,6 +28,7 @@ export default function AdminDashboard() {
   const [currentAdmins, setCurrentAdmins] = useState([])
   const [adminsError, setAdminsError] = useState('')
   const [busyAdminId, setBusyAdminId] = useState(null)
+  const [creatorEmails, setCreatorEmails] = useState({})
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingVendor, setEditingVendor] = useState(null)
@@ -48,17 +49,19 @@ export default function AdminDashboard() {
     if (!neighborhood || !isAdmin) return
     let active = true
     async function loadExtras() {
-      const [{ data: v }, { data: inv }, { count: unresolved }, { data: adm }] = await Promise.all([
+      const [{ data: v }, { data: inv }, { count: unresolved }, { data: adm }, { data: creators }] = await Promise.all([
         supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name'),
         supabase.from('admin_invites').select('*').eq('neighborhood_id', neighborhood.id).order('created_at'),
         supabase.from('contact_messages').select('*', { count: 'exact', head: true }).eq('neighborhood_id', neighborhood.id).eq('resolved', false),
         supabase.rpc('list_neighborhood_admins', { p_neighborhood_id: neighborhood.id }),
+        supabase.rpc('list_vendor_creators', { p_neighborhood_id: neighborhood.id }),
       ])
       if (!active) return
       setVendors(v || [])
       setInvites(inv || [])
       setUnresolvedCount(unresolved || 0)
       setCurrentAdmins(adm || [])
+      setCreatorEmails(Object.fromEntries((creators || []).map((c) => [c.user_id, c.email])))
     }
     loadExtras()
     return () => { active = false }
@@ -87,8 +90,12 @@ export default function AdminDashboard() {
   }, [vendors])
 
   const refreshVendors = async () => {
-    const { data } = await supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name')
+    const [{ data }, { data: creators }] = await Promise.all([
+      supabase.from('vendors').select('*').eq('neighborhood_id', neighborhood.id).order('name'),
+      supabase.rpc('list_vendor_creators', { p_neighborhood_id: neighborhood.id }),
+    ])
     setVendors(data || [])
+    setCreatorEmails(Object.fromEntries((creators || []).map((c) => [c.user_id, c.email])))
   }
 
   const saveVendor = async (form) => {
@@ -260,6 +267,7 @@ export default function AdminDashboard() {
               vendor={v}
               categories={categories}
               isAdmin
+              addedByEmail={v.created_by ? creatorEmails[v.created_by] : null}
               onEdit={(vv) => { setEditingVendor(vv); setModalOpen(true) }}
               onDelete={(vv) => setDeleteTarget(vv)}
             />
