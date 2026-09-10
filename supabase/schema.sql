@@ -49,6 +49,7 @@ create table vendors (
   phone text,
   website text,
   flyer_url text,
+  created_by uuid references auth.users(id) on delete set null default auth.uid(),
   created_at timestamptz not null default now()
 );
 
@@ -672,6 +673,24 @@ as $$
   where na.neighborhood_id = p_neighborhood_id
     and (is_neighborhood_admin(p_neighborhood_id) or is_platform_admin())
   order by na.created_at;
+$$;
+
+-- Sibling of list_neighborhood_admins/list_neighborhood_members: a plain
+-- client-side select can't join auth.users for the email column, and
+-- created_by can point at a platform admin who isn't one of this
+-- neighborhood's own admins, so the already-loaded admin list isn't enough.
+create or replace function public.list_vendor_creators(p_neighborhood_id uuid)
+returns table (user_id uuid, email text)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select distinct u.id, u.email
+  from vendors v
+  join auth.users u on u.id = v.created_by
+  where v.neighborhood_id = p_neighborhood_id
+    and (is_neighborhood_admin(p_neighborhood_id) or is_platform_admin());
 $$;
 
 -- Grants an EXISTING account admin access to a neighborhood directly.
