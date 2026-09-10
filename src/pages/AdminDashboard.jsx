@@ -218,7 +218,7 @@ export default function AdminDashboard() {
 
       <div className="controls controls-compact">
         <div className="search-box search-box-compact">
-          <input type="text" placeholder="Search vendors, categories, streets, phone…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search vendors, categories, phone…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="filter-pill-row">
           <FilterPill label="Category" options={categories} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
