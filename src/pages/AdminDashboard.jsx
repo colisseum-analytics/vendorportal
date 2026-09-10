@@ -309,6 +309,7 @@ export default function AdminDashboard() {
       {modalOpen ? (
         <VendorFormModal
           categories={categories}
+          vendors={vendors}
           existing={editingVendor}
           onCancel={() => { setModalOpen(false); setEditingVendor(null) }}
           onSave={saveVendor}
@@ -318,6 +319,7 @@ export default function AdminDashboard() {
       {importOpen ? (
         <ImportVendorsModal
           neighborhood={neighborhood}
+          vendors={vendors}
           onCancel={() => setImportOpen(false)}
           onImported={async (count) => {
             setImportOpen(false)

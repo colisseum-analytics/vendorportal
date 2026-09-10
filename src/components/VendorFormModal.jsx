@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { findDuplicateVendor } from '../utils/vendorDuplicates'
 
 const STATUSES = ['Verified', 'Unknown']
 
-export default function VendorFormModal({ categories, existing, onCancel, onSave }) {
+export default function VendorFormModal({ categories, vendors, existing, onCancel, onSave }) {
   const [form, setForm] = useState({
     name: existing?.name || '',
     categories: existing?.categories?.length ? existing.categories : (existing?.category ? [existing.category] : []),
@@ -16,8 +17,12 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
   })
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [pendingDuplicate, setPendingDuplicate] = useState(null)
 
-  const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const update = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }))
+    if (key === 'name' || key === 'phone') setPendingDuplicate(null)
+  }
   const updateCheckbox = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.checked }))
   const toggleCategory = (c) => {
     setForm((f) => ({
@@ -34,6 +39,12 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
     }
     if (form.categories.length === 0) {
       setError("Pick at least one category before saving.")
+      return
+    }
+    const duplicate = findDuplicateVendor(form, vendors || [], existing?.id)
+    if (duplicate && pendingDuplicate?.id !== duplicate.id) {
+      setError('')
+      setPendingDuplicate(duplicate)
       return
     }
     setSaving(true)
@@ -53,6 +64,11 @@ export default function VendorFormModal({ categories, existing, onCancel, onSave
         <h2>{existing ? 'Edit vendor' : 'Add a vendor'}</h2>
         <p className="sub">{existing ? 'Update the details neighbors see.' : 'This appears in the public directory right away.'}</p>
         {error ? <div className="error-msg">{error}</div> : null}
+        {pendingDuplicate ? (
+          <div className="warning-msg">
+            "{pendingDuplicate.name}" is already in the directory{pendingDuplicate.phone && form.phone ? ' with this phone number' : ''} — click {existing ? 'Save changes' : 'Add vendor'} again to add this one anyway.
+          </div>
+        ) : null}
         <form onSubmit={submit}>
           <div className="field">
             <label>Business name *</label>

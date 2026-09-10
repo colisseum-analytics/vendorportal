@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { parseCsv } from '../utils/csv'
 import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
+import { findDuplicateVendor } from '../utils/vendorDuplicates'
 
 const STATUSES = ['Verified', 'Unknown']
 
@@ -21,7 +22,7 @@ function truthy(v) {
   return ['yes', 'y', 'true', '1'].includes(String(v || '').trim().toLowerCase())
 }
 
-export default function ImportVendorsModal({ neighborhood, onCancel, onImported }) {
+export default function ImportVendorsModal({ neighborhood, vendors, onCancel, onImported }) {
   const [rows, setRows] = useState(null) // parsed + validated rows
   const [fileName, setFileName] = useState('')
   const [parseError, setParseError] = useState('')
@@ -97,11 +98,21 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
       headerRow.forEach((h, i) => { raw[h] = cols[i] })
       return validateRow(raw)
     })
+    // Flag likely duplicates against vendors already in the directory, and
+    // against earlier rows in this same file — informational only, doesn't
+    // block import, since two real vendors can legitimately share a phone.
+    const seenSoFar = []
+    for (const row of parsed) {
+      const dup = findDuplicateVendor(row, [...(vendors || []), ...seenSoFar])
+      row.duplicateOf = dup ? dup.name : null
+      seenSoFar.push(row)
+    }
     setRows(parsed)
   }
 
   const validRows = rows ? rows.filter((r) => r.errors.length === 0) : []
   const invalidRows = rows ? rows.filter((r) => r.errors.length > 0) : []
+  const duplicateCount = validRows.filter((r) => r.duplicateOf).length
 
   const commitImport = async () => {
     setImporting(true)
@@ -140,16 +151,22 @@ export default function ImportVendorsModal({ neighborhood, onCancel, onImported 
           </>
         ) : (
           <>
-            <p className="sub">{fileName} — {validRows.length} ready to import{invalidRows.length ? `, ${invalidRows.length} need fixing` : ''}.</p>
+            <p className="sub">
+              {fileName} — {validRows.length} ready to import{invalidRows.length ? `, ${invalidRows.length} need fixing` : ''}
+              {duplicateCount ? `, ${duplicateCount} might already exist` : ''}.
+            </p>
             {importError ? <div className="error-msg">{importError}</div> : null}
             <div className="import-preview">
               {rows.map((r, i) => (
-                <div key={i} className={`import-row ${r.errors.length ? 'import-row-error' : ''}`}>
+                <div key={i} className={`import-row ${r.errors.length ? 'import-row-error' : (r.duplicateOf ? 'import-row-duplicate' : '')}`}>
                   <div className="import-row-main">
                     <strong>{r.name || '(no name)'}</strong>
                     <span className="import-row-cat">{(r.categories || []).join(', ')}{r.specialty ? ` · ${r.specialty}` : ''}</span>
                   </div>
                   {r.errors.length ? <div className="import-row-errors">{r.errors.join('; ')}</div> : null}
+                  {!r.errors.length && r.duplicateOf ? (
+                    <div className="import-row-duplicate-note">Might already exist as "{r.duplicateOf}" — will still be imported unless you remove it from the file.</div>
+                  ) : null}
                 </div>
               ))}
             </div>
