@@ -3,6 +3,7 @@ import { useOutletContext, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { colorForCategory } from '../utils/categoryColor'
+import { normalizeVendorPhone } from '../utils/vendorDuplicates'
 import VendorCard from '../components/VendorCard.jsx'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
@@ -71,7 +72,9 @@ export default function NeighborhoodDirectory() {
       .filter((v) => {
         if (!search) return true
         const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
-        return hay.includes(search.toLowerCase())
+        if (hay.includes(search.toLowerCase())) return true
+        const searchDigits = normalizeVendorPhone(search)
+        return searchDigits.length >= 3 && normalizeVendorPhone(v.phone).includes(searchDigits)
       })
   }, [vendors, category, status, search])
 

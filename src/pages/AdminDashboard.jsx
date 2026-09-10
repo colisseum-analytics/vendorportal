@@ -5,6 +5,7 @@ import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
 import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
 import { colorForCategory } from '../utils/categoryColor'
+import { normalizeVendorPhone } from '../utils/vendorDuplicates'
 import { downloadVendorsCsv } from '../utils/vendorCsvExport'
 import ViewToggle from '../components/ViewToggle.jsx'
 import FilterPill from '../components/FilterPill.jsx'
@@ -70,7 +71,9 @@ export default function AdminDashboard() {
       .filter((v) => {
         if (!search) return true
         const hay = `${v.name} ${(v.categories || []).join(' ')} ${v.specialty || ''} ${v.address || ''} ${v.description || ''}`.toLowerCase()
-        return hay.includes(search.toLowerCase())
+        if (hay.includes(search.toLowerCase())) return true
+        const searchDigits = normalizeVendorPhone(search)
+        return searchDigits.length >= 3 && normalizeVendorPhone(v.phone).includes(searchDigits)
       })
   }, [vendors, category, status, search])
 
@@ -201,30 +204,30 @@ export default function AdminDashboard() {
         <p className="tagline">Changes here appear on the public directory immediately.</p>
       </div>
 
-      <div className="stats-row">
-        <div className="stat-item"><strong>{vendors.length}</strong><span>Vendor{vendors.length === 1 ? '' : 's'}</span></div>
-        <div className="stat-item"><strong>{categories.length}</strong><span>Categor{categories.length === 1 ? 'y' : 'ies'}</span></div>
-        <div className="stat-item"><strong>{residentCount}</strong><span>Neighbor-recommended</span></div>
-        {lastAdded ? <div className="stat-item"><strong>{relativeTime(lastAdded)}</strong><span>Last added</span></div> : null}
-        {unresolvedCount > 0 ? (
-          <Link to={`/n/${slug}/admin/messages`} className="stat-item stat-alert stat-item-clickable">
-            <strong>{unresolvedCount}</strong><span>New message{unresolvedCount === 1 ? '' : 's'}</span>
-          </Link>
-        ) : null}
-      </div>
+      {unresolvedCount > 0 ? (
+        <Link to={`/n/${slug}/admin/messages`} className="stat-item stat-alert stat-item-clickable" style={{ display: 'inline-flex', marginBottom: 14 }}>
+          <strong>{unresolvedCount}</strong><span>New message{unresolvedCount === 1 ? '' : 's'}</span>
+        </Link>
+      ) : null}
 
       <div className="controls controls-compact">
         <div className="search-box search-box-compact">
-          <input type="text" placeholder="Search vendors, categories, streets…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input type="text" placeholder="Search vendors, categories, phone…" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="filter-pill-row">
-          <FilterPill label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
           <FilterPill label="Category" options={categories} value={category} onChange={setCategory} renderOption={renderCategoryOption} />
+          <FilterPill label="Status" options={STATUS_OPTIONS} value={status} onChange={setStatus} />
           {status || category ? (
             <button type="button" className="filter-reset-btn" onClick={() => { setStatus(null); setCategory(null) }}>
               Reset ×
             </button>
           ) : null}
+        </div>
+        <div className="stats-compact stats-compact-inline">
+          <span><strong>{vendors.length}</strong> Vendor{vendors.length === 1 ? '' : 's'}</span>
+          <span><strong>{categories.length}</strong> Categor{categories.length === 1 ? 'y' : 'ies'}</span>
+          <span><strong>{residentCount}</strong> Neighbor-recommended</span>
+          {lastAdded ? <span><strong>{relativeTime(lastAdded)}</strong> Last added</span> : null}
         </div>
       </div>
 
