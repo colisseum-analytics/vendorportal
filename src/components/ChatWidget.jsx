@@ -4,6 +4,15 @@ import { useLanguage } from '../context/LanguageContext.jsx'
 import { answerQuestion } from '../utils/chatAnswer'
 
 function formatAnswer(match, t) {
+  if (match.type === 'emergency') {
+    const lines = [t('chatWidget.emergencyWarning')]
+    for (const item of match.items) {
+      const parts = [item.title]
+      if (item.phone) parts.push(`☏ ${item.phone}`)
+      lines.push(parts.join(' — '))
+    }
+    return lines.join('\n')
+  }
   if (match.type === 'vendors') {
     const verified = match.vendors.filter((v) => v.status === 'Verified')
     const shown = (verified.length ? verified : match.vendors).slice(0, 3)

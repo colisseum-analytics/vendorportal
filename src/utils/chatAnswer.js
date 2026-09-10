@@ -29,12 +29,27 @@ const SYNONYMS = {
   jardinero: 'landscaping', jardineria: 'landscaping', jardin: 'landscaping', cesped: 'landscaping',
   guard: 'security', gate: 'security', seguridad: 'security', guardia: 'security', porton: 'security',
   hoa: 'association', management: 'association', administracion: 'association', gerencia: 'association',
-  plumber: 'plumbing', leak: 'plumbing', plomero: 'plumbing', plomeria: 'plumbing', fuga: 'plumbing',
+  plumber: 'plumbing', leak: 'plumbing', leaking: 'plumbing', leaks: 'plumbing', dripping: 'plumbing', clogged: 'plumbing',
+  plomero: 'plumbing', plomeria: 'plumbing', fuga: 'plumbing', goteando: 'plumbing',
+  // "roof" maps separately (not folded into "leak") so "roof leak" produces
+  // both a plumbing and a roofing token and the two trades tie rather than
+  // Plumbing winning outright on "leak" alone — a defensible ambiguity
+  // between two adjacent trades, not a guaranteed-wrong answer.
+  roof: 'roofing', techo: 'roofing',
   electrician: 'electrical', electricista: 'electrical',
   bug: 'pest', bugs: 'pest', pests: 'pest', plagas: 'pest', insectos: 'pest',
   mosquitoes: 'mosquito', mosquitos: 'mosquito',
   cleaner: 'cleaning', clean: 'cleaning', limpieza: 'cleaning', limpiador: 'cleaning',
   bulky: 'bulk', voluminoso: 'bulk', voluminosos: 'bulk',
+  car: 'auto', vehicle: 'auto', carro: 'auto', coche: 'auto', auto: 'auto',
+  uber: 'rideshare', lyft: 'rideshare', taxi: 'rideshare',
+  tutor: 'tutoring', tutors: 'tutoring',
+  notario: 'notary', notaria: 'notary',
+  abogado: 'legal', lawyer: 'legal',
+  // NOT "unas: 'nails'" — after diacritics are stripped, "uñas" (nails)
+  // and "unas" (some, a very common word) become the identical token, so
+  // mapping it would wrongly inject "nails" into unrelated queries.
+  nail: 'nails', manicure: 'nails', manicura: 'nails',
 }
 
 // Diacritics are stripped before matching (á → a) so "jardinería"/"jardineria"
@@ -82,8 +97,19 @@ const CATEGORY_WEIGHT = TITLE_WEIGHT
 // the actual Landscaping category on keyword overlap alone).
 const VENDOR_INTENT_RE = /\b(is there|are there|do you have|know (?:a|an|any)|looking for|need (?:a|an)|recommend|who does|hay (?:un|una|algun|alguna)|conoces?|conocen|sabes? de|necesito (?:un|una)|busco|buscando)\b/
 
-// Returns { type: 'info', item } | { type: 'vendors', category, vendors } | null
+// A message that sounds like an active emergency must never get a cheerful
+// vendor recommendation (this genuinely happened during testing: "HELP MY
+// HOUSE IS ON FIRE" matched the House Cleaning category on the word
+// "house"). Checked before anything else, and short-circuits normal
+// scoring entirely rather than just being another candidate to score.
+const EMERGENCY_RE = /\b(fire|911|emergency|urgent|ambulance|help me|emergencia|incendio|ayuda)\b/
+
+// Returns { type: 'emergency', items } | { type: 'info', item } | { type: 'vendors', category, vendors } | null
 export function answerQuestion(query, { vendors, infoItems }) {
+  if (EMERGENCY_RE.test(stripDiacritics((query || '').toLowerCase()))) {
+    return { type: 'emergency', items: (infoItems || []).filter((i) => i.section === 'emergency') }
+  }
+
   const qTokens = tokenize(query)
   if (qTokens.length === 0) return null
 

@@ -212,6 +212,7 @@ export const translations = {
       noAnswer: "I don't have an answer for that yet.",
       contactAssociation: 'Contact the association',
       vendorsListedUnder: 'Here\'s what\'s listed under "{category}":',
+      emergencyWarning: '🚨 For a life-threatening emergency, call 911 first. Here are the community\'s emergency contacts:',
     },
     contactModal: {
       loginRequiredTitle: 'Log in to leave feedback',
@@ -588,6 +589,7 @@ export const translations = {
       noAnswer: 'Todavía no tengo una respuesta para eso.',
       contactAssociation: 'Contactar a la asociación',
       vendorsListedUnder: 'Esto es lo que está listado bajo "{category}":',
+      emergencyWarning: '🚨 Si es una emergencia que pone en peligro la vida, llama al 911 primero. Estos son los contactos de emergencia de la comunidad:',
     },
     contactModal: {
       loginRequiredTitle: 'Inicia sesión para enviar comentarios',
