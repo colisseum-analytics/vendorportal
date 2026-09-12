@@ -202,6 +202,7 @@ export const translations = {
     },
     chatWidget: {
       launcher: 'Ask a question',
+      beta: 'Beta',
       header: 'Ask {name}',
       greeting: "Hi 👋 Ask about vendors, garbage/recycling day, security, or anything else in the community directory.",
       starter1: 'When is garbage/recycling day?',
@@ -579,6 +580,7 @@ export const translations = {
     },
     chatWidget: {
       launcher: 'Hacer una pregunta',
+      beta: 'Beta',
       header: 'Preguntar a {name}',
       greeting: 'Hola 👋 Pregunta sobre proveedores, el día de basura/reciclaje, seguridad, o cualquier otra cosa del directorio comunitario.',
       starter1: '¿Cuándo es el día de basura/reciclaje?',

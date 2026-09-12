@@ -89,7 +89,7 @@ export default function ChatWidget({ neighborhood, onContactAdmins }) {
       {open ? (
         <div className="chat-panel">
           <div className="chat-panel-header">
-            <span>{t('chatWidget.header', { name: neighborhood.name })}</span>
+            <span>{t('chatWidget.header', { name: neighborhood.name })} <span className="chat-beta-badge">{t('chatWidget.beta')}</span></span>
             <button type="button" className="chat-close" onClick={() => setOpen(false)} aria-label="Close chat">×</button>
           </div>
           <div className="chat-panel-body" ref={scrollRef}>
@@ -125,7 +125,7 @@ export default function ChatWidget({ neighborhood, onContactAdmins }) {
         </div>
       ) : (
         <button type="button" className="chat-fab" onClick={() => setOpen(true)}>
-          💬 {t('chatWidget.launcher')}
+          💬 {t('chatWidget.launcher')} <span className="chat-beta-badge">{t('chatWidget.beta')}</span>
         </button>
       )}
     </div>
