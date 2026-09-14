@@ -455,7 +455,7 @@ a { color: var(--blue); }
   border: none; border-radius: 30px; padding: 13px 20px; font-family:'Inter'; font-weight:600; font-size:14px;
   display:flex; align-items:center; gap:8px; box-shadow: var(--shadow-lift); cursor: pointer; z-index: 40;
 }
-.fab:hover{ background:#1a232b; }
+.fab:hover{ filter: brightness(0.9); }
 
 /* ---------- modal ---------- */
 .overlay{ position: fixed; inset:0; background: rgba(20,26,32,0.5); display:flex; align-items:center; justify-content:center; padding: 20px; z-index: 100; animation: fade-in .15s ease; }
