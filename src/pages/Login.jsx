@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
+import { useTurnstile } from '../components/Turnstile.jsx'
 
 // To turn on Google / Apple / Microsoft login once you've enabled the
 // provider in Supabase Dashboard → Authentication → Providers, just
@@ -18,6 +19,7 @@ export default function Login() {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { captchaToken, captcha, resetCaptcha } = useTurnstile()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const redirectTo = params.get('redirect') || '/'
@@ -28,8 +30,9 @@ export default function Login() {
     setError('')
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: true },
+      options: { shouldCreateUser: true, captchaToken },
     })
+    resetCaptcha()
     setLoading(false)
     if (error) {
       setError(error.message)
@@ -61,6 +64,7 @@ export default function Login() {
         <h1>{t('login.title')}</h1>
         <p className="sub">{t('login.subtitle')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
+        {captcha}
 
         {step === 'email' ? (
           <>
@@ -76,7 +80,7 @@ export default function Login() {
               </div>
               <div className="modal-actions">
                 <Link className="btn-secondary" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }} to={redirectTo}>{t('common.cancel')}</Link>
-                <button type="submit" className="btn-primary" disabled={loading}>
+                <button type="submit" className="btn-primary" disabled={loading || !captchaToken}>
                   {loading ? t('login.emailSubmitting') : t('login.emailSubmit')}
                 </button>
               </div>
@@ -104,7 +108,7 @@ export default function Login() {
               </button>
             </div>
             <p className="auth-switch">
-              <button type="button" className="link-btn" onClick={sendCode} disabled={loading}>{t('login.resendCode')}</button>
+              <button type="button" className="link-btn" onClick={sendCode} disabled={loading || !captchaToken}>{t('login.resendCode')}</button>
               {' · '}
               <button type="button" className="link-btn" onClick={() => { setStep('email'); setCode(''); setError('') }}>{t('login.changeEmail')}</button>
             </p>

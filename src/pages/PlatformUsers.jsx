@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { relativeTime } from '../utils/relativeTime'
 import ActionMenu from '../components/ActionMenu.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
+import { useTurnstile } from '../components/Turnstile.jsx'
 
 const BATCH_SIZE = 50
 
@@ -20,6 +21,7 @@ export default function PlatformUsers() {
   usePageMeta({ title: 'Platform admin · Users', noindex: true })
   const { user } = useAuth()
   const { neighborhoods, users, reloadCore } = useOutletContext()
+  const { captchaToken, captcha, resetCaptcha } = useTurnstile()
 
   const [userSearch, setUserSearch] = useState('')
   const [tab, setTab] = useState('all')
@@ -213,8 +215,9 @@ export default function PlatformUsers() {
     setUserMsg('')
     const { error } = await supabase.auth.signInWithOtp({
       email: u.email,
-      options: { shouldCreateUser: false },
+      options: { shouldCreateUser: false, captchaToken },
     })
+    resetCaptcha()
     setBusyUserId(null)
     if (error) {
       setUserError(error.message)
@@ -342,7 +345,7 @@ export default function PlatformUsers() {
               onClick: () => startMove(u, n),
               disabled: busyUserId === u.user_id,
             })),
-            { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id },
+            { label: 'Send sign-in code', onClick: () => sendSignInCode(u), disabled: busyUserId === u.user_id || !captchaToken },
             { label: u.is_platform_admin ? 'Revoke platform admin' : 'Make platform admin', onClick: () => togglePlatformAdmin(u), disabled: busyUserId === u.user_id },
             { label: u.is_banned ? 'Enable account' : 'Disable account', onClick: () => toggleBanned(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
             { label: 'Delete account', onClick: () => setDeleteUserTarget(u), disabled: busyUserId === u.user_id || u.user_id === user.id, danger: true },
@@ -380,6 +383,7 @@ export default function PlatformUsers() {
           <button key={tb.key} type="button" className={tab === tb.key ? 'active' : ''} onClick={() => setTab(tb.key)}>{tb.label}</button>
         ))}
       </div>
+      {captcha}
       {userError ? <div className="error-msg">{userError}</div> : null}
       {userMsg ? <div className="success-msg">{userMsg}</div> : null}
 

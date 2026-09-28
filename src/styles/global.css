@@ -805,3 +805,5 @@ footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; bord
   .chat-widget{ right: 12px; bottom: 78px; }
   .chat-panel{ width: calc(100vw - 24px); }
 }
+
+.turnstile-box{ margin: 4px 0 14px; min-height: 0; }

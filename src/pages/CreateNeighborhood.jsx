@@ -5,6 +5,7 @@ import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
 import CityPicker from '../components/CityPicker.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { usePageMeta } from '../hooks/usePageMeta.js'
+import { useTurnstile } from '../components/Turnstile.jsx'
 
 const DEFAULT_CATEGORIES = [
   'Plumbing', 'HVAC', 'Electrical', 'Handyman', 'Landscaping', 'Flooring', 'Windows',
@@ -37,6 +38,7 @@ export default function CreateNeighborhood() {
   const [contactEmail, setContactEmail] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const { captchaToken, captcha, resetCaptcha } = useTurnstile()
   const [submitted, setSubmitted] = useState(false)
 
   const onNameChange = (e) => {
@@ -81,6 +83,23 @@ export default function CreateNeighborhood() {
     }
 
     const cleanEmail = contactEmail.trim().toLowerCase()
+
+    // Sends a magic-link email (via Supabase's built-in email sender) that
+    // both confirms this is really their inbox and creates their account —
+    // approval later grants that account admin rights directly, no
+    // separate signup step needed. Goes first so a failed CAPTCHA never
+    // leaves an orphaned pending request behind.
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: cleanEmail,
+      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/verify-request`, captchaToken },
+    })
+    resetCaptcha()
+    if (otpError) {
+      setSaving(false)
+      setError(otpError.message)
+      return
+    }
+
     const { error: insertError } = await supabase.from('neighborhood_requests').insert({
       name: name.trim(),
       slug: cleanSlug,
@@ -91,23 +110,9 @@ export default function CreateNeighborhood() {
       contact_name: contactName.trim() || null,
       contact_email: cleanEmail,
     })
-    if (insertError) {
-      setSaving(false)
-      setError(insertError.message)
-      return
-    }
-
-    // Sends a magic-link email (via Supabase's built-in email sender) that
-    // both confirms this is really their inbox and creates their account —
-    // approval later grants that account admin rights directly, no
-    // separate signup step needed.
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: cleanEmail,
-      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/verify-request` },
-    })
     setSaving(false)
-    if (otpError) {
-      setError(otpError.message)
+    if (insertError) {
+      setError(insertError.message)
       return
     }
     setSubmitted(true)
@@ -188,7 +193,8 @@ export default function CreateNeighborhood() {
           <div className="hint" style={{ marginBottom: 14 }}>
             {t('createNeighborhood.onceApproved')}
           </div>
-          <button type="submit" className="btn-primary" disabled={saving} style={{ width: '100%' }}>
+          {captcha}
+          <button type="submit" className="btn-primary" disabled={saving || !captchaToken} style={{ width: '100%' }}>
             {saving ? t('createNeighborhood.submitting') : t('createNeighborhood.submit')}
           </button>
         </form>
