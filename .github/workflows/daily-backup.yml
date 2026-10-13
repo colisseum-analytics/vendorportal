@@ -1,0 +1,60 @@
+name: Daily backup
+
+on:
+  schedule:
+    - cron: '30 7 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: node scripts/daily-backup.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - id: pack
+        run: |
+          STAMP=$(date -u +%F)
+          tar -czf "backup/looplisting-storage-$STAMP.tar.gz" -C backup/storage .
+          rm -rf backup/storage
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: looplisting-backup-${{ steps.pack.outputs.stamp }}
+          path: backup/
+          retention-days: 30
+
+      # Off-GitHub copy. Skipped (not failed) until the R2 secrets exist.
+      - name: Upload to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          if [ -z "$R2_ENDPOINT" ] || [ -z "$R2_BUCKET" ] || [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "R2 secrets not set — skipping off-site upload."
+            exit 0
+          fi
+          aws s3 cp backup/ "s3://$R2_BUCKET/looplisting/${{ steps.pack.outputs.stamp }}/" \
+            --recursive --endpoint-url "$R2_ENDPOINT"
+          # Keep 90 days of history.
+          CUTOFF=$(date -u -d '90 days ago' +%F)
+          aws s3 ls "s3://$R2_BUCKET/looplisting/" --endpoint-url "$R2_ENDPOINT" \
+            | awk '{print $2}' | tr -d '/' | while read d; do
+              if [ -n "$d" ] && [[ "$d" < "$CUTOFF" ]]; then
+                aws s3 rm "s3://$R2_BUCKET/looplisting/$d/" --recursive --endpoint-url "$R2_ENDPOINT"
+              fi
+            done

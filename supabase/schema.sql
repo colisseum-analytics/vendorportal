@@ -998,6 +998,13 @@ begin
     'contact_messages', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from contact_messages t),
     'neighborhood_requests', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from neighborhood_requests t),
     'app_changelog', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from app_changelog t),
+    'neighborhood_info_items', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from neighborhood_info_items t),
+    'neighborhood_members', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from neighborhood_members t),
+    'needs', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from needs t),
+    'need_supporters', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from need_supporters t),
+    'need_vendor_referrals', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from need_vendor_referrals t),
+    'broadcasts', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from broadcasts t),
+    'inactive_user_warnings', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from inactive_user_warnings t),
     'users', (
       select coalesce(jsonb_agg(jsonb_build_object(
         'id', u.id,
@@ -1015,7 +1022,11 @@ begin
     'vendors', jsonb_array_length(result->'vendors'),
     'users', jsonb_array_length(result->'users'),
     'contact_messages', jsonb_array_length(result->'contact_messages'),
-    'neighborhood_requests', jsonb_array_length(result->'neighborhood_requests')
+    'neighborhood_requests', jsonb_array_length(result->'neighborhood_requests'),
+    'neighborhood_info_items', jsonb_array_length(result->'neighborhood_info_items'),
+    'neighborhood_members', jsonb_array_length(result->'neighborhood_members'),
+    'needs', jsonb_array_length(result->'needs'),
+    'broadcasts', jsonb_array_length(result->'broadcasts')
   );
 
   insert into backup_log (created_by, row_counts) values (auth.uid(), counts);
