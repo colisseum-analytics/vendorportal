@@ -78,24 +78,6 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
             ) : null}
           </div>
         </div>
-        <div className="card-top-actions">
-          {v.flyer_url ? (
-            <button className="copy-btn" onClick={() => setFlyerOpen(true)} title={t('vendorCard.viewFlyer')} aria-label={t('vendorCard.viewFlyer')}>
-              🪧
-            </button>
-          ) : null}
-          {link ? (
-            <a className="copy-btn" href={whatsappHref} target="_blank" rel="noopener noreferrer" title={t('vendorCard.shareWhatsApp')} aria-label={t('vendorCard.shareWhatsApp')}>
-              <WhatsAppIcon />
-            </a>
-          ) : null}
-          <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title={t('vendorCard.copyToShare')} aria-label={t('vendorCard.copyToShare')}>
-            {copied ? '✓' : '⧉'}
-          </button>
-          <span className={`status-tag status-${(v.status || 'unknown').toLowerCase()}`}>
-            {t(`directory.status${v.status || 'Unknown'}`)}
-          </span>
-        </div>
       </div>
       {v.description ? <p className="desc" title={v.description}>{v.description}</p> : null}
       <div className="meta">
@@ -123,26 +105,56 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
           </div>
         ) : null}
       </div>
-      {rating && onToggleRating ? (
-        <div className="rating-row">
-          <button
-            type="button"
-            className={`rating-btn ${rating.mine ? 'on' : ''}`}
-            onClick={() => onToggleRating(v.id)}
-            aria-pressed={rating.mine}
-            title={t('vendorCard.recommendHint')}
-            aria-label={`${rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}${rating.total > 0 ? ` (${rating.total})` : ''}`}
-          >
-            👍<span className="rating-label"> {rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}</span>{rating.total > 0 ? ` · ${rating.total}` : ''}
-          </button>
-          {rating.neighbors > 0 ? (
-            <span className="rating-neighbors" title={t('vendorCard.neighborsHint')}>
-              {t(rating.neighbors === 1 ? 'vendorCard.neighborsOne' : 'vendorCard.neighborsOther', { count: rating.neighbors })}
-            </span>
+      <div className="card-footer">
+        <div className="card-footer-main">
+          {rating && onToggleRating ? (
+            <div className="rating-row">
+              <button
+                type="button"
+                className={`rating-btn ${rating.mine ? 'on' : ''}`}
+                onClick={() => onToggleRating(v.id)}
+                aria-pressed={rating.mine}
+                title={t('vendorCard.recommendHint')}
+                aria-label={`${rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}${rating.total > 0 ? ` (${rating.total})` : ''}`}
+              >
+                👍<span className="rating-label"> {rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}</span>{rating.total > 0 ? ` · ${rating.total}` : ''}
+              </button>
+              {rating.neighbors > 0 ? (
+                <span className="rating-neighbors" title={t('vendorCard.neighborsHint')}>
+                  {t(rating.neighbors === 1 ? 'vendorCard.neighborsOne' : 'vendorCard.neighborsOther', { count: rating.neighbors })}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+          {v.is_resident ? (
+            <div className="resident-badge" title={t('vendorCard.neighborRecommended')}>
+              <span aria-hidden="true">★</span><span className="badge-label"> {t('vendorCard.neighborRecommended').replace(/^★\s*/, '')}</span>
+            </div>
           ) : null}
         </div>
-      ) : null}
-      {v.is_resident ? <div className="resident-badge">{t('vendorCard.neighborRecommended')}</div> : null}
+        <div className="card-footer-actions">
+          {v.flyer_url ? (
+            <button className="copy-btn" onClick={() => setFlyerOpen(true)} title={t('vendorCard.viewFlyer')} aria-label={t('vendorCard.viewFlyer')}>
+              🪧
+            </button>
+          ) : null}
+          {link ? (
+            <a className="copy-btn" href={whatsappHref} target="_blank" rel="noopener noreferrer" title={t('vendorCard.shareWhatsApp')} aria-label={t('vendorCard.shareWhatsApp')}>
+              <WhatsAppIcon />
+            </a>
+          ) : null}
+          <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={copy} title={t('vendorCard.copyToShare')} aria-label={t('vendorCard.copyToShare')}>
+            {copied ? '✓' : '⧉'}
+          </button>
+          <span
+            className={`status-icon status-${(v.status || 'unknown').toLowerCase()}`}
+            title={t(`directory.status${v.status || 'Unknown'}`)}
+            aria-label={t(`directory.status${v.status || 'Unknown'}`)}
+          >
+            {v.status === 'Verified' ? '✓' : '?'}
+          </span>
+        </div>
+      </div>
       {isAdmin && addedByEmail ? <div className="added-by-note">Added by {addedByEmail}</div> : null}
       {isAdmin ? (
         <div className="card-admin-actions">
