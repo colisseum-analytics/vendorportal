@@ -195,6 +195,7 @@ export const translations = {
     },
     vendorCard: {
       copyToShare: 'Copy details to share',
+      shareWhatsApp: 'Share on WhatsApp',
       viewFlyer: 'View flyer',
       neighborRecommended: '★ Neighbor',
       edit: 'Edit',
@@ -573,6 +574,7 @@ export const translations = {
     },
     vendorCard: {
       copyToShare: 'Copiar detalles para compartir',
+      shareWhatsApp: 'Compartir por WhatsApp',
       viewFlyer: 'Ver volante',
       neighborRecommended: '★ Vecino',
       edit: 'Editar',

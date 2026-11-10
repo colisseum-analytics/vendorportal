@@ -267,6 +267,7 @@ export default function AdminDashboard() {
               vendor={v}
               categories={categories}
               isAdmin
+              shareSlug={neighborhood.slug}
               addedByEmail={v.created_by ? creatorEmails[v.created_by] : null}
               onEdit={(vv) => { setEditingVendor(vv); setModalOpen(true) }}
               onDelete={(vv) => setDeleteTarget(vv)}
