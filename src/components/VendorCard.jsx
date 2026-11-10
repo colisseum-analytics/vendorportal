@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { colorForCategory } from '../utils/categoryColor'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import { recordVendorClick } from '../utils/vendorClicks'
 
 function normalizeUrl(u) {
   if (!u) return ''
@@ -35,7 +36,7 @@ function WhatsAppIcon() {
   )
 }
 
-export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, onEdit, onDelete, neighborhood, shareSlug, rating, onToggleRating }) {
+export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, onEdit, onDelete, neighborhood, shareSlug, rating, onToggleRating, clicks }) {
   const v = vendor
   const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
@@ -102,14 +103,23 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
           <div className="row"><span className="icon">⌂</span><span>{v.address}</span></div>
         ) : null}
         {v.phone ? (
-          <div className="row"><span className="icon">☏</span><span>{v.phone}</span></div>
+          <div className="row">
+            <span className="icon">☏</span>
+            <a href={`tel:${v.phone.replace(/[^\d+]/g, '')}`} onClick={() => { if (!isAdmin) recordVendorClick(v.id, 'call') }}>{v.phone}</a>
+          </div>
         ) : null}
         {v.website ? (
           <div className="row">
             <span className="icon">↗</span>
-            <a href={normalizeUrl(v.website)} target="_blank" rel="noopener noreferrer">
+            <a href={normalizeUrl(v.website)} target="_blank" rel="noopener noreferrer" onClick={() => { if (!isAdmin) recordVendorClick(v.id, 'website') }}>
               {v.website.replace(/^https?:\/\//i, '')}
             </a>
+          </div>
+        ) : null}
+        {isAdmin && clicks ? (
+          <div className="row click-stats" title={t('vendorCard.clicksHint')}>
+            <span className="icon">↗</span>
+            <span>{t('vendorCard.clicksSummary', { calls: clicks.call?.last30 || 0, visits: clicks.website?.last30 || 0 })}</span>
           </div>
         ) : null}
       </div>
