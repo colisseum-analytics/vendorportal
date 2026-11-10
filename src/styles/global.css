@@ -315,7 +315,7 @@ a { color: var(--blue); }
 .grid.list-view{ grid-template-columns: 1fr; gap: 8px; }
 .grid.list-view .card{
   display:grid;
-  grid-template-columns: minmax(0,1.6fr) minmax(0,0.9fr) 108px 148px auto 100px auto;
+  grid-template-columns: minmax(0,1.6fr) minmax(0,0.9fr) 170px auto auto;
   align-items:center;
   column-gap: 16px;
   padding: 10px 18px 10px 30px;
@@ -331,12 +331,10 @@ a { color: var(--blue); }
   white-space:normal; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
   min-width:0; cursor:help; line-height:1.35;
 }
-.grid.list-view .card-top-actions{ grid-column:3; grid-row:1; }
-.grid.list-view .meta{ grid-column:4; grid-row:1; flex-direction:row; padding-left:0; gap:12px; margin-bottom:0; min-width:0; overflow:hidden; }
+.grid.list-view .meta{ grid-column:3; grid-row:1; flex-direction:row; padding-left:0; gap:12px; margin-bottom:0; min-width:0; overflow:hidden; }
 .grid.list-view .meta .row{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-.grid.list-view .resident-badge{ grid-column:6; grid-row:1; margin-top:0; margin-left:0; justify-self:end; }
-.grid.list-view .card-admin-actions{ grid-column:7; padding-left:0; border-top:none; margin-top:0; padding-top:0; }
-.rating-row{ display:flex; align-items:center; gap:8px; margin:8px 0 0 18px; flex-wrap:wrap; }
+.grid.list-view .card-admin-actions{ grid-column:5; padding-left:0; border-top:none; margin-top:0; padding-top:0; }
+.rating-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .rating-btn{
   font-family:'IBM Plex Mono', monospace; font-size:11px; background:none; border:1px solid var(--line);
   color: var(--ink-soft); padding:4px 10px; border-radius:999px; cursor:pointer;
@@ -347,9 +345,20 @@ a { color: var(--blue); }
   font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.04em; text-transform:uppercase;
   color: var(--green); padding:2px 8px; border-radius:10px; border:1px solid var(--green);
 }
-.grid.list-view .rating-row{ grid-column:5; grid-row:1; margin:0; justify-self:end; flex-wrap:nowrap; white-space:nowrap; }
+.grid.list-view .rating-row{ flex-wrap:nowrap; white-space:nowrap; }
 .grid.list-view .rating-neighbors{ display:none; }
-.grid.list-view .rating-label{ display:none; }
+.grid.list-view .rating-label, .grid.list-view .badge-label{ display:none; }
+
+/* ---------- card footer: recommend / badges on the left, share + status icons on the right ---------- */
+.card-footer{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding-left:18px; margin-top:6px; }
+.card-footer-main{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; }
+.card-footer-actions{ display:flex; align-items:center; gap:6px; margin-left:auto; flex-shrink:0; }
+.status-icon{
+  width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:700; flex-shrink:0; cursor:default;
+}
+.grid.list-view .card-footer{ grid-column:4; grid-row:1; padding-left:0; margin-top:0; flex-wrap:nowrap; gap:12px; justify-self:end; }
+.grid.list-view .card-footer-main{ flex-wrap:nowrap; gap:6px; }
 .grid.list-view .rating-btn{ padding:4px 8px; }
 /* The list-view row has no spare width on narrow screens; the grid view still shows the control there. */
 @media (max-width: 900px){ .grid.list-view .rating-row{ display:none; } }
@@ -405,7 +414,7 @@ a { color: var(--blue); }
 .copy-btn:hover{ border-color: var(--blue); color: var(--blue); }
 .copy-btn.copied{ border-color: var(--green); color: var(--green); }
 .resident-badge{
-  display:inline-flex; align-items:center; gap:4px; margin-top:8px; margin-left:18px;
+  display:inline-flex; align-items:center; gap:4px;
   font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.04em; text-transform:uppercase;
   color: var(--marigold); background: var(--marigold-soft); padding:2px 8px; border-radius:10px; width:fit-content;
 }
@@ -589,12 +598,21 @@ a { color: var(--blue); }
 .neighborhood-nav-link-active:hover{ border-color: var(--blue); }
 
 /* ---------- neighborhood sidebar shell ---------- */
-.neighborhood-shell{ display:grid; grid-template-columns: 220px 1fr; align-items:start; }
+.neighborhood-shell{
+  display:grid; grid-template-columns: 220px 1fr; align-items:start;
+  /* The page area (below the ~85px site header) is at least one screen tall, so the
+     full-height sidebar fits it exactly and a short page doesn't gain extra scroll. */
+  min-height: calc(100dvh - 85px);
+}
 .neighborhood-shell-content{ min-width:0; }
 .neighborhood-sidebar{
   display:flex; flex-direction:column; gap:20px;
   padding: 24px 16px; border-right: 1px solid var(--line);
   position: sticky; top: 0; align-self: start;
+  /* Full viewport height so the chat pill can sit at the very bottom inside it;
+     the extra bottom padding keeps the links clear of the pill, and the links
+     scroll if the window is too short for all of them. */
+  box-sizing: border-box; height: 100%; height: min(100dvh, 100%); overflow-y: auto; padding-bottom: 84px;
 }
 .sidebar-group{ display:flex; flex-direction:column; gap:2px; }
 .sidebar-group-label{
@@ -614,10 +632,11 @@ button.sidebar-link{ background:none; border:none; width:100%; text-align:left; 
 .sidebar-link-icon{ width:18px; text-align:center; flex-shrink:0; }
 
 @media (max-width: 720px){
-  .neighborhood-shell{ grid-template-columns: 1fr; }
+  .neighborhood-shell{ grid-template-columns: 1fr; min-height: 0; }
   .neighborhood-sidebar{
     flex-direction:row; gap:6px; overflow-x:auto; position:static;
     padding: 10px 16px; border-right:none; border-bottom: 1px solid var(--line);
+    height: auto; overflow-y: visible; padding-bottom: 10px;
   }
   .sidebar-group{ flex-direction:row; gap:6px; align-items:center; }
   .sidebar-group-label{ display:none; }
@@ -778,14 +797,14 @@ footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; bord
 }
 
 /* ---------- chat widget ---------- */
-/* bottom:86px, not 20px — admin pages also have a fixed "+ Add vendor" .fab
-   at bottom:26px (height ~43px), and this needs to clear it everywhere
-   without knowing per-page whether that fab is actually present. */
-.chat-widget{ position: fixed; bottom: 86px; right: 20px; z-index: 60; }
+/* Sits at the very bottom of the (full-height) left sidebar, so it never competes
+   with the "+ Add vendor" .fab at the bottom-right of admin pages. On narrow
+   screens the sidebar becomes a top bar, so it stays in the bottom-left corner. */
+.chat-widget{ position: fixed; bottom: 16px; left: 12px; z-index: 60; }
 .chat-fab{
-  display:flex; align-items:center; gap:8px; padding:12px 18px; border-radius:999px;
+  display:flex; align-items:center; gap:6px; padding:10px 14px; border-radius:999px;
   background: var(--ink); color: var(--paper-raised); border:none; cursor:pointer;
-  font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:600;
+  font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
   box-shadow: var(--shadow-lift); transition: transform .15s ease;
 }
 .chat-fab:hover{ transform: translateY(-2px); }
@@ -825,7 +844,6 @@ footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; bord
 .chat-panel-input input{ flex:1; min-width:0; }
 .chat-panel-input .btn-primary{ flex:none; padding:9px 14px; font-size:13px; }
 @media (max-width: 420px){
-  .chat-widget{ right: 12px; bottom: 78px; }
   .chat-panel{ width: calc(100vw - 24px); }
 }
 
