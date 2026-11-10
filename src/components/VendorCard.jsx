@@ -35,7 +35,7 @@ function WhatsAppIcon() {
   )
 }
 
-export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, onEdit, onDelete, neighborhood, shareSlug }) {
+export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, onEdit, onDelete, neighborhood, shareSlug, rating, onToggleRating }) {
   const v = vendor
   const { t } = useLanguage()
   const [copied, setCopied] = useState(false)
@@ -113,6 +113,24 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
           </div>
         ) : null}
       </div>
+      {rating && onToggleRating ? (
+        <div className="rating-row">
+          <button
+            type="button"
+            className={`rating-btn ${rating.mine ? 'on' : ''}`}
+            onClick={() => onToggleRating(v.id)}
+            aria-pressed={rating.mine}
+            title={t('vendorCard.recommendHint')}
+          >
+            👍 {rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}{rating.total > 0 ? ` · ${rating.total}` : ''}
+          </button>
+          {rating.neighbors > 0 ? (
+            <span className="rating-neighbors" title={t('vendorCard.neighborsHint')}>
+              {t(rating.neighbors === 1 ? 'vendorCard.neighborsOne' : 'vendorCard.neighborsOther', { count: rating.neighbors })}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       {v.is_resident ? <div className="resident-badge">{t('vendorCard.neighborRecommended')}</div> : null}
       {isAdmin && addedByEmail ? <div className="added-by-note">Added by {addedByEmail}</div> : null}
       {isAdmin ? (
