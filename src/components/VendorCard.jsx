@@ -135,7 +135,7 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
         <div className="card-footer-actions">
           {v.flyer_url ? (
             <button className="copy-btn" onClick={() => setFlyerOpen(true)} title={t('vendorCard.viewFlyer')} aria-label={t('vendorCard.viewFlyer')}>
-              🪧
+              🖼️
             </button>
           ) : null}
           {link ? (
