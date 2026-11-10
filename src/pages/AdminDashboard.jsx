@@ -129,6 +129,20 @@ export default function AdminDashboard() {
     await refreshVendors()
   }
 
+  // Fold a would-be duplicate into the vendor that already exists.
+  const mergeVendor = async (target, payload, addedCategories) => {
+    const { error } = await supabase.from('vendors').update(payload).eq('id', target.id)
+    if (error) throw error
+    setModalOpen(false)
+    setEditingVendor(null)
+    setImportMsg(
+      addedCategories.length
+        ? `Added ${addedCategories.join(', ')} to ${target.name} — no duplicate card created.`
+        : `Updated ${target.name} with the new details — no duplicate card created.`
+    )
+    await refreshVendors()
+  }
+
   const confirmDelete = async () => {
     await supabase.from('vendors').delete().eq('id', deleteTarget.id)
     setDeleteTarget(null)
@@ -345,6 +359,7 @@ export default function AdminDashboard() {
           existing={editingVendor}
           onCancel={() => { setModalOpen(false); setEditingVendor(null) }}
           onSave={saveVendor}
+          onMerge={mergeVendor}
         />
       ) : null}
 
