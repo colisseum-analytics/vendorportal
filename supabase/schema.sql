@@ -1006,6 +1006,7 @@ begin
     'broadcasts', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from broadcasts t),
     'inactive_user_warnings', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from inactive_user_warnings t),
     'vendor_ratings', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from vendor_ratings t),
+    'vendor_click_counts', (select coalesce(jsonb_agg(row_to_json(t)), '[]'::jsonb) from vendor_click_counts t),
     'users', (
       select coalesce(jsonb_agg(jsonb_build_object(
         'id', u.id,
@@ -1028,7 +1029,8 @@ begin
     'neighborhood_members', jsonb_array_length(result->'neighborhood_members'),
     'needs', jsonb_array_length(result->'needs'),
     'broadcasts', jsonb_array_length(result->'broadcasts'),
-    'vendor_ratings', jsonb_array_length(result->'vendor_ratings')
+    'vendor_ratings', jsonb_array_length(result->'vendor_ratings'),
+    'vendor_click_counts', jsonb_array_length(result->'vendor_click_counts')
   );
 
   insert into backup_log (created_by, row_counts) values (auth.uid(), counts);
