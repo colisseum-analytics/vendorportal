@@ -99,8 +99,8 @@ export default function NeighborhoodDirectory() {
     </>
   )
 
-  // Names only, no phone numbers, on purpose — the link is how people get
-  // the details, which brings the chat back to the site.
+  // Count and link only — no names or phone numbers, so the link is the
+  // way to see who the vendors are.
   const shareResultsHref = useMemo(() => {
     const params = new URLSearchParams()
     if (category) params.set('category', category)
@@ -108,13 +108,12 @@ export default function NeighborhoodDirectory() {
     const qs = params.toString()
     const link = `${window.location.origin}/n/${neighborhood.slug}${qs ? `?${qs}` : ''}`
     const label = category ? tCategory(category) : search.trim() ? `"${search.trim()}"` : t('directory.shareListAllVendors')
-    const MAX_NAMES = 8
     const lines = [
       t('directory.shareListHeading', { label, count: filtered.length, name: neighborhood.name }),
-      ...filtered.slice(0, MAX_NAMES).map((v) => `• ${v.name}`),
+      '',
+      t('directory.shareListCta'),
+      link,
     ]
-    if (filtered.length > MAX_NAMES) lines.push(t('directory.shareListMore', { count: filtered.length - MAX_NAMES }))
-    lines.push('', t('directory.shareListCta'), link)
     return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
   }, [filtered, category, search, neighborhood, t, tCategory])
   const canShareResults = (category || search.trim()) && filtered.length > 0
