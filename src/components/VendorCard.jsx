@@ -131,8 +131,9 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
             onClick={() => onToggleRating(v.id)}
             aria-pressed={rating.mine}
             title={t('vendorCard.recommendHint')}
+            aria-label={`${rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}${rating.total > 0 ? ` (${rating.total})` : ''}`}
           >
-            👍 {rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}{rating.total > 0 ? ` · ${rating.total}` : ''}
+            👍<span className="rating-label"> {rating.mine ? t('vendorCard.recommended') : t('vendorCard.recommend')}</span>{rating.total > 0 ? ` · ${rating.total}` : ''}
           </button>
           {rating.neighbors > 0 ? (
             <span className="rating-neighbors" title={t('vendorCard.neighborsHint')}>
@@ -145,6 +146,11 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
       {isAdmin && addedByEmail ? <div className="added-by-note">Added by {addedByEmail}</div> : null}
       {isAdmin ? (
         <div className="card-admin-actions">
+          {clicks ? (
+            <span className="click-chip" title={t('vendorCard.clicksHint')}>
+              ☏ {clicks.call?.last30 || 0} · ↗ {clicks.website?.last30 || 0}
+            </span>
+          ) : null}
           <button onClick={() => onEdit(v)}>{t('vendorCard.edit')}</button>
           <button className="danger" onClick={() => onDelete(v)}>{t('vendorCard.delete')}</button>
         </div>
