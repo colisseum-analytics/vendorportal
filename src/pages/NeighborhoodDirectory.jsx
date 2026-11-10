@@ -43,7 +43,7 @@ export default function NeighborhoodDirectory() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [vendors, setVendors] = useState([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(() => searchParams.get('q') || '')
   const [category, setCategory] = useState(() => searchParams.get('category') || null)
   const [status, setStatus] = useState(null)
   const [view, setView] = useVendorView()
@@ -137,7 +137,7 @@ export default function NeighborhoodDirectory() {
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
-          {filtered.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} />)}
+          {filtered.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} shareSlug={neighborhood.slug} />)}
         </div>
       )}
     </div>
