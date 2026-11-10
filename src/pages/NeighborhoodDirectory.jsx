@@ -99,6 +99,26 @@ export default function NeighborhoodDirectory() {
     </>
   )
 
+  // Names only, no phone numbers, on purpose — the link is how people get
+  // the details, which brings the chat back to the site.
+  const shareResultsHref = useMemo(() => {
+    const params = new URLSearchParams()
+    if (category) params.set('category', category)
+    if (search.trim()) params.set('q', search.trim())
+    const qs = params.toString()
+    const link = `${window.location.origin}/n/${neighborhood.slug}${qs ? `?${qs}` : ''}`
+    const label = category ? tCategory(category) : search.trim() ? `"${search.trim()}"` : t('directory.shareListAllVendors')
+    const MAX_NAMES = 8
+    const lines = [
+      t('directory.shareListHeading', { label, count: filtered.length, name: neighborhood.name }),
+      ...filtered.slice(0, MAX_NAMES).map((v) => `• ${v.name}`),
+    ]
+    if (filtered.length > MAX_NAMES) lines.push(t('directory.shareListMore', { count: filtered.length - MAX_NAMES }))
+    lines.push('', t('directory.shareListCta'), link)
+    return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
+  }, [filtered, category, search, neighborhood, t, tCategory])
+  const canShareResults = (category || search.trim()) && filtered.length > 0
+
   if (loading) return <div className="empty" style={{ marginTop: 20 }}>{t('directory.loadingDirectory')}</div>
 
   return (
@@ -127,7 +147,15 @@ export default function NeighborhoodDirectory() {
         <div className="count-row">
           {t(vendors.length === 1 ? 'directory.showingOne' : 'directory.showingOther', { shown: filtered.length, total: vendors.length })}
         </div>
-        <ViewToggle view={view} onChange={setView} />
+        <div className="count-row-actions">
+          {canShareResults ? (
+            <a className="share-list-btn" href={shareResultsHref} target="_blank" rel="noopener noreferrer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.93 9.93 0 0 0-8.5 15.1L2 22l5-1.5A9.94 9.94 0 1 0 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3 .88.9-2.9-.2-.3a8.2 8.2 0 1 1 6.8 3.65Z" /></svg>
+              {t('directory.shareList')}
+            </a>
+          ) : null}
+          <ViewToggle view={view} onChange={setView} />
+        </div>
       </div>
 
       {filtered.length === 0 ? (
