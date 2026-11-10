@@ -815,3 +815,5 @@ footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; bord
   font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap; transition: all .15s ease;
 }
 .share-list-btn:hover{ border-color: var(--green); color: var(--green); }
+.share-list-btn{ cursor:pointer; font-family:inherit; }
+.share-list-btn.copied{ border-color: var(--green); color: var(--green); }

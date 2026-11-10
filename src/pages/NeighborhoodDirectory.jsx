@@ -101,7 +101,7 @@ export default function NeighborhoodDirectory() {
 
   // Count and link only — no names or phone numbers, so the link is the
   // way to see who the vendors are.
-  const shareResultsHref = useMemo(() => {
+  const shareResultsText = useMemo(() => {
     const params = new URLSearchParams()
     if (category) params.set('category', category)
     if (search.trim()) params.set('q', search.trim())
@@ -114,8 +114,19 @@ export default function NeighborhoodDirectory() {
       t('directory.shareListCta'),
       link,
     ]
-    return `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`
+    return lines.join('\n')
   }, [filtered, category, search, neighborhood, t, tCategory])
+  const shareResultsHref = `https://wa.me/?text=${encodeURIComponent(shareResultsText)}`
+  const [listCopied, setListCopied] = useState(false)
+  const copyResults = async () => {
+    try {
+      await navigator.clipboard.writeText(shareResultsText)
+      setListCopied(true)
+      setTimeout(() => setListCopied(false), 1800)
+    } catch {
+      // clipboard unavailable (e.g. insecure context) — fail silently
+    }
+  }
   const canShareResults = (category || search.trim()) && filtered.length > 0
 
   if (loading) return <div className="empty" style={{ marginTop: 20 }}>{t('directory.loadingDirectory')}</div>
@@ -152,6 +163,11 @@ export default function NeighborhoodDirectory() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.93 9.93 0 0 0-8.5 15.1L2 22l5-1.5A9.94 9.94 0 1 0 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3 .88.9-2.9-.2-.3a8.2 8.2 0 1 1 6.8 3.65Z" /></svg>
               {t('directory.shareList')}
             </a>
+          ) : null}
+          {canShareResults ? (
+            <button type="button" className={`share-list-btn ${listCopied ? 'copied' : ''}`} onClick={copyResults}>
+              {listCopied ? t('directory.copiedList') : t('directory.copyList')}
+            </button>
           ) : null}
           <ViewToggle view={view} onChange={setView} />
         </div>
