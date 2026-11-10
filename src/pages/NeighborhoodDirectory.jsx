@@ -10,6 +10,7 @@ import FilterPill from '../components/FilterPill.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { relativeTime } from '../utils/relativeTime'
 import { usePageMeta } from '../hooks/usePageMeta.js'
+import { useVendorRatings } from '../hooks/useVendorRatings.js'
 import { buildShareListText, whatsappHref } from '../utils/shareList'
 
 const STATUS_OPTIONS = ['Verified', 'Unknown']
@@ -48,6 +49,7 @@ export default function NeighborhoodDirectory() {
   const [category, setCategory] = useState(() => searchParams.get('category') || null)
   const [status, setStatus] = useState(null)
   const [view, setView] = useVendorView()
+  const { ratings, available: ratingsAvailable, toggle: toggleRating } = useVendorRatings(neighborhood.id)
 
   useEffect(() => {
     let active = true
@@ -175,7 +177,7 @@ export default function NeighborhoodDirectory() {
         </div>
       ) : (
         <div className={`grid ${view === 'list' ? 'list-view' : ''}`}>
-          {filtered.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} shareSlug={neighborhood.slug} />)}
+          {filtered.map((v) => <VendorCard key={v.id} vendor={v} categories={categories} isAdmin={false} shareSlug={neighborhood.slug} rating={ratingsAvailable ? (ratings[v.id] || { total: 0, neighbors: 0, mine: false }) : undefined} onToggleRating={toggleRating} />)}
         </div>
       )}
     </div>
