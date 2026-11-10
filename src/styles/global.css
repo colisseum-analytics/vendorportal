@@ -807,3 +807,11 @@ footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; bord
 }
 
 .turnstile-box{ margin: 4px 0 14px; min-height: 0; }
+
+.count-row-actions{ display:flex; align-items:center; gap:10px; }
+.share-list-btn{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:8px;
+  border:1px solid var(--line); background: var(--paper-raised); color: var(--ink-soft);
+  font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap; transition: all .15s ease;
+}
+.share-list-btn:hover{ border-color: var(--green); color: var(--green); }
