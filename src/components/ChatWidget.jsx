@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { answerQuestion } from '../utils/chatAnswer'
+import { buildShareListText, whatsappHref } from '../utils/shareList'
 
 function formatAnswer(match, t) {
   if (match.type === 'emergency') {
@@ -29,7 +30,8 @@ function formatAnswer(match, t) {
 }
 
 export default function ChatWidget({ neighborhood, onContactAdmins }) {
-  const { t } = useLanguage()
+  const { t, tCategory } = useLanguage()
+  const [copiedIdx, setCopiedIdx] = useState(null)
   const [open, setOpen] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [data, setData] = useState({ vendors: [], infoItems: [] })
@@ -66,7 +68,19 @@ export default function ChatWidget({ neighborhood, onContactAdmins }) {
     setInput('')
     const match = answerQuestion(q, data)
     if (match) {
-      setMessages((m) => [...m, { role: 'bot', text: formatAnswer(match, t) }])
+      const bot = { role: 'bot', text: formatAnswer(match, t) }
+      if (match.type === 'vendors') {
+        // Same count-and-link message as the directory's Share list button.
+        bot.shareText = buildShareListText({
+          t,
+          slug: neighborhood.slug,
+          neighborhoodName: neighborhood.name,
+          label: tCategory(match.category),
+          count: match.vendors.length,
+          category: match.category,
+        })
+      }
+      setMessages((m) => [...m, bot])
     } else {
       setMessages((m) => [
         ...m,
@@ -76,6 +90,16 @@ export default function ChatWidget({ neighborhood, onContactAdmins }) {
           action: { label: t('chatWidget.contactAssociation'), onClick: onContactAdmins },
         },
       ])
+    }
+  }
+
+  const copyShare = async (text, i) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedIdx(i)
+      setTimeout(() => setCopiedIdx(null), 1800)
+    } catch {
+      // clipboard unavailable (e.g. insecure context) — fail silently
     }
   }
 
@@ -106,6 +130,17 @@ export default function ChatWidget({ neighborhood, onContactAdmins }) {
               messages.map((m, i) => (
                 <div key={i} className={`chat-bubble chat-bubble-${m.role}`}>
                   <p style={{ whiteSpace: 'pre-line' }}>{m.text}</p>
+                  {m.shareText ? (
+                    <div className="chat-share-row">
+                      <a className="share-list-btn" href={whatsappHref(m.shareText)} target="_blank" rel="noopener noreferrer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.93 9.93 0 0 0-8.5 15.1L2 22l5-1.5A9.94 9.94 0 1 0 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3 .88.9-2.9-.2-.3a8.2 8.2 0 1 1 6.8 3.65Z" /></svg>
+                        {t('directory.shareList')}
+                      </a>
+                      <button type="button" className={`share-list-btn ${copiedIdx === i ? 'copied' : ''}`} onClick={() => copyShare(m.shareText, i)}>
+                        {copiedIdx === i ? t('directory.copiedList') : t('directory.copyList')}
+                      </button>
+                    </div>
+                  ) : null}
                   {m.action ? (
                     <button type="button" className="btn-secondary chat-action-btn" onClick={m.action.onClick}>{m.action.label}</button>
                   ) : null}

@@ -10,6 +10,7 @@ import FilterPill from '../components/FilterPill.jsx'
 import { useVendorView } from '../hooks/useVendorView.js'
 import { relativeTime } from '../utils/relativeTime'
 import { usePageMeta } from '../hooks/usePageMeta.js'
+import { buildShareListText, whatsappHref } from '../utils/shareList'
 
 const STATUS_OPTIONS = ['Verified', 'Unknown']
 
@@ -101,22 +102,16 @@ export default function NeighborhoodDirectory() {
 
   // Count and link only — no names or phone numbers, so the link is the
   // way to see who the vendors are.
-  const shareResultsText = useMemo(() => {
-    const params = new URLSearchParams()
-    if (category) params.set('category', category)
-    if (search.trim()) params.set('q', search.trim())
-    const qs = params.toString()
-    const link = `${window.location.origin}/n/${neighborhood.slug}${qs ? `?${qs}` : ''}`
-    const label = category ? tCategory(category) : search.trim() ? `"${search.trim()}"` : t('directory.shareListAllVendors')
-    const lines = [
-      t('directory.shareListHeading', { label, count: filtered.length, name: neighborhood.name }),
-      '',
-      t('directory.shareListCta'),
-      link,
-    ]
-    return lines.join('\n')
-  }, [filtered, category, search, neighborhood, t, tCategory])
-  const shareResultsHref = `https://wa.me/?text=${encodeURIComponent(shareResultsText)}`
+  const shareResultsText = useMemo(() => buildShareListText({
+    t,
+    slug: neighborhood.slug,
+    neighborhoodName: neighborhood.name,
+    label: category ? tCategory(category) : search.trim() ? `"${search.trim()}"` : t('directory.shareListAllVendors'),
+    count: filtered.length,
+    category,
+    search,
+  }), [filtered, category, search, neighborhood, t, tCategory])
+  const shareResultsHref = whatsappHref(shareResultsText)
   const [listCopied, setListCopied] = useState(false)
   const copyResults = async () => {
     try {
