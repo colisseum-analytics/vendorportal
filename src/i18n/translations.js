@@ -216,7 +216,8 @@ export const translations = {
       delete: 'Delete',
     },
     chatWidget: {
-      launcher: 'Ask a question',
+      launcher: 'Chat',
+      launcherHint: 'Chat — ask a question about this community',
       beta: 'Beta',
       header: 'Ask {name}',
       greeting: "Hi 👋 Ask about vendors, garbage/recycling day, security, or anything else in the community directory.",
@@ -609,7 +610,8 @@ export const translations = {
       delete: 'Eliminar',
     },
     chatWidget: {
-      launcher: 'Hacer una pregunta',
+      launcher: 'Chat',
+      launcherHint: 'Chat: haz una pregunta sobre esta comunidad',
       beta: 'Beta',
       header: 'Preguntar a {name}',
       greeting: 'Hola 👋 Pregunta sobre proveedores, el día de basura/reciclaje, seguridad, o cualquier otra cosa del directorio comunitario.',

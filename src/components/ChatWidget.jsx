@@ -159,8 +159,15 @@ export default function ChatWidget({ neighborhood, onContactAdmins }) {
           </form>
         </div>
       ) : (
-        <button type="button" className="chat-fab" onClick={() => setOpen(true)}>
-          💬 {t('chatWidget.launcher')} <span className="chat-beta-badge">{t('chatWidget.beta')}</span>
+        <button type="button" className="chat-fab" onClick={() => setOpen(true)} title={t('chatWidget.launcherHint')} aria-label={t('chatWidget.launcherHint')}>
+          <svg className="chat-fab-icon" width="30" height="27" viewBox="0 0 32 28" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M14 4h13a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2v4l-4-4h-7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+            <path d="M19.3 8.6a1.9 1.9 0 1 1 2.7 1.7c-.7.4-.9.8-.9 1.5" />
+            <circle cx="21.1" cy="14" r=".6" fill="currentColor" />
+            <path d="M3 14h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8l-3 3v-3H3a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" />
+            <path d="M6 0.5l.9 2.6 2.6.9-2.6.9L6 7.5l-.9-2.6-2.6-.9 2.6-.9z" fill="currentColor" stroke="none" />
+          </svg>
+          <span className="chat-fab-label">{t('chatWidget.launcher')}</span>
         </button>
       )}
     </div>
