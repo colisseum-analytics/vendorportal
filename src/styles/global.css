@@ -315,7 +315,7 @@ a { color: var(--blue); }
 .grid.list-view{ grid-template-columns: 1fr; gap: 8px; }
 .grid.list-view .card{
   display:grid;
-  grid-template-columns: minmax(0,1.6fr) minmax(0,0.9fr) 170px auto auto;
+  grid-template-columns: minmax(0,1.6fr) minmax(0,0.9fr) 190px auto auto;
   align-items:center;
   column-gap: 16px;
   padding: 10px 18px 10px 30px;
@@ -331,8 +331,9 @@ a { color: var(--blue); }
   white-space:normal; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
   min-width:0; cursor:help; line-height:1.35;
 }
-.grid.list-view .meta{ grid-column:3; grid-row:1; flex-direction:row; padding-left:0; gap:12px; margin-bottom:0; min-width:0; overflow:hidden; }
-.grid.list-view .meta .row{ min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.grid.list-view .meta{ grid-column:3; grid-row:1; flex-direction:column; padding-left:0; gap:2px; margin-bottom:0; min-width:0; overflow:hidden; }
+.grid.list-view .meta .row{ min-width:0; overflow:hidden; white-space:nowrap; }
+.grid.list-view .meta .row > span:last-child, .grid.list-view .meta .row > a{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
 .grid.list-view .card-admin-actions{ grid-column:5; padding-left:0; border-top:none; margin-top:0; padding-top:0; }
 .rating-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .rating-btn{
@@ -359,9 +360,14 @@ a { color: var(--blue); }
 }
 .grid.list-view .card-footer{ grid-column:4; grid-row:1; padding-left:0; margin-top:0; flex-wrap:nowrap; gap:12px; justify-self:end; }
 .grid.list-view .card-footer-main{ flex-wrap:nowrap; gap:6px; }
+/* Fixed widths so the recommend button, share icons and status line up from row to row
+   (every row is its own grid, so auto-sized groups would drift with their content). */
+.grid.list-view .card-footer-main{ width:108px; justify-content:flex-start; }
+.grid.list-view .card-footer-actions{ width:122px; justify-content:flex-end; }
+.grid.list-view .card-admin-actions{ width:250px; justify-content:flex-end; }
 .grid.list-view .rating-btn{ padding:4px 8px; }
 /* The list-view row has no spare width on narrow screens; the grid view still shows the control there. */
-@media (max-width: 900px){ .grid.list-view .rating-row{ display:none; } }
+@media (max-width: 900px){ .grid.list-view .rating-row{ display:none; } .grid.list-view .card-footer-main{ width:auto; } }
 .grid.list-view .added-by-note{ display:none; }
 /* Click counts: a full line in the grid card, a compact chip beside Edit/Delete in list view (the contact column is too narrow for a third item). */
 .click-chip{ display:none; font-family:'IBM Plex Mono', monospace; font-size:11px; color: var(--ink-soft); align-self:center; margin-right:4px; white-space:nowrap; }
