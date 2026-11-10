@@ -82,7 +82,7 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
       {v.description ? <p className="desc" title={v.description}>{v.description}</p> : null}
       <div className="meta">
         {v.address ? (
-          <div className="row"><span className="icon">⌂</span><span>{v.address}</span></div>
+          <div className="row"><span className="icon">⌂</span><span title={v.address}>{v.address}</span></div>
         ) : null}
         {v.phone ? (
           <div className="row">
@@ -93,7 +93,7 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
         {v.website ? (
           <div className="row">
             <span className="icon">↗</span>
-            <a href={normalizeUrl(v.website)} target="_blank" rel="noopener noreferrer" onClick={() => { if (!isAdmin) recordVendorClick(v.id, 'website') }}>
+            <a href={normalizeUrl(v.website)} title={v.website} target="_blank" rel="noopener noreferrer" onClick={() => { if (!isAdmin) recordVendorClick(v.id, 'website') }}>
               {v.website.replace(/^https?:\/\//i, '')}
             </a>
           </div>
