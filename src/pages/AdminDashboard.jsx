@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [adminsError, setAdminsError] = useState('')
   const [busyAdminId, setBusyAdminId] = useState(null)
   const [creatorEmails, setCreatorEmails] = useState({})
+  const [clickStats, setClickStats] = useState(null) // null = not available yet
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingVendor, setEditingVendor] = useState(null)
@@ -44,6 +45,23 @@ export default function AdminDashboard() {
   const [inviteMsg, setInviteMsg] = useState('')
   const [inviteError, setInviteError] = useState('')
   const [inviteSending, setInviteSending] = useState(false)
+
+  // Separate from loadExtras so a missing function (migration not run yet)
+  // can't affect anything else on this page.
+  useEffect(() => {
+    if (!neighborhood || !isAdmin) return
+    let active = true
+    supabase.rpc('vendor_click_summary', { p_neighborhood_id: neighborhood.id }).then(({ data, error }) => {
+      if (!active || error || !Array.isArray(data)) return
+      const map = {}
+      for (const r of data) {
+        if (!map[r.vendor_id]) map[r.vendor_id] = {}
+        map[r.vendor_id][r.kind] = { last30: Number(r.last_30), total: Number(r.total) }
+      }
+      setClickStats(map)
+    })
+    return () => { active = false }
+  }, [neighborhood?.id, isAdmin])
 
   useEffect(() => {
     if (!neighborhood || !isAdmin) return
@@ -268,6 +286,7 @@ export default function AdminDashboard() {
               categories={categories}
               isAdmin
               shareSlug={neighborhood.slug}
+              clicks={clickStats ? (clickStats[v.id] || {}) : undefined}
               addedByEmail={v.created_by ? creatorEmails[v.created_by] : null}
               onEdit={(vv) => { setEditingVendor(vv); setModalOpen(true) }}
               onDelete={(vv) => setDeleteTarget(vv)}
