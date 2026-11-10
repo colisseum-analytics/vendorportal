@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { findDuplicateVendor } from '../utils/vendorDuplicates'
+import { findDuplicateVendor, findMergeCandidate, mergeVendorFields, normalizeVendorPhone } from '../utils/vendorDuplicates'
 
 const STATUSES = ['Verified', 'Unknown']
 
-export default function VendorFormModal({ categories, vendors, neighborhood, existing, onCancel, onSave }) {
+export default function VendorFormModal({ categories, vendors, neighborhood, existing, onCancel, onSave, onMerge }) {
   const [form, setForm] = useState({
     name: existing?.name || '',
     categories: existing?.categories?.length ? existing.categories : (existing?.category ? [existing.category] : []),
@@ -20,6 +20,7 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [pendingDuplicate, setPendingDuplicate] = useState(null)
+  const [mergeTarget, setMergeTarget] = useState(null)
   const [flyerUploading, setFlyerUploading] = useState(false)
   const [flyerError, setFlyerError] = useState('')
 
@@ -54,7 +55,7 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
 
   const update = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }))
-    if (key === 'name' || key === 'phone') setPendingDuplicate(null)
+    if (key === 'name' || key === 'phone') { setPendingDuplicate(null); setMergeTarget(null) }
   }
   const updateCheckbox = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.checked }))
   const toggleCategory = (c) => {
@@ -78,8 +79,39 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
     if (duplicate && pendingDuplicate?.id !== duplicate.id) {
       setError('')
       setPendingDuplicate(duplicate)
+      // Offer to fold this into the existing card — but only when adding a new
+      // vendor (not editing) and the match is clearly the same business.
+      setMergeTarget(existing ? null : findMergeCandidate(form, vendors || []))
       return
     }
+    setSaving(true)
+    setError('')
+    try {
+      await onSave({ ...form, name: form.name.trim(), flyer_url: form.flyer_url || null })
+    } catch (err) {
+      setError(err.message || "Couldn't save — try again.")
+      setSaving(false)
+    }
+  }
+
+  const newCategoriesForMerge = mergeTarget
+    ? form.categories.filter((c) => !(mergeTarget.categories || []).includes(c))
+    : []
+
+  const mergeIntoExisting = async () => {
+    if (!mergeTarget || !onMerge) return
+    setSaving(true)
+    setError('')
+    try {
+      const payload = mergeVendorFields(mergeTarget, { ...form, flyer_url: form.flyer_url || null })
+      await onMerge(mergeTarget, payload, newCategoriesForMerge)
+    } catch (err) {
+      setError(err.message || "Couldn't save — try again.")
+      setSaving(false)
+    }
+  }
+
+  const addAsSeparate = async () => {
     setSaving(true)
     setError('')
     try {
@@ -97,9 +129,33 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
         <h2>{existing ? 'Edit vendor' : 'Add a vendor'}</h2>
         <p className="sub">{existing ? 'Update the details neighbors see.' : 'This appears in the public directory right away.'}</p>
         {error ? <div className="error-msg">{error}</div> : null}
-        {pendingDuplicate ? (
+        {mergeTarget && onMerge ? (
+          <div className="warning-msg merge-prompt">
+            <div>
+              <strong>"{mergeTarget.name}" is already in the directory</strong>
+              {normalizeVendorPhone(mergeTarget.phone) && normalizeVendorPhone(mergeTarget.phone) === normalizeVendorPhone(form.phone) ? ' with this phone number' : ''}
+              {(mergeTarget.categories || []).length ? ` (${mergeTarget.categories.join(', ')})` : ''}.
+            </div>
+            <div className="merge-prompt-help">
+              Adding this to the existing card keeps one entry per business instead of two.
+              {' '}Existing details are never overwritten; empty ones are filled in.
+            </div>
+            <div className="merge-prompt-actions">
+              <button type="button" className="btn-primary" onClick={mergeIntoExisting} disabled={saving}>
+                {newCategoriesForMerge.length
+                  ? `Add ${newCategoriesForMerge.join(', ')} to "${mergeTarget.name}"`
+                  : `Update "${mergeTarget.name}" with these details`}
+              </button>
+              <button type="button" className="btn-secondary" onClick={addAsSeparate} disabled={saving}>Add as a separate vendor</button>
+            </div>
+          </div>
+        ) : pendingDuplicate ? (
           <div className="warning-msg">
-            "{pendingDuplicate.name}" is already in the directory{pendingDuplicate.phone && form.phone ? ' with this phone number' : ''} — click {existing ? 'Save changes' : 'Add vendor'} again to add this one anyway.
+            "{pendingDuplicate.name}" is already in the directory{
+              normalizeVendorPhone(pendingDuplicate.phone) && normalizeVendorPhone(form.phone)
+                ? (normalizeVendorPhone(pendingDuplicate.phone) === normalizeVendorPhone(form.phone) ? ' with this phone number' : ' with a different phone number')
+                : ''
+            } — click {existing ? 'Save changes' : 'Add vendor'} again to add this one anyway.
           </div>
         ) : null}
         <form onSubmit={submit}>

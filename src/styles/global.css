@@ -865,3 +865,9 @@ footer.site-footer{ text-align:center; padding-top: 30px; margin-top: 40px; bord
 .share-list-btn:hover{ border-color: var(--green); color: var(--green); }
 .share-list-btn{ cursor:pointer; font-family:inherit; }
 .share-list-btn.copied{ border-color: var(--green); color: var(--green); }
+
+/* ---------- duplicate-vendor merge prompt (in the Add vendor form) ---------- */
+.merge-prompt{ display:flex; flex-direction:column; gap:8px; }
+.merge-prompt-help{ font-size:12.5px; opacity:.85; }
+.merge-prompt-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:2px; }
+.merge-prompt-actions button{ padding:8px 12px; font-size:12.5px; text-align:left; }
