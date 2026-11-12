@@ -26,7 +26,8 @@ function slugify(str) {
 
 export default function CreateNeighborhood() {
   const { t } = useLanguage()
-  usePageMeta({ title: t('createNeighborhood.title'), description: t('createNeighborhood.subtitle') })
+  // noindex: this is a sign-up step, not a page to land on from search — the home page is the front door.
+  usePageMeta({ title: t('createNeighborhood.title'), description: t('createNeighborhood.subtitle'), noindex: true })
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
@@ -159,6 +160,7 @@ export default function CreateNeighborhood() {
   return (
     <div className="wrap-narrow">
       <div className="auth-card">
+        <p className="sub" style={{ marginBottom: 6 }}><strong>LoopListing</strong> — {t('createNeighborhood.aboutLine')} <Link to="/">{t('createNeighborhood.aboutLink')}</Link></p>
         <h1>{t('createNeighborhood.title')}</h1>
         <p className="sub">{t('createNeighborhood.subtitle')}</p>
         {error ? <div className="error-msg">{error}</div> : null}
