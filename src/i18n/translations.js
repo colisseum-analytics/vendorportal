@@ -325,6 +325,9 @@ export const translations = {
       errorNeedEmail: "Add the email you'll use to sign in once this is approved.",
       errorNeedCity: 'Add the city this neighborhood is in.',
       errorSlugTaken: "That web address is already taken — try another.",
+      errorInvalidInput: "Something in the form looks off — check the name, web address and email, then try again.",
+      errorTooMany: "We're getting a lot of requests right now — please try again in a little while.",
+      errorVerifyEmail: "We couldn't confirm your email — please try submitting again.",
       categoryLabels: {
         'Plumbing': 'Plumbing',
         'HVAC': 'HVAC',
@@ -719,6 +722,9 @@ export const translations = {
       errorNeedEmail: 'Agrega el correo que usarás para iniciar sesión una vez aprobado.',
       errorNeedCity: 'Agrega la ciudad donde está este vecindario.',
       errorSlugTaken: 'Esa dirección web ya está en uso — prueba con otra.',
+      errorInvalidInput: 'Algo en el formulario no parece correcto — revisa el nombre, la dirección web y el correo, e inténtalo de nuevo.',
+      errorTooMany: 'Estamos recibiendo muchas solicitudes — inténtalo de nuevo en un rato.',
+      errorVerifyEmail: 'No pudimos confirmar tu correo — intenta enviar de nuevo.',
       categoryLabels: {
         'Plumbing': 'Plomería',
         'HVAC': 'Aire Acondicionado (HVAC)',

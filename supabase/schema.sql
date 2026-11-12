@@ -252,11 +252,9 @@ create policy "contact_messages_admin_delete"
   on contact_messages for delete
   using (is_neighborhood_admin(contact_messages.neighborhood_id) or is_platform_admin());
 
--- neighborhood_requests: anyone can submit one; only platform admins can
--- see or manage the queue.
-create policy "requests_public_insert"
-  on neighborhood_requests for insert
-  with check (status = 'pending');
+-- neighborhood_requests: submitted only through submit_neighborhood_request()
+-- (no direct insert for visitors); only platform admins can see or manage
+-- the queue.
 
 create policy "requests_platform_read"
   on neighborhood_requests for select
@@ -284,7 +282,6 @@ grant select on neighborhood_admins to authenticated;
 grant select, insert, delete on admin_invites to authenticated;
 grant select on platform_admins to authenticated;
 grant insert, select, update, delete on contact_messages to authenticated;
-grant insert on neighborhood_requests to anon, authenticated;
 grant select, update, delete on neighborhood_requests to authenticated;
 
 -- ---------- functions ----------
@@ -421,6 +418,89 @@ begin
   delete from platform_admins where user_id = p_user_id;
 end;
 $$;
+
+-- Checked front door for new directory requests (see migration
+-- 20261111130000_submit_neighborhood_request.sql for the reasoning).
+create or replace function public.submit_neighborhood_request(
+  p_name text,
+  p_slug text,
+  p_tagline text,
+  p_city text,
+  p_community_type text,
+  p_categories jsonb,
+  p_contact_name text,
+  p_contact_email text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_email text := lower(btrim(coalesce(p_contact_email, '')));
+  v_slug text := btrim(coalesce(p_slug, ''));
+  v_name text := btrim(coalesce(p_name, ''));
+  v_cats jsonb := coalesce(p_categories, '[]'::jsonb);
+  v_sent timestamptz;
+  v_id uuid;
+begin
+  -- field validation
+  if length(v_name) < 2 or length(v_name) > 80
+     or length(v_slug) < 3 or length(v_slug) > 60 or v_slug !~ '^[a-z0-9]+(-[a-z0-9]+)*$'
+     or length(btrim(coalesce(p_tagline, ''))) > 200
+     or length(btrim(coalesce(p_city, ''))) > 80
+     or length(btrim(coalesce(p_contact_name, ''))) > 80
+     or (p_community_type is not null and p_community_type not in ('hoa', 'condo', 'community'))
+     or length(v_email) > 254 or v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+     or jsonb_typeof(v_cats) <> 'array' or jsonb_array_length(v_cats) > 60
+     or exists (
+       select 1 from jsonb_array_elements(v_cats) c
+       where jsonb_typeof(c) <> 'string' or length(c #>> '{}') > 60
+     )
+  then
+    raise exception 'invalid_input';
+  end if;
+
+  -- proof that the sign-in email (CAPTCHA-protected) was really just sent
+  select greatest(u.recovery_sent_at, u.confirmation_sent_at) into v_sent
+  from auth.users u
+  where lower(u.email) = v_email
+  limit 1;
+  if v_sent is null or v_sent < now() - interval '15 minutes' then
+    raise exception 'verify_email_first';
+  end if;
+
+  -- backstop against floods
+  if (select count(*) from neighborhood_requests where created_at > now() - interval '1 hour') >= 30 then
+    raise exception 'too_many_requests';
+  end if;
+
+  if exists (select 1 from neighborhood_requests where lower(contact_email) = v_email and status = 'pending') then
+    raise exception 'already_pending';
+  end if;
+
+  if exists (select 1 from neighborhoods where slug = v_slug)
+     or exists (select 1 from neighborhood_requests where slug = v_slug and status = 'pending') then
+    raise exception 'slug_taken';
+  end if;
+
+  insert into neighborhood_requests (name, slug, tagline, city, community_type, categories, contact_name, contact_email, email_verified)
+  values (
+    v_name, v_slug,
+    nullif(btrim(coalesce(p_tagline, '')), ''),
+    nullif(btrim(coalesce(p_city, '')), ''),
+    p_community_type, v_cats,
+    nullif(btrim(coalesce(p_contact_name, '')), ''),
+    v_email, false
+  )
+  returning id into v_id;
+
+  return v_id;
+end;
+$$;
+
+revoke all on function public.submit_neighborhood_request(text, text, text, text, text, jsonb, text, text) from public;
+grant execute on function public.submit_neighborhood_request(text, text, text, text, text, jsonb, text, text) to anon, authenticated;
 
 -- Called by the requester's own (now-authenticated, magic-link) session
 -- to confirm their contact email. Doesn't trust a client-supplied
