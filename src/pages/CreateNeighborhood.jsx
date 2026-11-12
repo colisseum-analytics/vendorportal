@@ -100,7 +100,10 @@ export default function CreateNeighborhood() {
       return
     }
 
-    const { error: insertError } = await supabase.from('neighborhood_requests').insert({
+    // Goes through a checked database function (it confirms the sign-in email
+    // above was really sent, validates the fields, and saves the request as
+    // unverified) instead of writing to the table directly.
+    const fields = {
       name: name.trim(),
       slug: cleanSlug,
       tagline: tagline.trim() || null,
@@ -109,10 +112,29 @@ export default function CreateNeighborhood() {
       categories,
       contact_name: contactName.trim() || null,
       contact_email: cleanEmail,
+    }
+    let { error: insertError } = await supabase.rpc('submit_neighborhood_request', {
+      p_name: fields.name, p_slug: fields.slug, p_tagline: fields.tagline, p_city: fields.city,
+      p_community_type: fields.community_type, p_categories: fields.categories,
+      p_contact_name: fields.contact_name, p_contact_email: fields.contact_email,
     })
+    // Before the database function exists (deploy-before-migration window),
+    // fall back to the old direct insert so signups keep working.
+    if (insertError && (insertError.code === 'PGRST202' || insertError.code === '42883')) {
+      ({ error: insertError } = await supabase.from('neighborhood_requests').insert(fields))
+    }
     setSaving(false)
     if (insertError) {
-      setError(insertError.message)
+      const m = insertError.message || ''
+      // Already have a pending request for this email: they're in the queue, so show the same confirmation.
+      if (m.includes('already_pending')) { setSubmitted(true); return }
+      setError(
+        m.includes('slug_taken') ? t('createNeighborhood.errorSlugTaken')
+        : m.includes('invalid_input') ? t('createNeighborhood.errorInvalidInput')
+        : m.includes('too_many_requests') ? t('createNeighborhood.errorTooMany')
+        : m.includes('verify_email_first') ? t('createNeighborhood.errorVerifyEmail')
+        : m
+      )
       return
     }
     setSubmitted(true)
