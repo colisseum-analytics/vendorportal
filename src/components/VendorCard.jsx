@@ -107,7 +107,16 @@ export default function VendorCard({ vendor, categories, isAdmin, addedByEmail, 
       </div>
       <div className="card-footer">
         <div className="card-footer-main">
-          {rating && onToggleRating ? (
+          {rating && isAdmin ? (
+            <div className="rating-row">
+              <span className="rating-static" title={t('vendorCard.neighborsHint')}>👍 {rating.total}</span>
+              {rating.neighbors > 0 ? (
+                <span className="rating-neighbors" title={t('vendorCard.neighborsHint')}>
+                  {t(rating.neighbors === 1 ? 'vendorCard.neighborsOne' : 'vendorCard.neighborsOther', { count: rating.neighbors })}
+                </span>
+              ) : null}
+            </div>
+          ) : rating && onToggleRating ? (
             <div className="rating-row">
               <button
                 type="button"

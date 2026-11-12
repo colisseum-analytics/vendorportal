@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { useVendorRatings } from '../hooks/useVendorRatings.js'
 import VendorCard from '../components/VendorCard.jsx'
 import VendorFormModal from '../components/VendorFormModal.jsx'
 import ImportVendorsModal from '../components/ImportVendorsModal.jsx'
@@ -30,6 +31,7 @@ export default function AdminDashboard() {
   const [busyAdminId, setBusyAdminId] = useState(null)
   const [creatorEmails, setCreatorEmails] = useState({})
   const [clickStats, setClickStats] = useState(null) // null = not available yet
+  const { ratings, available: ratingsAvailable } = useVendorRatings(neighborhood?.id)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingVendor, setEditingVendor] = useState(null)
@@ -300,6 +302,7 @@ export default function AdminDashboard() {
               categories={categories}
               isAdmin
               shareSlug={neighborhood.slug}
+              rating={ratingsAvailable ? (ratings[v.id] || { total: 0, neighbors: 0, mine: false }) : undefined}
               clicks={clickStats ? (clickStats[v.id] || {}) : undefined}
               addedByEmail={v.created_by ? creatorEmails[v.created_by] : null}
               onEdit={(vv) => { setEditingVendor(vv); setModalOpen(true) }}
