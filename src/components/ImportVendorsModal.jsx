@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatVendorPhone } from '../utils/phone'
 import { supabase } from '../supabaseClient'
 import { parseCsv } from '../utils/csv'
 import { downloadVendorCsvTemplate } from '../utils/vendorCsvTemplate'
@@ -66,7 +67,7 @@ export default function ImportVendorsModal({ neighborhood, vendors, onCancel, on
       status,
       description: (raw.description || '').trim(),
       address: (raw.address || '').trim(),
-      phone: (raw.phone || '').trim(),
+      phone: formatVendorPhone(raw.phone),
       website: (raw.website || '').trim(),
       is_resident: truthy(raw.lives_here),
       errors,

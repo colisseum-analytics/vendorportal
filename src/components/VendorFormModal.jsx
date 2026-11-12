@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { formatVendorPhone } from '../utils/phone'
 import { findDuplicateVendor, findMergeCandidate, mergeVendorFields, normalizeVendorPhone } from '../utils/vendorDuplicates'
 
 const STATUSES = ['Verified', 'Unknown']
@@ -87,7 +88,7 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
     setSaving(true)
     setError('')
     try {
-      await onSave({ ...form, name: form.name.trim(), flyer_url: form.flyer_url || null })
+      await onSave({ ...form, phone: formatVendorPhone(form.phone), name: form.name.trim(), flyer_url: form.flyer_url || null })
     } catch (err) {
       setError(err.message || "Couldn't save — try again.")
       setSaving(false)
@@ -103,7 +104,7 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
     setSaving(true)
     setError('')
     try {
-      const payload = mergeVendorFields(mergeTarget, { ...form, flyer_url: form.flyer_url || null })
+      const payload = mergeVendorFields(mergeTarget, { ...form, phone: formatVendorPhone(form.phone), flyer_url: form.flyer_url || null })
       await onMerge(mergeTarget, payload, newCategoriesForMerge)
     } catch (err) {
       setError(err.message || "Couldn't save — try again.")
@@ -115,7 +116,7 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
     setSaving(true)
     setError('')
     try {
-      await onSave({ ...form, name: form.name.trim(), flyer_url: form.flyer_url || null })
+      await onSave({ ...form, phone: formatVendorPhone(form.phone), name: form.name.trim(), flyer_url: form.flyer_url || null })
     } catch (err) {
       setError(err.message || "Couldn't save — try again.")
       setSaving(false)
@@ -203,7 +204,7 @@ export default function VendorFormModal({ categories, vendors, neighborhood, exi
           <div className="field-row">
             <div className="field">
               <label>Phone</label>
-              <input type="text" value={form.phone} onChange={update('phone')} placeholder="(555) 123-4567" />
+              <input type="text" value={form.phone} onChange={update('phone')} onBlur={() => setForm((f) => ({ ...f, phone: formatVendorPhone(f.phone) }))} placeholder="786-555-1234" />
             </div>
             <div className="field">
               <label>Website</label>
